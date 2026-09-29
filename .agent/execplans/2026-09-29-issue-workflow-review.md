@@ -28,8 +28,10 @@ transitions without unattended automation.
   SQLite persistence, and renamed bootstrap/re-lock/verifier all passed.
 - [x] (2026-09-29) Amended the local repair commit to `aeccd61`, then verified
   its clean archive build, locked sync, canonical verifier, and self-test.
-- [x] (2026-09-29) Prepared local Issue/label proposals instead of attempting
-  remote reads or writes because `gh auth status` remained invalid.
+- [x] (2026-09-29) GitHub authentication became valid; verified the configured
+  target, created four status labels and Issues #1–#4 after duplicate checks,
+  and moved genuine repair Issue #2 through ready → in-progress → human-review
+  with progress and verification comments. No Issue was closed or code pushed.
 
 ## Surprises & Discoveries
 
@@ -63,11 +65,10 @@ transitions without unattended automation.
 
 ## Outcomes & Retrospective
 
-Local repair and clean-archive verification passed. Live GitHub workflow
-activation remains blocked only by invalid local GitHub CLI authentication, not
-by a missing repository workflow design. Interactive VS Code attachment and an
-observed remote CI run remain manual checks. Final evidence is recorded in a
-separate documentation-only commit so the exact clean archive remains visible.
+Local repair, clean-archive verification, and live GitHub workflow activation
+passed. Interactive VS Code attachment and an observed remote CI run remain
+manual checks. Final evidence is recorded in documentation-only commits so the
+exact clean archive remains visible.
 
 ## Context and Orientation
 
@@ -127,11 +128,13 @@ login command the user must run.
 Observed starting commit: `b38df7dd0308f015077780457cfad545d52f3e7f`; repair
 commit: `aeccd6156815759d9b0c0a7806340b8d8c86317e`, both on `main`. Remote
 points to the expected `successbycs/template` target without exposing
-credentials. Current `gh auth status` is invalid. Docker host check reports
-29.2.0 and Compose 5.0.2. Archive project `template-clean-prompt3` passed the
+credentials. Docker host check reports 29.2.0 and Compose 5.0.2. Archive
+project `template-clean-prompt3` passed the
 clean start and two-container persistence test; the renamed bootstrap archive
 also passed after re-locking. `template-final-prompt3` passed final clean
-archive build, locked sync, verifier, and self-test.
+archive build, locked sync, verifier, and self-test. Live target verification
+created Issues #1–#4 and status labels; Issue #2 has evidence comments and is
+open for human review.
 
 ## Interfaces and Dependencies
 

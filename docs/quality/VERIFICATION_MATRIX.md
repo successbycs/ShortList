@@ -17,7 +17,7 @@ evidence.
 | RQ-001–RQ-003 | passed | Generic Python self-test source was inspected; baseline health, synthetic self-test, and no-op demo completed locally without API keys or external calls on 2026-09-29. |
 | RQ-010–RQ-013 | partial | Docker 29.2.0 and Compose 5.0.2 were observed on the WSL host. Compose config resolves non-root user, source and `var/` binds, no ports, no Docker socket, dropped capabilities, and `no-new-privileges`; an isolated archive used UID/GID 1000 rather than the image's UID/GID 10001 and wrote synthetic runtime data. Interactive VS Code Dev Container attachment remains required. |
 | RQ-014 | deferred | T480/cloud deployment and image publication are intentionally absent. |
-| RQ-015 | blocked | Session-driven workflow, labels, configurable target, and local Issue proposal are implemented. Live repository/Issue/label inspection and writes are blocked because `gh auth status` reports an invalid active token. |
+| RQ-015 | passed | The configured `successbycs/template` target was verified live; the four status labels and [tracking Issue](https://github.com/successbycs/template/issues/1) were created after duplicate inspection. The genuine [repair task](https://github.com/successbycs/template/issues/2) moved ready → in-progress → human-review with evidence comments; two environment-dependent tasks remain open and blocked. |
 | RQ-020 | passed | `.python-version`, `pyproject.toml`, committed `uv.lock`, and locked container `uv sync --locked --group dev` were inspected/run. |
 | RQ-021 | partial | Container local verification passed with Ruff lint/format, 17 pytest tests, and link checker; CI now builds the image then calls the same verifier. A remote GitHub Actions result is not observed. |
 | RQ-022–RQ-023 | passed | Optional packs are documentation-only and absent from baseline dependencies/services. Official OpenAI skill/instruction sources and dates are registered; no unverified native Codex configuration was added. |
@@ -49,4 +49,6 @@ the canonical verifier, and self-test under `template-final-prompt3`.
 
 The host sandbox cannot itself connect to `/var/run/docker.sock`; these Docker
 checks were deliberately run through approved host access. No remote GitHub
-Actions run or interactive VS Code attachment has been observed.
+Actions run or interactive VS Code attachment has been observed. GitHub Issue
+workflow activation is observed; its current state is canonical on GitHub, not
+in this matrix.
