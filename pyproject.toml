@@ -38,3 +38,8 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.app-template.github]
+# The repository that a user-started Codex session may inspect or update.
+# `scripts/bootstrap_template.py` requires a replacement value for copied projects.
+repository = "successbycs/template"

@@ -10,13 +10,14 @@ Use Windows with WSL2, Docker Desktop with this distro enabled for WSL integrati
 
 ## Start and verify
 
-From the repository root, first create the lockfile in the container only if `uv.lock` is absent, review it, and commit it with the dependency change:
+From the repository root, create the lockfile in the container only if `uv.lock`
+is absent. If bootstrap changes the distribution or package name, regenerate the
+lockfile with `uv lock`, review it, and commit it with that bootstrap change.
+For ordinary verification, keep the lock unchanged and use the locked install:
 
     docker compose build
-    docker compose run --rm app uv lock
     docker compose run --rm app uv sync --locked --group dev
-    docker compose run --rm app uv run ruff check .
-    docker compose run --rm app uv run pytest -q
+    docker compose run --rm app uv run python scripts/verify.py
     docker compose run --rm app uv run app-template health
     docker compose run --rm app uv run app-template self-test
     docker compose run --rm app uv run app-template demo --no-op
@@ -26,6 +27,23 @@ The self-test and demo use only a local SQLite audit database and never call an 
     docker compose down
 
 VS Code attachment is a manual check: run **Dev Containers: Reopen in Container**, then run the same commands from the integrated terminal.
+
+## Configure the copied project
+
+Before running a Codex Issue session in a copied template, set the GitHub target
+during bootstrap. This prevents a copied repository from operating on the
+source template's Issues:
+
+    docker compose run --rm app uv run python scripts/bootstrap_template.py \
+      --project-name my-project --package-name my_project \
+      --github-repository OWNER/REPOSITORY
+    docker compose run --rm app uv lock
+    docker compose run --rm app uv sync --locked --group dev
+    docker compose run --rm app uv run python scripts/verify.py
+
+The command requires an explicit `OWNER/REPOSITORY`; it changes only the
+bounded template markers and records the selected values in an ignored local
+state file. See [the GitHub Issue workflow](docs/harness/GITHUB_ISSUE_WORKFLOW.md).
 
 ## Configuration
 

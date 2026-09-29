@@ -37,6 +37,8 @@ def test_dry_run_preserves_files(copied_template: Path, capsys: pytest.CaptureFi
         "demo-app",
         "--package-name",
         "demo_app",
+        "--github-repository",
+        "example-owner/demo-app",
         "--dry-run",
     ]
     assert main(arguments) == 0
@@ -54,6 +56,8 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
         "demo-app",
         "--package-name",
         "demo_app",
+        "--github-repository",
+        "example-owner/demo-app",
     ]
 
     assert main(arguments) == 0
@@ -61,6 +65,9 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert (copied_template / "src" / "demo_app").is_dir()
     assert not (copied_template / "src" / "app_template").exists()
     assert 'name = "demo-app"' in (copied_template / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'repository = "example-owner/demo-app"' in (
+        copied_template / "pyproject.toml"
+    ).read_text(encoding="utf-8")
     result = subprocess.run(
         [sys.executable, "-c", "import demo_app; print(demo_app.__version__)"],
         cwd=copied_template,
@@ -82,6 +89,8 @@ def test_invalid_name_and_conflict_fail_without_overwrite(copied_template: Path)
         "Bad Name",
         "--package-name",
         "bad_name",
+        "--github-repository",
+        "example-owner/bad-name",
     ]
     conflict = [
         "--root",
@@ -90,7 +99,25 @@ def test_invalid_name_and_conflict_fail_without_overwrite(copied_template: Path)
         "demo-app",
         "--package-name",
         "taken_name",
+        "--github-repository",
+        "example-owner/demo-app",
     ]
     assert main(invalid_name) == 2
     assert main(conflict) == 2
+    assert (copied_template / "src" / "app_template").is_dir()
+
+
+def test_invalid_github_repository_fails_without_changes(copied_template: Path) -> None:
+    arguments = [
+        "--root",
+        str(copied_template),
+        "--project-name",
+        "demo-app",
+        "--package-name",
+        "demo_app",
+        "--github-repository",
+        "not a repository",
+    ]
+
+    assert main(arguments) == 2
     assert (copied_template / "src" / "app_template").is_dir()

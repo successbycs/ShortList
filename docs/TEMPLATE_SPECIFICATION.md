@@ -23,6 +23,7 @@ This is the canonical requirements record for the `successbycs/template` reposit
 | RQ-011 | Keep source in WSL and bind-mount it into Docker. Run Python tools and project services inside Docker; manage containers with host Docker/Compose commands. |
 | RQ-012 | Do not embed WSL in a Docker image, mount the Docker socket into the development container, run privileged containers, or run containers as root. |
 | RQ-013 | Keep each project’s services standalone. GitHub supplies source control, Issues, pull requests, and CI; GitHub-hosted CI is the sole remote-execution exception. |
+| RQ-015 | Provide a user-started, session-driven GitHub Issue workflow. Its target must be configurable when the template is copied; GitHub Issues are the sole task-status queue, and local technical plans hold implementation detail and evidence. |
 | RQ-014 | Defer T480/cloud deployment and container-image publication. |
 
 ## Active and optional technology
@@ -47,7 +48,7 @@ This is the canonical requirements record for the `successbycs/template` reposit
 
 | ID | Requirement |
 | --- | --- |
-| RQ-040 | Create the foundation files and directory layout listed in [Required documentation and repository layout](#required-documentation-and-repository-layout). Do not choose a licence or invent `CODEOWNERS` entries. Record licence and ownership as unresolved decisions. |
+| RQ-040 | Create the foundation files and directory layout listed in [Required documentation and repository layout](#required-documentation-and-repository-layout). Preserve the existing `LICENSE`; do not choose a replacement or invent `CODEOWNERS` entries. Record its actual status and unresolved ownership decisions. |
 | RQ-041 | Supply `config/app.example.toml` and a real typed application loader that rejects unknown keys and invalid values. Document and test configuration precedence. Keep secrets in ignored `.env` files and use safe placeholders only in `.env.example`; identify inactive TOML examples clearly. |
 | RQ-042 | Implement typed configuration loading, structured correlation-ID logging with secret redaction, and a safe CLI health/self-test command. |
 | RQ-043 | Implement SQLite-backed synthetic audit-event recording with schema-version metadata and transactional writes. |
@@ -75,9 +76,11 @@ The implementation must create `docs/INDEX.md` as a catalogue. Every catalogue e
 
 ## Initial decisions and unresolved decisions
 
-Agreed now: Python, `uv`, Pydantic, standard-library SQLite, Ruff, pytest, Compose, Dev Containers, and Mermaid are the default foundation. Optional capability packs are opt-in and isolated. Local Docker is intended but cannot currently be verified in this WSL instance: `docker` and `docker compose` are unavailable; Docker Desktop WSL integration must be enabled before container verification.
+Agreed now: Python, `uv`, Pydantic, standard-library SQLite, Ruff, pytest, Compose, Dev Containers, and Mermaid are the default foundation. Optional capability packs are opt-in and isolated. Local Docker is verified on the T16 WSL2 host with Docker Desktop. The GitHub task workflow is session-driven: a user starts Codex, which selects one eligible ready Issue and leaves it in human review after verification. It does not poll, run unattended, or automatically spawn agents.
 
-Unresolved: licence choice and repository ownership/CODEOWNERS assignments. These are intentionally not selected or fabricated by this template.
+The existing repository `LICENSE` is an MIT License, retained without change.
+Repository ownership/CODEOWNERS assignments and a consuming project's licence
+decision remain unresolved; this template does not fabricate either.
 
 ## Cross-references
 

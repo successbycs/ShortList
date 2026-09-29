@@ -8,4 +8,7 @@ Use [GETTING_STARTED.md](GETTING_STARTED.md) to create the local environment, th
 
 ## Current implementation status
 
-The Python self-test foundation is implemented. Docker verification depends on Docker Desktop WSL integration being available. Cloud deployment, image publication, runtime AI agents, and optional capability packs are deferred.
+The Python self-test foundation and local Docker verification are implemented.
+Interactive VS Code Dev Container attachment and observed remote GitHub Actions
+results still require their respective environments. Cloud deployment, image
+publication, runtime AI agents, and optional capability packs are deferred.

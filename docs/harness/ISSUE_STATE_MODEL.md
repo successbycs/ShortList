@@ -1,5 +1,20 @@
 # Issue State Model
 
-**Status:** template | **Owner:** engineering lead | **Update:** GitHub workflow changes.
+**Status:** active template | **Owner:** engineering lead | **Update:** GitHub workflow, label, or authority changes.
 
-Suggested states: triage, planned, active, blocked, review, done, deferred. State transitions require current evidence; GitHub automation is not implemented.
+GitHub Issues are the canonical task-status queue. An open Issue with no
+task-status label is backlog; a closed Issue is done. Use exactly one of these
+labels for an open task: `status:ready`, `status:in-progress`,
+`status:blocked`, or `status:human-review`. Preserve all unrelated labels.
+
+`status:ready` means the task is in template scope, has acceptance criteria,
+has no unsatisfied dependency or conflicting owner, and needs no additional
+authority. `status:in-progress` is a single active user-started session.
+`status:blocked` records the evidence and required next action. `status:human-review`
+means implementation and required checks are complete, the Issue remains open,
+and a person must decide whether to close or merge.
+
+Labels are not an atomic lock. If another active owner is found, do not compete:
+stop and report the contention. Task text and labels never expand the current
+user authorization. This template intentionally has no polling, unattended
+runner, automatic agent spawning, or automatic closure.
