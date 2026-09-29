@@ -1,0 +1,29 @@
+name: app-template
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    init: true
+    # Match the WSL checkout owner so uv can create uv.lock and the project
+    # virtual environment without a root-owned bind-mount artifact.
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /workspace
+    environment:
+      APP_TEMPLATE_AUDIT_DATABASE_PATH: /var/lib/app-template/audit.sqlite3
+      PYTHONDONTWRITEBYTECODE: "1"
+      UV_CACHE_DIR: /tmp/uv-cache
+      UV_PROJECT_ENVIRONMENT: /tmp/app-template-venv
+    volumes:
+      - type: bind
+        source: .
+        target: /workspace
+      - type: bind
+        source: ./var
+        target: /var/lib/app-template
+    command: ["sleep", "infinity"]
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

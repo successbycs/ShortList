@@ -1,0 +1,9 @@
+# INACTIVE EXAMPLE. Copy the desired values into an ignored active file such as
+# config/app.toml, or provide its path using --config / APP_TEMPLATE_CONFIG_FILE.
+# Precedence: built-in defaults < selected TOML file < APP_TEMPLATE_ environment
+# variables < explicit CLI/test overrides.
+
+app_name = "example-project"
+log_level = "INFO"
+audit_database_path = "var/audit.sqlite3"
+# diagnostic_token = "replace-only-in-an-ignored-active-file"
