@@ -42,7 +42,10 @@ health, self-test, demo, and a two-container synthetic SQLite persistence read
 all passed. The archive then bootstrapped with a different project/package/
 GitHub target, ran `uv lock`, locked sync, the canonical verifier, and the
 renamed no-op demo successfully. It used the supported Compose fallback UID/GID
-1000, which differs from the image's built-in 10001 identity.
+1000, which differs from the image's built-in 10001 identity. A subsequent
+archive of `aeccd6156815759d9b0c0a7806340b8d8c86317e`—whose changes since that
+run were evidence/documentation only—again passed image build, locked sync,
+the canonical verifier, and self-test under `template-final-prompt3`.
 
 The host sandbox cannot itself connect to `/var/run/docker.sock`; these Docker
 checks were deliberately run through approved host access. No remote GitHub

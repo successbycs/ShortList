@@ -26,9 +26,10 @@ transitions without unattended automation.
 - [x] (2026-09-29) Created local commit `d07f506`, then verified its isolated
   archive: build, locked install, verifier, health/self-test/demo, two-container
   SQLite persistence, and renamed bootstrap/re-lock/verifier all passed.
-- [ ] (2026-09-29) Amend the local commit with final evidence-only records and
-  attempt live Issue tracking only if authentication becomes valid without
-  credential handling.
+- [x] (2026-09-29) Amended the local repair commit to `aeccd61`, then verified
+  its clean archive build, locked sync, canonical verifier, and self-test.
+- [x] (2026-09-29) Prepared local Issue/label proposals instead of attempting
+  remote reads or writes because `gh auth status` remained invalid.
 
 ## Surprises & Discoveries
 
@@ -65,7 +66,8 @@ transitions without unattended automation.
 Local repair and clean-archive verification passed. Live GitHub workflow
 activation remains blocked only by invalid local GitHub CLI authentication, not
 by a missing repository workflow design. Interactive VS Code attachment and an
-observed remote CI run remain manual checks.
+observed remote CI run remain manual checks. Final evidence is recorded in a
+separate documentation-only commit so the exact clean archive remains visible.
 
 ## Context and Orientation
 
@@ -123,12 +125,13 @@ login command the user must run.
 ## Artifacts and Notes
 
 Observed starting commit: `b38df7dd0308f015077780457cfad545d52f3e7f`; repair
-commit: `d07f506214066cc25e77ea410dcd2b4bbba60769`, both on `main`. Remote
+commit: `aeccd6156815759d9b0c0a7806340b8d8c86317e`, both on `main`. Remote
 points to the expected `successbycs/template` target without exposing
 credentials. Current `gh auth status` is invalid. Docker host check reports
 29.2.0 and Compose 5.0.2. Archive project `template-clean-prompt3` passed the
 clean start and two-container persistence test; the renamed bootstrap archive
-also passed after re-locking.
+also passed after re-locking. `template-final-prompt3` passed final clean
+archive build, locked sync, verifier, and self-test.
 
 ## Interfaces and Dependencies
 
