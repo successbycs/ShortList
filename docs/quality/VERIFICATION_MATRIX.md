@@ -15,7 +15,7 @@ evidence.
 | Requirement IDs | Status | Observed evidence / remaining check |
 | --- | --- | --- |
 | RQ-001–RQ-003 | passed | Generic Python self-test source was inspected; baseline health, synthetic self-test, and no-op demo completed locally without API keys or external calls on 2026-09-29. |
-| RQ-010–RQ-013 | partial | Docker 29.2.0 and Compose 5.0.2 were observed on the WSL host. Compose config resolves non-root user, source and `var/` binds, no ports, no Docker socket, dropped capabilities, and `no-new-privileges`; an isolated archive used UID/GID 1000 rather than the image's UID/GID 10001 and wrote synthetic runtime data. Interactive VS Code Dev Container attachment remains required. |
+| RQ-010–RQ-013 | passed | Docker 29.2.0 and Compose 5.0.2 were observed on the WSL host. Compose config resolves non-root user, source and `var/` binds, no ports, no Docker socket, dropped capabilities, and `no-new-privileges`. On 2026-10-01, VS Code attached through WSL to the Dev Container as non-root UID/GID 1000 at `/workspace`; Git and `uv` were available and the canonical verifier passed. |
 | RQ-014 | deferred | T480/cloud deployment and image publication are intentionally absent. |
 | RQ-015 | passed | The configured `successbycs/template` target was verified live; the four status labels and [tracking Issue](https://github.com/successbycs/template/issues/1) were created after duplicate inspection. The genuine [repair task](https://github.com/successbycs/template/issues/2) moved ready → in-progress → human-review with evidence comments; two environment-dependent tasks remain open and blocked. |
 | RQ-020 | passed | `.python-version`, `pyproject.toml`, committed `uv.lock`, and locked container `uv sync --locked --group dev` were inspected/run. |
@@ -48,7 +48,11 @@ run were evidence/documentation only—again passed image build, locked sync,
 the canonical verifier, and self-test under `template-final-prompt3`.
 
 The host sandbox cannot itself connect to `/var/run/docker.sock`; these Docker
-checks were deliberately run through approved host access. No remote GitHub
-Actions run or interactive VS Code attachment has been observed. GitHub Issue
+checks were deliberately run through approved host access. On 2026-10-01, an
+interactive VS Code Dev Container terminal on the T16 reported UID 1000,
+`/workspace`, Git 2.39.5, and `Verification: passed` (Ruff lint/format, 30
+tests, and Markdown links). The image now provides Bash and Git for the
+non-root developer user, and Dev Containers aligns that user with the WSL
+checkout UID. No remote GitHub Actions run has been observed. GitHub Issue
 workflow activation is observed; its current state is canonical on GitHub, not
 in this matrix.

@@ -6,7 +6,7 @@
   "overrideCommand": false,
   "remoteUser": "app",
   "containerUser": "app",
-  "updateRemoteUserUID": false,
+  "updateRemoteUserUID": true,
   "customizations": {
     "vscode": {
       "extensions": [
