@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: astral-sh/setup-uv@e92e97b1e4f27e7db3de4f64dd7c1e6d4259f66f # v5.4.0
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
       - name: Build development image
         run: docker build --file .devcontainer/Dockerfile --tag app-template-ci:local .
       - name: Install locked dependencies
