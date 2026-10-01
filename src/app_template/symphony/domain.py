@@ -13,6 +13,15 @@ class ObservationStatus(StrEnum):
     UNKNOWN = "unknown"
 
 
+class FailureKind(StrEnum):
+    TASK_LOCAL = "task_local"
+    APPROVAL = "approval"
+    CANCELLED = "cancelled"
+    PROVIDER = "provider"
+    ENVIRONMENT = "environment"
+    PROTOCOL = "protocol"
+
+
 class RunStatus(StrEnum):
     QUEUED = "queued"
     RUNNING = "running"
@@ -51,6 +60,7 @@ class RunResult:
     input_tokens: int = 0
     output_tokens: int = 0
     rate_limit_percent: int | None = None
+    failure_kind: FailureKind | None = None
 
 
 @dataclass

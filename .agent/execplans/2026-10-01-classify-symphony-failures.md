@@ -12,7 +12,7 @@ Issue #26 prevents global, provider, approval, and cancellation failures from be
 
 - [x] (2026-10-01 07:00Z) Verified #8 and #25 closure, claimed #26, and inspected runner, scheduler, domain, and focused tests.
 - [x] (2026-10-01 07:00Z) Identified that every failed `RunResult` currently consumes the retry budget and Astra has no named immutable snapshot.
-- [ ] Add failure kind, immutable review snapshot, protocol classification, and scheduler routing.
+- [ ] Add failure kind and immutable review snapshot; protocol classification and scheduler routing remain.
 - [ ] Add focused classification/routing tests, canonical verification, local commit/push, and human-review handoff.
 
 ## Surprises & Discoveries
@@ -59,3 +59,4 @@ Classification is pure and repeatable. Non-task-local failure stops further task
 ## Interfaces and Dependencies
 
 `FailureKind`, `FailureSnapshot`, and `RunResult.failure_kind` will be defined in `domain.py`; runner emits them and scheduler consumes them. No new service or dependency is introduced.
+- 2026-10-01 07:10Z: added `FailureKind`, immutable `FailureSnapshot`, and optional `RunResult.failure_kind`. Ruff format/check and focused runner/scheduler tests passed (7). Routing and protocol emission remain incomplete.
