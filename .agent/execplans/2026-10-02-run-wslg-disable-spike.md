@@ -17,7 +17,8 @@ Run one controlled, temporary host experiment: disable WSLg through the document
 - [x] (2026-10-01 21:45Z) Ran a safe host helper that created the temporary setting, restarted WSL, and restored the previously absent configuration. The agent session was terminated before the after-test; this result is unobserved.
 - [x] (2026-10-01 22:05Z) Rebuilt the procedure as a two-session workflow and added the operator/compliance rules.
 - [x] (2026-10-01 22:08Z) Ran diff, Markdown-link, and canonical verification after the documentation update; 59 tests passed in 3.31 seconds.
-- [ ] Session A: record baseline, create bounded restoration helper, and transition #32 to blocked before shutdown.
+- [x] (2026-10-01 22:20Z) Session A fresh baseline: live preflight returned 2; normal editor probe creation succeeded and immediate normal deletion failed with the named mount error; exact disposable file was removed through the approved fallback.
+- [ ] Session A: create bounded restoration helper and transition #32 to blocked before shutdown.
 - [ ] Human recovery: reopen Ubuntu and start a new Codex session.
 - [ ] Session B: re-read and claim #32, run the normal-editor after-test, signal restoration, and verify restored state.
 - [ ] Record result, verify repository, commit, and hand off for review.
@@ -29,6 +30,9 @@ Run one controlled, temporary host experiment: disable WSLg through the document
 
 - Observation: The direct app-server command probe passed while the nested mount remained, whereas the normal editor deletion failed.
   Evidence: before-state commands on 2026-10-01. The app-server command probe is supporting evidence only; the normal editor path remains the relevant boundary.
+
+- Observation: Fresh normal-editor reproduction again failed only on deletion after a successful creation.
+  Evidence: normal patch deletion reported the unsupported host mount error on 2026-10-01.
 
 ## Decision Log
 
