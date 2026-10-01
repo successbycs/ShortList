@@ -118,3 +118,4 @@ The rebuild changes GitHub task records and parent planning documents, not runti
 
 - 2026-10-01 04:15Z: live GitHub records #5, #8, #10, #12, #13, and #24 were re-read before scope updates. #5 became parent-only; #8 was narrowed to S1; dependent ready/blocked labels were removed from #10/#12/#13/#24; #25–#28 were created unlabelled as backlog. No closed Issue was reopened, deleted, or relabelled.
 - 2026-10-01 04:20Z: renamed #5 to `Symphony Set-up delivery programme` and #8 to `Host execution broker and safe preflight`; removed premature `status:ready` from #16 and stale `status:blocked` from #23. The only active rebuilt implementation task is #8.
+- 2026-10-01 06:10Z: #8 was closed after human review; #25 was verified and moved to `status:human-review`. Because #27 depends only on #8, it was re-read and marked `status:ready` but left unclaimed for the next one-Issue session. #26 remains gated by #25 review.
