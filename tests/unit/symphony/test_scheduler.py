@@ -6,6 +6,7 @@ from pathlib import Path
 
 from app_template.symphony.domain import (
     Issue,
+    FailureKind,
     IssueObservation,
     ObservationStatus,
     RunRecord,
@@ -188,3 +189,24 @@ def test_reconstructed_scheduler_performs_a_fresh_observation(tmp_path: Path) ->
     assert first_tracker.observation_calls == [issue.id]
     assert second_tracker.observation_calls == [issue.id]
     assert second.records[issue.id].status == RunStatus.QUEUED
+
+
+def test_non_task_failure_blocks_without_terra_retry_or_astra(tmp_path: Path) -> None:
+    issue = Issue(
+        "approval", "#approval", "Approval", None, "open", labels=("status:ready", "symphony:ready")
+    )
+    runner = FakeRunner(
+        [RunResult(False, "operator approval required", failure_kind=FailureKind.APPROVAL)]
+    )
+    tracker = FakeTracker(issue)
+    scheduler = Scheduler(workflow(tmp_path), tracker, runner)
+
+    async def execute() -> None:
+        await scheduler.tick()
+        await asyncio.gather(*scheduler.running.values())
+
+    asyncio.run(execute())
+
+    assert runner.calls == [("gpt-5.6-terra", "implementation")]
+    assert scheduler.records[issue.id].status == RunStatus.BLOCKED
+    assert tracker.transitions == [("status:in-progress", "status:blocked")]

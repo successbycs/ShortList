@@ -9,7 +9,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Protocol
 
-from app_template.symphony.domain import Issue, RunResult
+from app_template.symphony.domain import FailureKind, Issue, RunResult
 
 
 class Runner(Protocol):
@@ -156,6 +156,7 @@ class CodexAppServerRunner:
                             turn_id,
                             input_tokens,
                             output_tokens,
+                            failure_kind=FailureKind.APPROVAL,
                         )
                     if isinstance(params, dict):
                         usage = params.get("usage")
@@ -195,15 +196,24 @@ class CodexAppServerRunner:
                             turn_id,
                             input_tokens,
                             output_tokens,
+                            failure_kind=FailureKind.TASK_LOCAL,
                         )
         except (TimeoutError, OSError) as error:
             return RunResult(
-                False, f"{role} runner failure: {type(error).__name__}", thread_id, turn_id
+                False,
+                f"{role} runner failure: {type(error).__name__}",
+                thread_id,
+                turn_id,
+                failure_kind=FailureKind.ENVIRONMENT,
             )
         finally:
             if process.returncode is None:
                 process.terminate()
             await process.wait()
         return RunResult(
-            False, f"{role} app-server exited without terminal turn event", thread_id, turn_id
+            False,
+            f"{role} app-server exited without terminal turn event",
+            thread_id,
+            turn_id,
+            failure_kind=FailureKind.PROTOCOL,
         )

@@ -6,7 +6,7 @@ import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from app_template.symphony.domain import Issue, RunRecord, RunResult, RunStatus
+from app_template.symphony.domain import FailureKind, Issue, RunRecord, RunResult, RunStatus
 from app_template.symphony.runner import Runner
 from app_template.symphony.tracker import Tracker
 from app_template.symphony.workflow import Workflow
@@ -162,6 +162,10 @@ class Scheduler:
                         return
                     self.tracker.comment(issue, f"Terra implementation completed: {result.summary}")
                     self._notify_human_review(record)
+                    return
+                if result.failure_kind not in {None, FailureKind.TASK_LOCAL}:
+                    record.update(RunStatus.BLOCKED, error=result.summary)
+                    self.tracker.finish(issue, status_label="status:blocked")
                     return
                 record.update(RunStatus.RETRY_QUEUED, error=result.summary)
                 record.next_attempt_at = datetime.now(UTC)
