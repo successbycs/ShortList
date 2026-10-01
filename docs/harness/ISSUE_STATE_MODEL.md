@@ -20,3 +20,7 @@ Labels are not an atomic lock. If another active owner is found, do not compete:
 stop and report the contention. Task text and labels never expand the current
 user authorization. The long-running Symphony service is separately configured
 in `WORKFLOW.md`, defaults to disabled live dispatch, and never closes Issues.
+
+## Fresh GitHub observations
+
+A scheduler decision is valid only when the host tracker has just observed the relevant Issue and each dependency. An unavailable read is `unknown`, not closed or ineligible: it must prevent a GitHub write and leave the local run available for a later fresh check. Do not treat retained labels on a closed Issue as evidence that it can run.

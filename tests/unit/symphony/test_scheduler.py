@@ -8,6 +8,7 @@ from app_template.symphony.domain import (
     Issue,
     IssueObservation,
     ObservationStatus,
+    RunRecord,
     RunResult,
     RunStatus,
 )
@@ -20,6 +21,7 @@ class FakeTracker:
         self.issues = {issue.id: issue for issue in issues}
         self.transitions: list[tuple[str, str]] = []
         self.comments: list[str] = []
+        self.observation_calls: list[str] = []
 
     def candidates(self, required_labels: set[str]) -> list[Issue]:
         return [
@@ -27,6 +29,7 @@ class FakeTracker:
         ]
 
     def observe(self, issue_id: str) -> IssueObservation:
+        self.observation_calls.append(issue_id)
         issue = self.issues.get(issue_id)
         return IssueObservation(
             issue_id,
@@ -67,7 +70,7 @@ class FakeRunner:
 
 def workflow(tmp_path: Path):  # type: ignore[no-untyped-def]
     repository = tmp_path / "repository"
-    repository.mkdir()
+    repository.mkdir(parents=True)
     for command in (
         ["git", "init"],
         ["git", "config", "user.email", "operator.test"],
@@ -166,3 +169,22 @@ def test_unscoped_work_is_serialized_against_all_packets(tmp_path: Path) -> None
     scheduler = Scheduler(workflow(tmp_path), FakeTracker(unscoped), FakeRunner([]))
     assert not scheduler._eligible(unscoped, {"src/app"})
     assert not scheduler._eligible(scoped, {"__unscoped__"})
+
+
+def test_reconstructed_scheduler_performs_a_fresh_observation(tmp_path: Path) -> None:
+    issue = Issue(
+        "fresh", "#fresh", "Fresh read", None, "open", labels=("status:ready", "symphony:ready")
+    )
+    first_tracker = FakeTracker(issue)
+    first = Scheduler(workflow(tmp_path / "first"), first_tracker, FakeRunner([]))
+    first.records[issue.id] = RunRecord(issue=issue, status=RunStatus.QUEUED)
+    first.reconcile()
+
+    second_tracker = FakeTracker(issue)
+    second = Scheduler(workflow(tmp_path / "second"), second_tracker, FakeRunner([]))
+    second.records[issue.id] = RunRecord(issue=issue, status=RunStatus.QUEUED)
+    second.reconcile()
+
+    assert first_tracker.observation_calls == [issue.id]
+    assert second_tracker.observation_calls == [issue.id]
+    assert second.records[issue.id].status == RunStatus.QUEUED

@@ -13,7 +13,7 @@ Issue #27 makes GitHub state a fresh, explicit input to every Symphony eligibili
 - [x] (2026-10-01 06:20Z) Verified #8 closure, claimed #27, and inspected the current tracker, scheduler, service, domain, and tests.
 - [x] (2026-10-01 06:20Z) Identified that `GitHubTracker.get()` catches read failures and returns `None`, while scheduler reconciliation treats `None` as cancellation.
 - [x] Add typed observations, fresh decision gates, and non-mutating unknown handling.
-- [ ] Add stale-label, dependency, read-failure, and new-scheduler tests; verify and hand off.
+- [x] Add stale-label, dependency, read-failure, and new-scheduler tests; verify and hand off.
 
 ## Surprises & Discoveries
 
@@ -31,7 +31,7 @@ Issue #27 makes GitHub state a fresh, explicit input to every Symphony eligibili
 
 ## Outcomes & Retrospective
 
-Pending implementation and verification.
+Implemented timestamped known/unknown observations. A fresh direct observation now gates claim, review, and generic state transition writes; reconciliation preserves queued work when GitHub evidence is unknown. Tests cover stale closed labels, dependencies, unavailable reads, and reconstructed schedulers. A bounded live host read observed closed Issue #25 without any mutation.
 
 ## Context and Orientation
 
@@ -66,3 +66,4 @@ Observation reads are repeatable. Unknown observations do not cause writes, canc
 `IssueObservation` is added in `src/app_template/symphony/domain.py`. `Tracker.observe(issue_id) -> IssueObservation` and boolean state-transition outcomes are implemented in `tracker.py`, including dashboard-safe no-op behavior. `Scheduler` consumes observations before eligibility and mutation. No new package or external service is added.
 - 2026-10-01 06:30Z: added timestamped known/unknown observations, direct-read gates for claim/review/transition writes, and reconciliation behavior that preserves a run when a read is unknown. Focused tracker/scheduler tests passed (7); canonical verifier passed (48 tests, Ruff lint/format, Markdown links).
 - Remaining: add explicit reconstructed-scheduler fresh-observation test and document the operator-facing decision-evidence rule before human-review handoff.
+- 2026-10-01 06:45Z: focused tracker/scheduler checks passed (8 tests). A host-only read-only `GitHubTracker.observe("25")` reported a known closed Issue, no dependencies, a GitHub source, and a timestamp; no claim, edit, dispatch, or Codex turn occurred. Final canonical verifier passed: 49 tests, Ruff lint/format, and Markdown links.
