@@ -23,6 +23,20 @@ An ExecPlan does not grant permission for destructive actions, production access
 - Treat configuration, Docker, deployment, and agent-runtime setup as absent until they are implemented and verified; documentation is not proof of enforcement.
 - Keep build-time coding-agent instructions separate from runtime application-agent prompts and behavior.
 
+## Quality warnings
+
+For test warnings and dependency deprecations, follow
+[`docs/quality/TEST_STRATEGY.md`](docs/quality/TEST_STRATEGY.md) and
+[`docs/architecture/DEPENDENCY_POLICY.md`](docs/architecture/DEPENDENCY_POLICY.md).
+Do not suppress warnings without explicit human approval.
+
+## Durable verification
+
+Terminal output and chat updates are not durable completion proof. Follow
+[`docs/harness/DEFINITION_OF_DONE.md`](docs/harness/DEFINITION_OF_DONE.md) to
+record verification, and its risk criteria before deciding whether an ExecPlan
+is required.
+
 ## User-started GitHub Issue sessions
 
 When the task asks to work from the GitHub queue, read

@@ -8,6 +8,11 @@ Follow this file exactly when authoring or implementing an ExecPlan. Before writ
 
 Create an ExecPlan before a complex feature, material refactor, migration, risky configuration change, or multi-session task. A small, isolated change may proceed without one unless the user asks for an ExecPlan. Do not begin implementation when the user asked only for planning.
 
+An ExecPlan is mandatory when any condition in
+[`docs/harness/DEFINITION_OF_DONE.md`](../docs/harness/DEFINITION_OF_DONE.md)'s
+ExecPlan risk test applies. If the risk is uncertain, create an ExecPlan rather
+than treating the work as small.
+
 ## Non-negotiable requirements
 
 Every ExecPlan must be fully self-contained in its current form. A novice must be able to understand the objective, relevant repository state, exact edits, commands, decisions, and validation without relying on chat history, unstated context, or external links. Define specialized terms in plain language when first used.

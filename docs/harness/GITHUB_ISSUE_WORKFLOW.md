@@ -30,11 +30,13 @@ At the user’s request, a Codex session performs this sequence:
 2. Re-read the Issue immediately before changing it. Change only its
    task-status label to `status:in-progress`, preserving unrelated labels, and
    add a concise progress comment.
-3. Read or create the material task’s ExecPlan in `.agent/execplans/`. Link the
-   Issue and plan in both directions. The plan does not grant new authority.
+3. Apply the ExecPlan risk test in [Definition of Done](DEFINITION_OF_DONE.md).
+   Read or create the required plan in `.agent/execplans/`, linking it and the
+   Issue in both directions. The plan does not grant new authority.
 4. Make the smallest coherent change, run the Issue’s acceptance checks, review
-   the diff, and update the verification matrix plus the plan with observed
-   evidence.
+   the diff, and immediately record command, result, date, and remaining limits
+   in the durable evidence artifact before reporting progress in chat. Update
+   the verification matrix when the result proves a template requirement.
 5. Create a local commit when the work is safely separable. Post a concise
    evidence comment, replace `status:in-progress` with `status:human-review`,
    and leave the Issue open. If a required check is blocked, use
