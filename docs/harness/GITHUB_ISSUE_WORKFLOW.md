@@ -61,6 +61,15 @@ the exact blocker, the required owner/action, and the criterion that remains
 unobserved. Follow [Definition of Done](DEFINITION_OF_DONE.md); mocks and
 synthetic checks may support regression coverage but do not replace that proof.
 
+When a task requires a restart that terminates the active agent, it is a
+two-session workflow. Before restart, the first session must record its
+baseline, update the Issue to `status:blocked` with the exact human recovery
+action, and name the restoration owner and timeout behaviour. The new
+user-directed session must re-read and claim the Issue before running the
+after-test. A restart, a helper log, or a reopened editor alone cannot satisfy
+the acceptance criterion. If the handoff does not occur, retain
+`status:blocked` and record the criterion as unobserved.
+
 The four task labels are created or reused only after a live target read confirms
 the repository and duplicate labels are absent. GitHub's documented CLI
 supports non-interactive Issue creation with title/body and labels; labels

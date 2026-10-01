@@ -48,3 +48,31 @@ host WSLg mount environment using a vendor-supported procedure. Both routes
 require explicit human approval before any setting, WSL service, or mount is
 changed. Keep the preflight evidence and normal-patch result with the approval
 request so the host/tool owner can reproduce the intermittent failure.
+
+### Human recovery during an approved WSLg experiment
+
+An approved WSLg experiment uses `wsl --shutdown`, which deliberately ends WSL
+terminal, Codex, and Dev Container processes. This is expected, not proof that
+the experiment failed. Save active work first. After WSL restarts, the human
+operator must open Ubuntu and run:
+
+```bash
+cd /home/chris/template
+code .
+```
+
+Before shutdown, the first Codex session must record the baseline and leave the
+GitHub Issue `status:blocked` with this recovery action. After restart, open
+Ubuntu and run:
+
+```bash
+cd /home/chris/template
+code .
+```
+
+Start a new user-directed Codex session and report that the workspace is back.
+Do not edit `.wslconfig`, unmount a path, or restart WSL again. Reopening VS
+Code is not proof that Codex is repaired. The new session re-reads and claims
+the Issue, runs the after-state probe, and requests restoration. If it does not
+return, the approved host-side timeout restores the original configuration; the
+Issue remains blocked and the after-test is unobserved.

@@ -26,6 +26,17 @@ external action, credential access, deployment, or system change. Do not invent
 an operational proof for documentation-only, refactor-only, deferred, or
 deliberately disabled work.
 
+## Disruptive host restart evidence
+
+A host configuration change, mount disappearance, WSL restart, or reopened VS
+Code window is supporting evidence only. An approved restart may terminate the
+active agent, so that session cannot produce after-state proof. Before the
+restart, record the baseline and a blocked human-recovery handoff. The required
+evidence comes from a new post-restart session exercising the claimed boundary,
+then recording restoration. If the new session, the claimed operation, or
+restoration evidence is missing, record the criterion as blocked or unobserved,
+not passed.
+
 ## Durable verification evidence
 
 Terminal output and chat updates are transient evidence, not completion proof.

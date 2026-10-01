@@ -23,6 +23,18 @@ An ExecPlan does not grant permission for destructive actions, production access
 - Treat configuration, Docker, deployment, and agent-runtime setup as absent until they are implemented and verified; documentation is not proof of enforcement.
 - Keep build-time coding-agent instructions separate from runtime application-agent prompts and behavior.
 
+## Disruptive host restart handoff
+
+An approved host restart such as `wsl --shutdown` ends the active WSL Codex
+session. It is a two-session procedure, not a resumable turn. Before the
+restart, record the baseline and transition the Issue to `status:blocked`
+with the exact human recovery action. A human reopens the workspace and starts
+a new user-directed Codex session; that new session performs the after-test and
+requests restoration. If either handoff or after-test is missing, record the
+criterion as blocked or unobserved, not passed. Follow
+`docs/operations/TROUBLESHOOTING.md`; do not add this manual host procedure to
+Symphony runtime automation.
+
 ## Quality warnings
 
 For test warnings and dependency deprecations, follow

@@ -11,8 +11,11 @@ labels for an open task: `status:ready`, `status:in-progress`,
 has no unsatisfied dependency or conflicting owner, and needs no additional
 authority. `symphony:ready` is a separate, explicit opt-in for continuous
 dispatch; both labels are required before the service may claim an Issue.
-`status:in-progress` is a single active claimed run.
-`status:blocked` records the evidence and required next action. `status:human-review`
+`status:in-progress` is a single active claimed run. A disruptive host restart
+that ends that run must transition the Issue to `status:blocked` before the
+restart; it has no active owner until a new user-directed session claims it.
+`status:blocked` records the evidence and required next action, including a
+human recovery handoff when applicable. `status:human-review`
 means implementation and required checks are complete, the Issue remains open,
 and a person must decide whether to close or merge.
 
