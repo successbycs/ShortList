@@ -215,3 +215,23 @@ def test_non_task_failure_blocks_without_terra_retry_or_astra(tmp_path: Path) ->
     assert runner.calls == [("gpt-5.6-terra", "implementation")]
     assert scheduler.records[issue.id].status == RunStatus.BLOCKED
     assert tracker.transitions == [("status:in-progress", "status:blocked")]
+
+
+def test_provider_failure_blocks_without_escalation(tmp_path: Path) -> None:
+    issue = Issue(
+        "provider", "#provider", "Provider", None, "open", labels=("status:ready", "symphony:ready")
+    )
+    runner = FakeRunner(
+        [RunResult(False, "provider unavailable", failure_kind=FailureKind.PROVIDER)]
+    )
+    tracker = FakeTracker(issue)
+    scheduler = Scheduler(workflow(tmp_path), tracker, runner)
+
+    async def execute() -> None:
+        await scheduler.tick()
+        await asyncio.gather(*scheduler.running.values())
+
+    asyncio.run(execute())
+
+    assert runner.calls == [("gpt-5.6-terra", "implementation")]
+    assert scheduler.records[issue.id].status == RunStatus.BLOCKED
