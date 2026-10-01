@@ -6,11 +6,13 @@
 **Requirements source:** [TEMPLATE_SPECIFICATION.md](../TEMPLATE_SPECIFICATION.md)
 **Workflow source:** [GITHUB_ISSUE_WORKFLOW.md](../harness/GITHUB_ISSUE_WORKFLOW.md)
 
-`passed` means the cited artifact was inspected or the stated local command
-passed. `partial` identifies a real implementation whose environment-dependent
-check remains unobserved. `blocked` records a specific external prerequisite;
-`deferred` is an agreed exclusion. File existence alone is never behaviour
-evidence.
+`passed` means the requirement's relevant acceptance evidence was observed.
+Inspection can satisfy an inspection-based requirement; it cannot alone satisfy
+a claimed operational capability. For the latter, the cited evidence must reach
+the real available boundary required by [Definition of Done](../harness/DEFINITION_OF_DONE.md). `partial` identifies a real implementation whose
+environment-dependent check remains unobserved. `blocked` records a specific
+external prerequisite; `deferred` is an agreed exclusion. File existence alone
+is never behaviour evidence.
 
 | Requirement IDs | Status | Observed evidence / remaining check |
 | --- | --- | --- |

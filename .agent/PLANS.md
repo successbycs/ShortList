@@ -75,6 +75,13 @@ Give exact commands and their working directory. For commands that produce meani
 
 Specify behavior-oriented acceptance criteria. Include appropriate lint, test, build, runtime, and end-to-end checks, with inputs, expected outputs, and how to interpret failures. Explain how to demonstrate internal changes. State test names and expected counts when they are known.
 
+For material work that claims a runnable, user-visible, persistent, deployed,
+or external capability, name the claimed operational boundary, the real proof,
+its prerequisites and authority, and whether its result is passed, failed,
+blocked, or unobserved. Use a compact proof matrix when several capabilities
+make it clearer. Follow [Definition of Done](../docs/harness/DEFINITION_OF_DONE.md): supporting imports, mocks, fakes, and synthetic tests do not replace
+an available real-boundary proof.
+
 ## Idempotence and Recovery
 
 Explain which steps are safe to repeat. For a risky, stateful, or potentially destructive step, specify prerequisites, backups where applicable, retry behavior, and rollback or safe fallback. State any remaining manual action.

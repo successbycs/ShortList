@@ -54,6 +54,13 @@ expected verification, exclusions, and authority boundaries. A tracking Issue
 summarises baseline work and makes clear that local-only commits are invisible
 to GitHub until a person pushes them.
 
+When a concrete task claims an operational capability, its expected verification
+must name the real operational boundary and the evidence that will prove it. If
+the boundary cannot be exercised within current authority, the Issue must name
+the exact blocker, the required owner/action, and the criterion that remains
+unobserved. Follow [Definition of Done](DEFINITION_OF_DONE.md); mocks and
+synthetic checks may support regression coverage but do not replace that proof.
+
 The four task labels are created or reused only after a live target read confirms
 the repository and duplicate labels are absent. GitHub's documented CLI
 supports non-interactive Issue creation with title/body and labels; labels

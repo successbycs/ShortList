@@ -6,6 +6,26 @@ Done means scope implemented, relevant tests/evidence recorded, docs/config
 updated, limitations stated, and required review/authorization complete. A
 blocked check remains blocked, not passed.
 
+## Operational proof for capability claims
+
+When a task claims a runnable, user-visible, persistent, deployed, or external
+capability, and the claimed operational boundary is available within the task's
+authority, its acceptance evidence must include a reproducible proof at that
+boundary. A real boundary is the actual interface being claimed, such as a
+running HTTP endpoint reached through HTTP, an operator-invoked CLI process, a
+database reopened after persistence, a running container, or an explicitly
+approved provider request.
+
+Synthetic data and disposable environments are permitted. Imports, source
+inspection, mocks, fakes, screenshots, client construction, and unit tests can
+prove logic, safety, or design, but cannot by themselves prove the claimed
+operational capability. If the boundary, prerequisite, or authority is
+unavailable, record that specific criterion as blocked or unobserved with the
+exact required action; do not mark it passed. This rule does not authorize an
+external action, credential access, deployment, or system change. Do not invent
+an operational proof for documentation-only, refactor-only, deferred, or
+deliberately disabled work.
+
 ## Durable verification evidence
 
 Terminal output and chat updates are transient evidence, not completion proof.
