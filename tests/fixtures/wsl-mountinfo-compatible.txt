@@ -1,0 +1,2 @@
+81 80 0:38 / /mnt/wslg rw,relatime shared:2 - tmpfs none rw
+82 81 0:80 / /mnt/wslg/run/user/1000 rw,nosuid,nodev - tmpfs tmpfs rw

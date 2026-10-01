@@ -1,0 +1,2 @@
+81 80 0:38 / /mnt/wslg rw,relatime shared:2 - tmpfs none rw
+82 81 8:48 / /mnt/wslg/distro ro,relatime shared:3 - ext4 /dev/sdd rw
