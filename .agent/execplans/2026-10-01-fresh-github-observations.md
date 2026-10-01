@@ -12,7 +12,7 @@ Issue #27 makes GitHub state a fresh, explicit input to every Symphony eligibili
 
 - [x] (2026-10-01 06:20Z) Verified #8 closure, claimed #27, and inspected the current tracker, scheduler, service, domain, and tests.
 - [x] (2026-10-01 06:20Z) Identified that `GitHubTracker.get()` catches read failures and returns `None`, while scheduler reconciliation treats `None` as cancellation.
-- [ ] Add typed observations, fresh decision gates, and non-mutating unknown handling.
+- [x] Add typed observations, fresh decision gates, and non-mutating unknown handling.
 - [ ] Add stale-label, dependency, read-failure, and new-scheduler tests; verify and hand off.
 
 ## Surprises & Discoveries
@@ -64,3 +64,5 @@ Observation reads are repeatable. Unknown observations do not cause writes, canc
 ## Interfaces and Dependencies
 
 `IssueObservation` is added in `src/app_template/symphony/domain.py`. `Tracker.observe(issue_id) -> IssueObservation` and boolean state-transition outcomes are implemented in `tracker.py`, including dashboard-safe no-op behavior. `Scheduler` consumes observations before eligibility and mutation. No new package or external service is added.
+- 2026-10-01 06:30Z: added timestamped known/unknown observations, direct-read gates for claim/review/transition writes, and reconciliation behavior that preserves a run when a read is unknown. Focused tracker/scheduler tests passed (7); canonical verifier passed (48 tests, Ruff lint/format, Markdown links).
+- Remaining: add explicit reconstructed-scheduler fresh-observation test and document the operator-facing decision-evidence rule before human-review handoff.
