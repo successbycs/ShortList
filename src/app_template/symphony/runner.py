@@ -172,13 +172,20 @@ class CodexAppServerRunner:
                         if isinstance(turn, dict):
                             turn_id = str(turn.get("id") or turn_id or "") or None
                             if turn.get("status") != "completed":
+                                status = str(turn.get("status") or "failure")
+                                kind = (
+                                    FailureKind.CANCELLED
+                                    if status in {"cancelled", "canceled"}
+                                    else FailureKind.TASK_LOCAL
+                                )
                                 return RunResult(
                                     False,
-                                    f"{role} reported turn {turn.get('status') or 'failure'}",
+                                    f"{role} reported turn {status}",
                                     thread_id,
                                     turn_id,
                                     input_tokens,
                                     output_tokens,
+                                    failure_kind=kind,
                                 )
                         return RunResult(
                             True,
