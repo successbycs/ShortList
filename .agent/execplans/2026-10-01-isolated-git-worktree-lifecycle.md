@@ -12,8 +12,8 @@ Issue #25 replaces the current directory-only workspace manager with a Git workt
 
 - [x] (2026-10-01 05:30Z) Re-read closed dependency #8, verified the GitHub target, promoted and claimed #25, and inspected current workspace, scheduler, runner, tests, configuration, and runbook.
 - [x] (2026-10-01 05:30Z) Identified that `WorkspaceManager.prepare()` creates ordinary directories, while the configured root is inside the shared checkout; neither meets #25.
-- [ ] Implement a validated external worktree root, deterministic per-Issue branch naming, creation/recovery, and contained removal.
-- [ ] Add focused lifecycle and runner-cwd tests plus a disposable-repository demonstration, update the operator runbook, run canonical verification, and hand #25 to human review.
+- [x] Implement a validated external worktree root, deterministic per-Issue branch naming, creation/recovery, and contained removal.
+- [x] Add focused lifecycle and runner-cwd tests plus a disposable-repository demonstration, update the operator runbook, run canonical verification, and hand #25 to human review.
 
 ## Surprises & Discoveries
 
@@ -33,7 +33,7 @@ Issue #25 replaces the current directory-only workspace manager with a Git workt
 
 ## Outcomes & Retrospective
 
-Pending implementation and verification.
+Implemented and verified a per-Issue Git worktree lifecycle. The scheduler now passes only a validated Git worktree to a runner. Clean worktrees are removed through Git; dirty worktrees remain for explicit operator recovery. The source checkout and Issue branches are never cleanup targets. No live dispatch, GitHub task write, dashboard change, concurrency change, or Codex turn occurred.
 
 ## Context and Orientation
 
@@ -81,3 +81,11 @@ Preparing a valid existing worktree is safe and reruns hooks. If a worker stops,
 ## Interfaces and Dependencies
 
 `WorkspaceManager(settings: WorkspaceSettings, repository_root: Path)` will own Git command execution. It will expose `path_for(issue) -> Path`, `branch_for(issue) -> str`, `prepare(issue) -> Path`, `complete(workspace) -> None`, and `remove(workspace) -> None`. `Scheduler` will construct it from `workflow.config.workspace` and `workflow.path.parent`. The runner interface remains unchanged and receives the validated path. Only local `git` is required; no new Python dependency or external service is introduced.
+- Observation: Git refuses ordinary worktree removal when hooks or task work leave untracked files. This is retained as a fail-closed recovery boundary rather than bypassed with force removal.
+  Evidence: initial disposable lifecycle test returned Git error `contains modified or untracked files`; revised test proves the dirty worktree remains and shared checkout is untouched.
+- Decision: Validate the source repository at `prepare()` time rather than scheduler construction.
+  Rationale: a disabled dashboard scheduler must remain constructible without a Git checkout, while every actual task preparation must validate the Git boundary.
+  Date/Author: 2026-10-01 / Codex
+- 2026-10-01 05:55Z: focused Dev Container checks passed: Ruff format/check and `pytest -q tests/unit/symphony/test_workspaces.py tests/unit/symphony/test_workflow.py tests/unit/symphony/test_runner.py tests/unit/symphony/test_scheduler.py` (17 passed).
+- 2026-10-01 05:56Z: local disposable Git demonstration created a branch and worktree, confirmed its top level and branch, removed it with Git, and confirmed the source checkout survived. No GitHub, Codex, or live dispatch activity occurred.
+- 2026-10-01 06:05Z: canonical Dev Container verifier passed: Ruff lint/format, 46 tests, and Markdown-link validation. `git diff --check` passed. #25 is ready for human review; successors remain gated.
