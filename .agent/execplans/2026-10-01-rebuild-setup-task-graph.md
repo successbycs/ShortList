@@ -12,8 +12,8 @@ The current Set-up queue contains a broad parent (#5), overlapping implementatio
 - [x] (2026-10-01 04:00Z) Identified the parent/child overlap, stale state evidence, and missing proof boundaries.
 - [x] (2026-10-01 04:00Z) Designed the replacement Set-up graph, issue templates, dependencies, and verification gates.
 - [ ] (2026-10-01 04:00Z) Obtain review of this rebuild plan before creating/re-scoping GitHub task records.
-- [ ] (after approval) Update the parent #5 description and create/re-scope the replacement task issues without closing historical evidence issues.
-- [ ] (after approval) Execute one ready task at a time, recording durable proof before unblocking its successor.
+- [x] (2026-10-01 04:15Z) Re-scoped #5, #8, #10, #12, #13, and #24; created focused backlog issues #25–#28 without deleting or reopening historical evidence.
+- [ ] (2026-10-01 04:15Z) Execute one ready task at a time, recording durable proof before unblocking its successor. #8 is the only active implementation packet.
 
 ## Surprises & Discoveries
 
@@ -102,3 +102,18 @@ Read-only inventory and local drafts are repeatable. Before an Issue write, re-r
 ## Interfaces and Dependencies
 
 The rebuild changes GitHub task records and parent planning documents, not runtime APIs. New implementation Issues may later define `HostExecutionBroker`, worktree lifecycle, observation envelopes, reconciliation decisions, durable event schemas, and dashboard read models. Each must name exact module signatures in its own SPEC/ExecPlan before implementation. GitHub CLI authentication is required only for task-record writes; no credentials are stored in issue text or repository files.
+
+## Applied graph (2026-10-01)
+
+- Parent #5 is now a programme tracker with no active worker label.
+- S1 is #8, Host execution broker and safe preflight (active).
+- S2 is #25, Create isolated Git worktree lifecycle for Symphony tasks (backlog).
+- S3 is #26, Classify Terra failures and hand off Astra reviews (backlog).
+- S4 is #27, Require fresh GitHub observations before Symphony decisions (backlog).
+- S5 is #28, Persist Symphony operational evidence for safe recovery (backlog).
+- S6 remains #10; S7 remains #12; S8 remains #13; #16 remains independent delivery-policy work; S9 remains #24.
+- Operator categorisation is deferred as S10 until delivery graph work is stable. New category label definitions exist, but no Issue has been reclassified with them.
+
+## Rebuild evidence
+
+- 2026-10-01 04:15Z: live GitHub records #5, #8, #10, #12, #13, and #24 were re-read before scope updates. #5 became parent-only; #8 was narrowed to S1; dependent ready/blocked labels were removed from #10/#12/#13/#24; #25–#28 were created unlabelled as backlog. No closed Issue was reopened, deleted, or relabelled.
