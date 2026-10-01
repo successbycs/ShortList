@@ -20,13 +20,14 @@ evidence.
 | RQ-015 | passed | The configured `successbycs/template` target was verified live; the four status labels and [tracking Issue](https://github.com/successbycs/template/issues/1) were created after duplicate inspection. The genuine [repair task](https://github.com/successbycs/template/issues/2) moved ready → in-progress → human-review with evidence comments; two environment-dependent tasks remain open and blocked. |
 | RQ-020 | passed | `.python-version`, `pyproject.toml`, committed `uv.lock`, and locked container `uv sync --locked --group dev` were inspected/run. |
 | RQ-021 | partial | Container local verification passed with Ruff lint/format, 17 pytest tests, and link checker; CI now builds the image then calls the same verifier. A remote GitHub Actions result is not observed. |
-| RQ-022–RQ-023 | passed | Optional packs are documentation-only and absent from baseline dependencies/services. Official OpenAI skill/instruction sources and dates are registered; no unverified native Codex configuration was added. |
+| RQ-022–RQ-023 | passed | On 2026-10-01, Dev Container `uv lock --check`, `uv sync --locked --group dev`, focused manifest test, and the canonical verifier passed. `pyproject.toml`/`uv.lock` declare OpenAI Agents SDK, Prefect, and FastAPI as standard libraries while runtime execution remains opt-in; no native agent configuration was added. |
 | RQ-030–RQ-033 | passed | Adapter, audit store, documentation, and tests show deterministic no-op behavior, explicit limits, and build-time/runtime-agent distinction. |
 | RQ-040 | passed | Required foundation/layout paths were inspected. The existing MIT `LICENSE` was preserved; no CODEOWNERS entry was invented. |
 | RQ-041–RQ-044 | passed | Container tests cover precedence, unknown/invalid config, safe token redaction, correlation IDs, transactional rollback, schema-version rejection, persistence, health, self-test, and no-op demo. |
 | RQ-050–RQ-051 | passed | Required repository foundations, issue forms, source/test/evals/scripts/templates/config/optional paths, ignored secrets, and lockfile were inspected. A copied archive bootstrapped to `clinic-template` / `clinic_template` / `example-owner/clinic-template`, re-locked, and passed the canonical verifier. |
 | RQ-052–RQ-061 | passed | Documentation catalogue and content were inspected; architecture/workflows are linked and three Mermaid blocks exist. Application material is marked template or deferred. |
 | RQ-062 | passed | `python3 scripts/check_markdown_links.py` and the container canonical verifier reported `Markdown links: passed` on 2026-09-29. The checker validates relative local Markdown links; it does not validate external URLs, rendered anchors, or prose accuracy. |
+| RQ-063–RQ-064 | passed | `AGENTS.md` routes agents to the canonical Definition of Done; it distinguishes terminal/chat output from durable proof and defines the mandatory ExecPlan risk test. The Issue workflow and PLANS contract require evidence recording before progress/handoff. Markdown links and whitespace checks passed on 2026-10-01. |
 
 ## Command evidence
 

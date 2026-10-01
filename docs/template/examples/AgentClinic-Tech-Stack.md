@@ -12,7 +12,7 @@ Read the source specification at [AgentClinic-Tech-Stack.md](https://github.com/
 
 Use its level of technical detail as a model only after the consuming project has selected its own requirements and architecture. Keep technology selection separate from product intent, record assumptions, and verify real behavior with tests and operational evidence.
 
-This template does **not** adopt the source’s Next.js, React, SSE, Anthropic SDK, API-key, SQLite ORM, background-job, endpoint, or LLM-call design. The template’s active baseline remains Python, Pydantic, standard-library SQLite, `uv`, Ruff, pytest, Compose, and Dev Containers. Optional web, AI, PostgreSQL, and worker packs require explicit adoption under [OPTIONAL_PACKS.md](../OPTIONAL_PACKS.md).
+This template does **not** adopt the source’s Next.js, React, SSE, Anthropic SDK, API-key, SQLite ORM, background-job, endpoint, or LLM-call design. The template’s active baseline includes Python, Pydantic, OpenAI Agents SDK, Prefect, FastAPI, standard-library SQLite, `uv`, Ruff, pytest, Compose, and Dev Containers. Installing those libraries does not activate AI calls, web endpoints, or workers; optional FastAPI UI, PostgreSQL, RAG, and worker packs require explicit adoption under [OPTIONAL_PACKS.md](../OPTIONAL_PACKS.md).
 
 ## Attribution
 

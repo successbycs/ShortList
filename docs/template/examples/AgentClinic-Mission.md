@@ -12,7 +12,7 @@ Read the source specification at [AgentClinic-Mission.md](https://github.com/htt
 
 Use it for structure and specificity, not as an implementation mandate. Before adopting any part, write the consuming project’s own requirements, authority boundaries, privacy/security design, data retention, model policy, evaluation plan, and deterministic enforcement.
 
-In particular, this template does **not** adopt the source example’s domain model, REST endpoints, API-key authentication pattern, LLM triage/diagnosis behavior, dashboard, automated treatment behavior, or medical metaphor. Runtime AI and web capability packs remain deferred and opt-in under [OPTIONAL_PACKS.md](../OPTIONAL_PACKS.md).
+In particular, this template does **not** adopt the source example’s domain model, REST endpoints, API-key authentication pattern, LLM triage/diagnosis behavior, dashboard, automated treatment behavior, or medical metaphor. OpenAI Agents SDK, Prefect, and FastAPI are installed libraries, but runtime AI and web capability packs remain unconfigured and opt-in under [OPTIONAL_PACKS.md](../OPTIONAL_PACKS.md).
 
 ## Attribution
 

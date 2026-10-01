@@ -32,7 +32,7 @@ This is the canonical requirements record for the `successbycs/template` reposit
 | --- | --- |
 | RQ-020 | Pin a supported Python minor version explicitly; use `uv`, commit `uv.lock`, and use locked installs. |
 | RQ-021 | Use Pydantic, Python-standard-library SQLite, Ruff, pytest, Docker Compose, VS Code Dev Containers, and Mermaid in Markdown. |
-| RQ-022 | Provide documented extension packs for OpenAI Agents SDK, Prefect, FastAPI, FastAPI + Jinja/HTMX UI, PostgreSQL, RAG, and background/scheduled workers. Do not install or start them by default. |
+| RQ-022 | Install OpenAI Agents SDK, Prefect, and FastAPI as standard Python libraries. Their agent, workflow, and web-server runtime capabilities remain unconfigured and inactive by default. Provide documented extension packs for FastAPI + Jinja/HTMX UI, PostgreSQL, RAG, and background/scheduled workers. |
 | RQ-023 | Use `pyproject.toml` for native Python/tool configuration. Add `.codex/config.toml` or development-agent configuration only after verifying their current official schemas and registration mechanisms; do not invent native formats (for example, `prefect.toml`). Record official sources and their verification dates. |
 
 ## Architecture and safety boundaries
@@ -73,10 +73,19 @@ The implementation must create `docs/INDEX.md` as a catalogue. Every catalogue e
 | RQ-060 | Create template documents: `NEW_PROJECT_GUIDE.md`, `OPTIONAL_PACKS.md`, and `TEMPLATE_UPGRADES.md`. |
 | RQ-061 | Include Mermaid diagrams for environment boundaries, development workflow, and runtime component relationships. |
 | RQ-062 | Automatically check internal Markdown file links. |
+| RQ-063 | Treat terminal output and chat updates as transient evidence. Before reporting a task or milestone verified, record durable proof in the applicable Issue, `SPEC.md`, ExecPlan, or Verification Matrix. |
+| RQ-064 | Require an ExecPlan for risky work: external or irreversible effects; cross-cutting contracts; multi-packet or multi-session changes; unfamiliar integrations; rollback/retry needs; or coordinated human-review gates. |
+
+RQ-063 and RQ-064 are implemented through the concise routing rule in
+`AGENTS.md`, the canonical durable-evidence and risk criteria in
+[`DEFINITION_OF_DONE.md`](harness/DEFINITION_OF_DONE.md), the Issue handoff
+workflow, and `.agent/PLANS.md`. The detailed policy belongs in those canonical
+documents; individual specifications state their own acceptance evidence rather
+than duplicating the governance rules.
 
 ## Initial decisions and unresolved decisions
 
-Agreed now: Python, `uv`, Pydantic, standard-library SQLite, Ruff, pytest, Compose, Dev Containers, and Mermaid are the default foundation. Optional capability packs are opt-in and isolated. Local Docker is verified on the T16 WSL2 host with Docker Desktop. The GitHub task workflow is session-driven: a user starts Codex, which selects one eligible ready Issue and leaves it in human review after verification. It does not poll, run unattended, or automatically spawn agents.
+Agreed now: Python, `uv`, Pydantic, OpenAI Agents SDK, Prefect, FastAPI, standard-library SQLite, Ruff, pytest, Compose, Dev Containers, and Mermaid are the default foundation. Installing those libraries does not configure an API key, start an agent, worker, or web server, or enable external calls. Optional capability packs remain opt-in and isolated. Local Docker is verified on the T16 WSL2 host with Docker Desktop. The GitHub task workflow is session-driven: a user starts Codex, which selects one eligible ready Issue and leaves it in human review after verification. It does not poll, run unattended, or automatically spawn agents.
 
 The existing repository `LICENSE` is an MIT License, retained without change.
 Repository ownership/CODEOWNERS assignments and a consuming project's licence
