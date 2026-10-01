@@ -1,6 +1,8 @@
+import sqlite3
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 import uvicorn
 from fastapi.testclient import TestClient
 
@@ -181,3 +183,41 @@ def test_preflight_fails_closed_without_host_prerequisites(tmp_path: Path, monke
         "github_authenticated": False,
         "dispatch_ready": False,
     }
+
+
+def test_operational_evidence_migrates_reopens_and_stays_sanitized(tmp_path: Path) -> None:
+    database = tmp_path / "events.sqlite3"
+    with sqlite3.connect(database) as connection:
+        connection.execute("CREATE TABLE symphony_events(id INTEGER PRIMARY KEY)")
+
+    first = EventStore(database)
+    first.record_operation("observation", "28", {"known": True, "source": "github"})
+    first.record_operation("admission_decision", "28", {"decision": "claim_attempt"})
+    assert first.reserve("28") is True
+
+    reopened = EventStore(database)
+    operations = reopened.recent_operations()
+
+    assert {event["kind"] for event in operations} >= {
+        "observation",
+        "admission_decision",
+        "queue_age",
+        "reservation",
+    }
+    assert reopened.active_reservations() == {"28"}
+    assert reopened.reserve("28") is False
+    with pytest.raises(ValueError, match="allow-listed"):
+        reopened.record_operation("observation", "28", {"runner_transcript": "secret"})
+
+
+def test_interrupted_reservation_survives_restart_until_worker_stop(tmp_path: Path) -> None:
+    database = tmp_path / "events.sqlite3"
+    interrupted = EventStore(database)
+    assert interrupted.reserve("28") is True
+
+    recovered = EventStore(database)
+    assert recovered.active_reservations() == {"28"}
+    recovered.stop_reservation("28", "human_review")
+
+    assert EventStore(database).active_reservations() == set()
+    assert EventStore(database).recent_operations()[0]["kind"] == "worker_stop"

@@ -26,12 +26,138 @@ from app_template.symphony.workflow import Workflow, load_workflow
 
 
 class EventStore:
+    _OPERATION_FIELDS = {
+        "observation": {"source", "status", "known"},
+        "admission_decision": {"decision"},
+        "claim": {"status_label"},
+        "reviewed_revision": {"revision"},
+        "queue_age": {"seconds"},
+        "reservation": {"state"},
+        "worker_stop": {"outcome"},
+    }
+
     def __init__(self, database: Path) -> None:
         self.database = database
 
-    def append(self, record: RunRecord, result: RunResult | None) -> None:
+    def _connect(self) -> sqlite3.Connection:
         self.database.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.database) as connection:
+        connection = sqlite3.connect(self.database)
+        connection.execute(
+            """CREATE TABLE IF NOT EXISTS symphony_operational_events(
+               id INTEGER PRIMARY KEY, created_at TEXT NOT NULL, issue_id TEXT NOT NULL,
+               kind TEXT NOT NULL, details_json TEXT NOT NULL)"""
+        )
+        connection.execute(
+            """CREATE TABLE IF NOT EXISTS symphony_reservations(
+               issue_id TEXT PRIMARY KEY, acquired_at TEXT NOT NULL, status TEXT NOT NULL,
+               stopped_at TEXT, outcome TEXT)"""
+        )
+        connection.execute(
+            """CREATE TABLE IF NOT EXISTS symphony_queue_age(
+               issue_id TEXT PRIMARY KEY, first_seen_at TEXT NOT NULL)"""
+        )
+        return connection
+
+    @staticmethod
+    def _safe_details(
+        kind: str, details: dict[str, object]
+    ) -> dict[str, str | int | float | bool | None]:
+        """Allow only the bounded evidence fields, never runner content or credentials."""
+        allowed = EventStore._OPERATION_FIELDS.get(kind)
+        if allowed is None or set(details) - allowed:
+            raise ValueError("operation details contain fields that are not allow-listed")
+        safe: dict[str, str | int | float | bool | None] = {}
+        for key, value in details.items():
+            if not key.replace("_", "").isalnum() or len(key) > 64:
+                raise ValueError("operational evidence keys must be short identifiers")
+            if not isinstance(value, str | int | float | bool | type(None)):
+                raise ValueError("operational evidence values must be scalar")
+            if isinstance(value, str) and len(value) > 256:
+                raise ValueError("operational evidence strings must be at most 256 characters")
+            safe[key] = value
+        return safe
+
+    @staticmethod
+    def _record_operation(
+        connection: sqlite3.Connection,
+        kind: str,
+        issue_id: str,
+        details: dict[str, str | int | float | bool | None],
+    ) -> None:
+        connection.execute(
+            "INSERT INTO symphony_operational_events(created_at, issue_id, kind, details_json) "
+            "VALUES (?, ?, ?, ?)",
+            (datetime.now(UTC).isoformat(), issue_id, kind, json.dumps(details, sort_keys=True)),
+        )
+
+    def record_operation(self, kind: str, issue_id: str, details: dict[str, object]) -> None:
+        if kind not in self._OPERATION_FIELDS:
+            raise ValueError("operation kind is not allow-listed")
+        safe_details = self._safe_details(kind, details)
+        with self._connect() as connection:
+            if kind == "admission_decision":
+                row = connection.execute(
+                    "SELECT first_seen_at FROM symphony_queue_age WHERE issue_id = ?", (issue_id,)
+                ).fetchone()
+                now = datetime.now(UTC)
+                if row is None:
+                    connection.execute(
+                        "INSERT INTO symphony_queue_age(issue_id, first_seen_at) VALUES (?, ?)",
+                        (issue_id, now.isoformat()),
+                    )
+                    age_seconds = 0
+                else:
+                    elapsed = now - datetime.fromisoformat(row[0])
+                    age_seconds = max(0, int(elapsed.total_seconds()))
+                self._record_operation(connection, "queue_age", issue_id, {"seconds": age_seconds})
+            self._record_operation(connection, kind, issue_id, safe_details)
+
+    def reserve(self, issue_id: str) -> bool:
+        """Acquire the local crash-safety fence for one Issue exactly once."""
+        with self._connect() as connection:
+            cursor = connection.execute(
+                "INSERT OR IGNORE INTO symphony_reservations(issue_id, acquired_at, status) "
+                "VALUES (?, ?, 'active')",
+                (issue_id, datetime.now(UTC).isoformat()),
+            )
+            acquired = cursor.rowcount == 1
+            if acquired:
+                self._record_operation(connection, "reservation", issue_id, {"state": "active"})
+        return acquired
+
+    def stop_reservation(self, issue_id: str, outcome: str) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                "UPDATE symphony_reservations SET status = 'stopped', stopped_at = ?, outcome = ? "
+                "WHERE issue_id = ? AND status = 'active'",
+                (datetime.now(UTC).isoformat(), outcome[:256], issue_id),
+            )
+            self._record_operation(connection, "worker_stop", issue_id, {"outcome": outcome[:256]})
+
+    def active_reservations(self) -> set[str]:
+        if not self.database.exists():
+            return set()
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT issue_id FROM symphony_reservations WHERE status = 'active'"
+            ).fetchall()
+        return {str(row[0]) for row in rows}
+
+    def recent_operations(self) -> list[dict[str, object]]:
+        if not self.database.exists():
+            return []
+        with self._connect() as connection:
+            rows = connection.execute(
+                "SELECT created_at, issue_id, kind, details_json FROM symphony_operational_events "
+                "ORDER BY id DESC LIMIT 100"
+            ).fetchall()
+        return [
+            {"created_at": row[0], "issue_id": row[1], "kind": row[2], **json.loads(row[3])}
+            for row in rows
+        ]
+
+    def append(self, record: RunRecord, result: RunResult | None) -> None:
+        with self._connect() as connection:
             connection.execute(
                 """CREATE TABLE IF NOT EXISTS symphony_events(
                    id INTEGER PRIMARY KEY, created_at TEXT NOT NULL, issue_id TEXT NOT NULL,
@@ -62,7 +188,7 @@ class EventStore:
     def recent(self) -> list[dict[str, object]]:
         if not self.database.exists():
             return []
-        with sqlite3.connect(self.database) as connection:
+        with self._connect() as connection:
             rows = connection.execute(
                 "SELECT created_at, issue_id, status, attempt, model, summary, "
                 "payload_json FROM symphony_events ORDER BY id DESC LIMIT 100"
@@ -82,8 +208,7 @@ class EventStore:
 
     def claim_notification(self, issue_id: str, transition_id: str) -> bool:
         """Reserve one delivery attempt for a particular human-review transition."""
-        self.database.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.database) as connection:
+        with self._connect() as connection:
             connection.execute(
                 """CREATE TABLE IF NOT EXISTS symphony_notification_deliveries(
                    id INTEGER PRIMARY KEY, created_at TEXT NOT NULL, issue_id TEXT NOT NULL,
@@ -101,7 +226,7 @@ class EventStore:
     def complete_notification(
         self, issue_id: str, transition_id: str, result: NotificationResult
     ) -> None:
-        with sqlite3.connect(self.database) as connection:
+        with self._connect() as connection:
             connection.execute(
                 "UPDATE symphony_notification_deliveries "
                 "SET status = ?, detail = ?, attempts = ? "
@@ -113,7 +238,7 @@ class EventStore:
         if not self.database.exists():
             return []
         try:
-            with sqlite3.connect(self.database) as connection:
+            with self._connect() as connection:
                 rows = connection.execute(
                     "SELECT created_at, issue_id, transition_id, status, detail, attempts "
                     "FROM symphony_notification_deliveries ORDER BY id DESC LIMIT 100"
@@ -179,6 +304,10 @@ class SymphonyService:
             runner,
             on_event=self.store.append,
             on_human_review=self._notify_human_review,
+            on_operation=self.store.record_operation,
+            reserve=self.store.reserve,
+            stop_reservation=self.store.stop_reservation,
+            active_reservations=self.store.active_reservations,
         )
 
     def _notify_human_review(self, record: RunRecord) -> None:
@@ -271,6 +400,7 @@ class SymphonyService:
             return {
                 **self.scheduler.snapshot(),
                 "events": self.store.recent(),
+                "operations": self.store.recent_operations(),
                 "notifications": self.store.recent_notifications(),
             }
 

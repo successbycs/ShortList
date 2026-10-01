@@ -28,6 +28,10 @@ class Scheduler:
         runner: Runner,
         on_event: Callable[[RunRecord, RunResult | None], None] | None = None,
         on_human_review: Callable[[RunRecord], None] | None = None,
+        on_operation: Callable[[str, str, dict[str, object]], None] | None = None,
+        reserve: Callable[[str], bool] | None = None,
+        stop_reservation: Callable[[str, str], None] | None = None,
+        active_reservations: Callable[[], set[str]] | None = None,
     ) -> None:
         self.workflow, self.tracker, self.runner, self.on_event = (
             workflow,
@@ -36,6 +40,10 @@ class Scheduler:
             on_event,
         )
         self.on_human_review = on_human_review
+        self.on_operation = on_operation
+        self.reserve = reserve
+        self.stop_reservation = stop_reservation
+        self.persisted_reservations = active_reservations() if active_reservations else set()
         self.workspaces = WorkspaceManager(workflow.config.workspace, workflow.path.parent)
         self.records: dict[str, RunRecord] = {}
         self.running: dict[str, asyncio.Task[None]] = {}
@@ -82,11 +90,16 @@ class Scheduler:
     def _eligible(self, issue: Issue, packets: set[str]) -> bool:
         if (
             issue.id in self.running
+            or issue.id in self.persisted_reservations
             or issue.id in self.records
             and self.records[issue.id].status in {RunStatus.HUMAN_REVIEW, RunStatus.BLOCKED}
         ):
             return False
         return not self._packets_overlap(issue, packets)
+
+    def _operation(self, kind: str, issue_id: str, **details: object) -> None:
+        if self.on_operation:
+            self.on_operation(kind, issue_id, details)
 
     def reconcile(self) -> None:
         """Stop tracking runs whose authoritative GitHub Issue changed externally."""
@@ -95,6 +108,13 @@ class Scheduler:
             if record.status not in {RunStatus.QUEUED, RunStatus.RETRY_QUEUED}:
                 continue
             observation = self.tracker.observe(issue_id)
+            self._operation(
+                "observation",
+                issue_id,
+                source=observation.source,
+                status=observation.status.value,
+                known=observation.known,
+            )
             current = observation.issue
             if not observation.known:
                 record.error = "GitHub observation unavailable"
@@ -127,12 +147,24 @@ class Scheduler:
                 break
             if self._eligible(issue, reserved):
                 contract = self.workflow.config.task_contract
+                self._operation("admission_decision", issue.id, decision="claim_attempt")
+                if self.reserve and not self.reserve(issue.id):
+                    self.persisted_reservations.add(issue.id)
+                    self._operation("admission_decision", issue.id, decision="reserved_elsewhere")
+                    continue
+                if self.reserve:
+                    self.persisted_reservations.add(issue.id)
                 if self.tracker.claim(
                     issue, status_label=contract.ready_label, terra_label=contract.terra_label
                 ):
+                    self._operation("claim", issue.id, status_label=contract.ready_label)
                     reserved.update(self._packets(issue))
                     self.running[issue.id] = asyncio.create_task(self._execute(issue))
                     slots -= 1
+                elif self.reserve:
+                    if self.stop_reservation:
+                        self.stop_reservation(issue.id, "claim_rejected")
+                    self.persisted_reservations.discard(issue.id)
 
     async def _attempt(self, record: RunRecord, *, model: str, role: str, prompt: str) -> RunResult:
         record.model = model
@@ -169,6 +201,9 @@ class Scheduler:
                         )
                         return
                     self.tracker.comment(issue, f"Terra implementation completed: {result.summary}")
+                    self._operation(
+                        "reviewed_revision", issue.id, revision=record.updated_at.isoformat()
+                    )
                     self._notify_human_review(record)
                     return
                 if result.failure_kind not in {None, FailureKind.TASK_LOCAL}:
@@ -225,6 +260,11 @@ class Scheduler:
             record.update(RunStatus.BLOCKED, error=f"{type(error).__name__}: {error}")
         finally:
             self.running.pop(issue.id, None)
+            if self.reserve:
+                outcome = record.status.value if issue.id in self.records else "interrupted"
+                if self.stop_reservation:
+                    self.stop_reservation(issue.id, outcome)
+                self.persisted_reservations.discard(issue.id)
 
     def _notify_human_review(self, record: RunRecord) -> None:
         """Keep optional notification failures outside the completed task path."""

@@ -14,6 +14,7 @@ from app_template.symphony.domain import (
     RunStatus,
 )
 from app_template.symphony.scheduler import Scheduler
+from app_template.symphony.service import EventStore
 from app_template.symphony.workflow import load_workflow
 
 
@@ -23,6 +24,7 @@ class FakeTracker:
         self.transitions: list[tuple[str, str]] = []
         self.comments: list[str] = []
         self.observation_calls: list[str] = []
+        self.claims: list[str] = []
 
     def candidates(self, required_labels: set[str]) -> list[Issue]:
         return [
@@ -50,6 +52,7 @@ class FakeTracker:
         self.transitions.append((remove, add))
 
     def claim(self, issue: Issue, *, status_label: str, terra_label: str) -> bool:
+        self.claims.append(issue.id)
         return status_label in issue.normalized_labels and not issue.blocked_by
 
     def finish(self, issue: Issue, *, status_label: str) -> bool:
@@ -235,3 +238,69 @@ def test_provider_failure_blocks_without_escalation(tmp_path: Path) -> None:
 
     assert runner.calls == [("gpt-5.6-terra", "implementation")]
     assert scheduler.records[issue.id].status == RunStatus.BLOCKED
+
+
+def test_recovered_reservation_prevents_duplicate_dispatch(tmp_path: Path) -> None:
+    issue = Issue(
+        "recovered",
+        "#recovered",
+        "Recovered",
+        None,
+        "open",
+        labels=("status:ready", "symphony:ready"),
+    )
+    store = EventStore(tmp_path / "events.sqlite3")
+    assert store.reserve(issue.id) is True  # Simulates a process ending after reservation.
+    tracker = FakeTracker(issue)
+    scheduler = Scheduler(
+        workflow(tmp_path),
+        tracker,
+        FakeRunner([RunResult(True, "must not run")]),
+        reserve=store.reserve,
+        stop_reservation=store.stop_reservation,
+        active_reservations=store.active_reservations,
+    )
+
+    asyncio.run(scheduler.tick())
+
+    assert tracker.claims == []
+    assert scheduler.running == {}
+    assert EventStore(tmp_path / "events.sqlite3").active_reservations() == {issue.id}
+
+
+def test_scheduler_persists_full_admission_and_worker_lifecycle(tmp_path: Path) -> None:
+    issue = Issue(
+        "evidence",
+        "#evidence",
+        "Evidence",
+        None,
+        "open",
+        labels=("status:ready", "symphony:ready"),
+    )
+    store = EventStore(tmp_path / "events.sqlite3")
+    scheduler = Scheduler(
+        workflow(tmp_path),
+        FakeTracker(issue),
+        FakeRunner([RunResult(True, "done")]),
+        on_operation=store.record_operation,
+        reserve=store.reserve,
+        stop_reservation=store.stop_reservation,
+        active_reservations=store.active_reservations,
+    )
+
+    async def execute() -> None:
+        await scheduler.tick()
+        await asyncio.gather(*scheduler.running.values())
+
+    asyncio.run(execute())
+
+    kinds = {event["kind"] for event in store.recent_operations()}
+    assert {
+        "admission_decision",
+        "queue_age",
+        "claim",
+        "reservation",
+        "reviewed_revision",
+        "worker_stop",
+    } <= kinds
+    assert store.active_reservations() == set()

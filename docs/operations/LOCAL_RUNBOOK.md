@@ -18,6 +18,21 @@ To expose the loopback-only operator API while dispatch remains disabled, run
 Stop it with `docker compose --profile symphony stop symphony`. Enable live
 dispatch only after the dedicated end-to-end demonstration is approved.
 
+### Restart-safe operational evidence
+
+The local `var/symphony/events.sqlite3` database records sanitized scheduling facts
+under the dashboard's `/api/status` `operations` data. These include fresh
+observations, admission decisions and queue age, claims, reservations, reviewed
+revision markers, and worker stops. It contains no runner prompts, transcripts,
+credentials, or email bodies.
+
+If a host process ends after acquiring a reservation but before recording its worker
+stop, the next service instance retains that Issue's active reservation and refuses
+to dispatch it again. This is intentional: it prevents duplicate execution while the
+operator determines the prior worker outcome. Do not delete or alter the SQLite file
+to clear this fence. Record the outcome through the normal recovery workflow once it
+exists; until then, the safe state is blocked local dispatch for that Issue.
+
 ## Optional human-review email
 
 Symphony can send a concise email only when an Issue has already moved to
