@@ -94,3 +94,11 @@ class IssueObservation:
     @property
     def known(self) -> bool:
         return self.status is ObservationStatus.KNOWN and self.issue is not None
+
+
+@dataclass(frozen=True)
+class FailureSnapshot:
+    issue_id: str
+    issue_identifier: str
+    workspace: Path | None
+    failures: tuple[RunResult, ...]

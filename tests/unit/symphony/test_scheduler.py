@@ -5,8 +5,8 @@ import subprocess
 from pathlib import Path
 
 from app_template.symphony.domain import (
-    Issue,
     FailureKind,
+    Issue,
     IssueObservation,
     ObservationStatus,
     RunRecord,
@@ -61,11 +61,13 @@ class FakeRunner:
     def __init__(self, results: list[RunResult]) -> None:
         self.results = results
         self.calls: list[tuple[str, str]] = []
+        self.prompts: list[str] = []
 
     async def run(
         self, issue: Issue, workspace: Path, *, model: str, role: str, prompt: str
     ) -> RunResult:
         self.calls.append((model, role))
+        self.prompts.append(prompt)
         return self.results.pop(0)
 
 
@@ -135,6 +137,9 @@ def test_two_terra_failures_escalate_to_astra_then_terra_resume(tmp_path: Path) 
         "gpt-5.6-terra",
     ]
     assert scheduler.records["5"].status == RunStatus.HUMAN_REVIEW
+    assert "FailureSnapshot" in runner.prompts[2]
+    assert "first failure" in runner.prompts[2]
+    assert "second failure" in runner.prompts[2]
     assert tracker.transitions == [("status:in-progress", "status:human-review")]
 
 

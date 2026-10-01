@@ -6,7 +6,14 @@ import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
 
-from app_template.symphony.domain import FailureKind, Issue, RunRecord, RunResult, RunStatus
+from app_template.symphony.domain import (
+    FailureKind,
+    FailureSnapshot,
+    Issue,
+    RunRecord,
+    RunResult,
+    RunStatus,
+)
 from app_template.symphony.runner import Runner
 from app_template.symphony.tracker import Tracker
 from app_template.symphony.workflow import Workflow
@@ -149,6 +156,7 @@ class Scheduler:
         terra = self.workflow.config.agent.terra_model
         try:
             result: RunResult | None = None
+            task_failures: list[RunResult] = []
             for _ in range(self.workflow.config.agent.max_attempts):
                 result = await self._attempt(
                     record, model=terra, role="implementation", prompt=self.workflow.prompt_template
@@ -167,10 +175,14 @@ class Scheduler:
                     record.update(RunStatus.BLOCKED, error=result.summary)
                     self.tracker.finish(issue, status_label="status:blocked")
                     return
+                task_failures.append(result)
                 record.update(RunStatus.RETRY_QUEUED, error=result.summary)
                 record.next_attempt_at = datetime.now(UTC)
                 await asyncio.sleep(self.workflow.config.agent.retry_backoff_seconds)
             record.update(RunStatus.ESCALATING, error=result.summary if result else "no result")
+            snapshot = FailureSnapshot(
+                issue.id, issue.identifier, record.workspace, tuple(task_failures)
+            )
             astra = self.workflow.config.agent.astra_model
             plan = await self._attempt(
                 record,
@@ -179,7 +191,7 @@ class Scheduler:
                 prompt=(
                     "Create a self-contained ExecPlan that diagnoses the failed implementation "
                     "and proposes the smallest repair.\n"
-                    f"Issue: {issue.title}\nFailure: {record.error}\n"
+                    f"Issue: {issue.title}\nSnapshot: {snapshot!r}\n"
                 ),
             )
             if not plan.succeeded:
