@@ -65,12 +65,13 @@ Create the following issues under parent #5, each with an explicit `## Code pack
 | S7 — Safe single-worker end-to-end demonstration | S1–S6 | `tests/`, `scripts/`, verification matrix | Dedicated test Issue only; clean start, restart, dashboard, GitHub read/write, and no-unrelated-dispatch proof pass with live dispatch false afterward. |
 | S8 — Operator and delivery documentation | S7 | `docs/guides/`, `docs/harness/`, `docs/quality/` | Guides match proven behavior, commands, limits, recovery, and issue workflow; links pass. |
 | S9 — Controlled concurrency safety gates | S7, S8 | scheduler/workspaces/tracker/event/dashboard packets | #24’s eight gates pass before any second Terra slot can be configured or admitted. |
+| S10 — Operator board categorisation | S8 | GitHub labels, issue metadata, operator guide | Apply the reviewed `status`/`kind`/`area`/`gate` taxonomy to open tasks; remove stale workflow labels from closed issues; publish a one-page operator legend. |
 
 ### Milestone 3: retire overlap and use a simple dependency order
 
 After reviewing the new task bodies, change #8 to S1 scope or replace it with S1 and mark #8 superseded with a link. Re-scope #10 as S6, #12 as S7, #13 as S8, and #24 as S9; #16 becomes an independent documentation-policy task after S8 or is folded into S8 only if its acceptance criteria are preserved verbatim. Do not treat status labels in closed Issues as current blockers. Every replacement issue references its predecessor by native GitHub dependency, not only body prose.
 
-Observable result: the executable order is `S1 → S2/S4 → S3 → S5 → S6 → S7 → S8 → S9`, with S2 and S4 allowed in parallel only after S1 is human-reviewed and code packets do not overlap.
+Observable result: the executable order is `S1 → S2/S4 → S3 → S5 → S6 → S7 → S8 → S9`, with S10 performed afterward as non-blocking board hygiene, with S2 and S4 allowed in parallel only after S1 is human-reviewed and code packets do not overlap.
 
 ### Milestone 4: execute and evidence
 
