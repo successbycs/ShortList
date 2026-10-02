@@ -4,7 +4,10 @@
 
 A material change has an outcome, scope/non-goals, owner, acceptance evidence, affected boundaries, and known decisions or questions before implementation begins.
 
-## Symphony eligibility
+User-directed coding sessions require no readiness or agent labels; select work
+from the request, actual dependencies, and acceptance evidence.
+
+## Symphony runtime eligibility (separate from coding sessions)
 
 An Issue is eligible for continuous Symphony dispatch only when it is open and
 has both `status:ready` and `symphony:ready`. The first declares that the task

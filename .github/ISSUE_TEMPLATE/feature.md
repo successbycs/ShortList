@@ -14,8 +14,7 @@ about: Propose a bounded product or template capability
 List repository-relative paths this task may change. If scope is unknown, say
 `unscoped — serialize`; do not assume it may run concurrently.
 
-## Automation eligibility
+## Dependencies and verification
 
-- [ ] `status:ready` is appropriate.
-- [ ] `symphony:ready` is intentionally requested (optional; never implied).
+- State actual prerequisites and the command or observation that proves completion.
 - [ ] The appropriate SDD artifact is linked, if this is a tier-2 or tier-3 task.

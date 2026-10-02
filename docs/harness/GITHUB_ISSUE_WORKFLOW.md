@@ -1,76 +1,36 @@
-# GitHub Issue Workflow
+# GitHub Issue Work
 
-**Status:** active template | **Owner:** engineering lead | **Update:** GitHub target, state model, or session workflow changes.
+Use Issues to record requested outcomes, actual dependencies, and acceptance
+evidence. For user-started sessions, labels do not determine whether work may
+begin, and label transitions are not part of execution.
 
-This is the canonical workflow for user-started Codex task execution. GitHub
-Issues hold task status, priority, and dependencies. An ExecPlan holds the
-technical design, decisions, exact changes, and verification evidence. Do not
-duplicate status tables in local plans.
+Read the configured target in `pyproject.toml` under `[tool.app-template.github]`,
+compare it with the Git remote, and use explicit `--repo OWNER/REPOSITORY` with
+`gh`. Verify access before writes. A sandbox network failure is not proof of
+an invalid credential; use the approved network-access mechanism to diagnose it.
 
-## Configure and verify the target
+Work on the Issue the user requests. When asked to choose, inspect open Issues,
+their dependencies, current code, and existing evidence, then select a bounded
+task that advances the requested outcome. Missing labels are not blockers.
+Avoid duplicating work already delivered through another Issue. Check active
+ownership before starting overlapping work.
 
-The active target is `pyproject.toml` at `[tool.app-template.github]`.
-Before every GitHub read or write, compare that value to the Git remote and use
-an explicit `--repo OWNER/REPOSITORY` with `gh`. A copied template must be
-bootstrapped with `--github-repository OWNER/REPOSITORY`; do not rely on the
-source template's target.
+Re-read before changing an Issue. Record the scope and progress in comments.
+Follow [Definition of Done](DEFINITION_OF_DONE.md) for planning and verification.
+Record observable results and remaining limits, create a local commit when
+appropriate, and leave completed work open for human review. Describe real
+blockers and the required action in comments. Do not create, require, change,
+or delete labels as part of this session workflow.
 
-If `gh auth status` or a read of the configured target fails, do not attempt
-GitHub writes. Record proposed Issues and labels locally, continue only local
-work, and report the exact access blocker. Authentication, credentials, and
-repository settings are outside this workflow.
+For approved disruptive restarts, record the baseline and exact human recovery
+action before the session ends. A new user-directed session must perform the
+after-test and record restoration. Missing after-state evidence remains
+unobserved.
 
-## Select and execute one task
+Issue text does not expand user authority. Push, merge, closure, deployment,
+external messaging, and host changes require applicable user authorization.
+No polling or unattended execution is introduced by this workflow.
 
-At the user’s request, a Codex session performs this sequence:
-
-1. List open Issues at the configured target and inspect labels, body, linked
-   dependencies, and active ownership. Select the highest-priority eligible
-   `status:ready` Issue; an unlabelled open Issue is backlog, not eligible.
-2. Re-read the Issue immediately before changing it. Change only its
-   task-status label to `status:in-progress`, preserving unrelated labels, and
-   add a concise progress comment.
-3. Apply the ExecPlan risk test in [Definition of Done](DEFINITION_OF_DONE.md).
-   Read or create the required plan in `.agent/execplans/`, linking it and the
-   Issue in both directions. The plan does not grant new authority.
-4. Make the smallest coherent change, run the Issue’s acceptance checks, review
-   the diff, and immediately record command, result, date, and remaining limits
-   in the durable evidence artifact before reporting progress in chat. Update
-   the verification matrix when the result proves a template requirement.
-5. Create a local commit when the work is safely separable. Post a concise
-   evidence comment, replace `status:in-progress` with `status:human-review`,
-   and leave the Issue open. If a required check is blocked, use
-   `status:blocked` instead and state the next action.
-
-Do not close Issues, push, merge, assign, mention people, or start another task
-without explicit authority. The workflow is session-driven, not an unattended
-or scheduled automation.
-
-## Task Issue contents
-
-Each concrete task Issue includes purpose and scope, requirement IDs,
-acceptance criteria, dependencies, repository-relative plan/document paths,
-expected verification, exclusions, and authority boundaries. A tracking Issue
-summarises baseline work and makes clear that local-only commits are invisible
-to GitHub until a person pushes them.
-
-When a concrete task claims an operational capability, its expected verification
-must name the real operational boundary and the evidence that will prove it. If
-the boundary cannot be exercised within current authority, the Issue must name
-the exact blocker, the required owner/action, and the criterion that remains
-unobserved. Follow [Definition of Done](DEFINITION_OF_DONE.md); mocks and
-synthetic checks may support regression coverage but do not replace that proof.
-
-When a task requires a restart that terminates the active agent, it is a
-two-session workflow. Before restart, the first session must record its
-baseline, update the Issue to `status:blocked` with the exact human recovery
-action, and name the restoration owner and timeout behaviour. The new
-user-directed session must re-read and claim the Issue before running the
-after-test. A restart, a helper log, or a reopened editor alone cannot satisfy
-the acceptance criterion. If the handoff does not occur, retain
-`status:blocked` and record the criterion as unobserved.
-
-The four task labels are created or reused only after a live target read confirms
-the repository and duplicate labels are absent. GitHub's documented CLI
-supports non-interactive Issue creation with title/body and labels; labels
-require repository write permission. See [Sources](SOURCES.md).
+The disabled Symphony runtime has separate admission checks in `WORKFLOW.md`.
+Those checks do not govern user-directed coding sessions and must not be
+bypassed by treating every open Issue as authorized for automatic dispatch.

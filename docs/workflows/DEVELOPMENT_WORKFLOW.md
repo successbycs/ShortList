@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart LR
-  Issue[Eligible ready Issue] --> Active[One user-started session]
+  Issue[User-requested Issue] --> Active[One user-started session]
   Active --> Plan[ExecPlan when material]
   Plan --> Change[small implementation]
   Change --> Verify[canonical local verification]
@@ -16,6 +16,6 @@ flowchart LR
 
 Work in small changes, use an ExecPlan for material scope, verify in the
 container through `scripts/verify.py`, retain evidence, and use a GitHub pull
-request. The Issue transition details are canonical in
+request. The Issue execution guidance is canonical in
 [GITHUB_ISSUE_WORKFLOW.md](../harness/GITHUB_ISSUE_WORKFLOW.md). No deployment
 follows from merge.

@@ -75,7 +75,7 @@ code .
 ```
 
 Before shutdown, the first Codex session must record the baseline and leave the
-GitHub Issue `status:blocked` with this recovery action. After restart, open
+GitHub Issue comment documenting the blocker and this recovery action. After restart, open
 Ubuntu and run:
 
 ```bash

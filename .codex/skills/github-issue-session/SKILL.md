@@ -10,9 +10,10 @@ GitHub Issue. Read `docs/harness/GITHUB_ISSUE_WORKFLOW.md` and the configured
 repository target in `pyproject.toml` first. Verify the target before every
 GitHub write.
 
-Work on one eligible `status:ready` Issue in this session. Preserve unrelated
-labels, use an ExecPlan for material work, record real verification evidence,
-and leave a completed Issue open with `status:human-review`. If GitHub access,
+Work on the user-requested Issue, or select a bounded task by actual dependencies
+and acceptance evidence. No label is required to begin and no label transition
+is part of this workflow. Use an ExecPlan for material work, record verification
+in an evidence comment, and leave completed work open for human review. If GitHub access,
 a dependency, authority, or ownership is missing, do not mutate the Issue;
 record the blocker and report it.
 
