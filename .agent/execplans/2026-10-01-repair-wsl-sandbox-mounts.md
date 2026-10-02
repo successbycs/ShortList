@@ -4,6 +4,8 @@ This ExecPlan is a living document and must be maintained under `.agent/PLANS.md
 
 **Implementation task:** [GitHub Issue #29](https://github.com/successbycs/template/issues/29)
 
+**Targeted repair task:** [GitHub Issue #35](https://github.com/successbycs/template/issues/35)
+
 ## Purpose / Big Picture
 
 This work makes the WSL mount condition behind intermittent Codex sandbox failures visible before a developer relies on the normal patch path. Afterward, an operator can run a read-only preflight that reports whether `/mnt/wslg/distro` is a nested mount known to be incompatible with the app-server sandbox. The repository provides a precise diagnosis and recovery design; it does not change WSL mounts, restart WSL, or alter host-wide configuration without explicit approval.
@@ -17,8 +19,18 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 - [x] (2026-10-02 00:45Z) Started a detailed incident dossier and sanitized trace snapshot at the operator's request. Captured 12 matching error lines across five selected extension logs and inspected the visible app-server executable, which reports 0.155.0-alpha.16.
 - [x] (2026-10-02 00:48Z) Validated the snapshot with `python3 -m json.tool`, all Markdown links with `.venv/bin/python scripts/check_markdown_links.py`, and whitespace with `git diff --check`; all passed. No runtime recovery is claimed.
 - [ ] Resolve the historical 0.159.3 version discrepancy, trace the rejected socket, and reproduce with the same runtime outside Symphony before selecting a repair.
+- [x] (2026-10-02 01:49Z) Executed #35 source/runtime diagnosis. Pinned installed binary SHA-256; the installed tag drops WSLg masks during proc preflight. Located existing upstream fix 1bd1bfa7ca4cd15f0dbf5efb8a28b9142c961d37 (PR #46125), present in official 0.160.0.
+- [x] (2026-10-02 01:49Z) Reproduced the exact failure in an isolated filesystem helper and sandbox command without Symphony. Verified official candidate archive digest and 10 filesystem/command cycles plus a fresh-process check, preserving tested restrictions with WSLg enabled.
+- [x] (2026-10-02 01:49Z) Extracted and apply-checked the upstream two-file patch against peeled base 0e2f848bf4a4e8d41a02d848a851ba126c09d185. Preserved upstream attribution/license, reproducible harness, result JSON, and upstream report draft. No local Rust build was performed; the tested artifact is the official release.
+- [x] (2026-10-02) Canonical verification passed Ruff, 66 tests in 3.27 seconds, Markdown links and diff whitespace. Inspected installed extension manifest: executable override is application-scoped/development-only, so workspace-only activation is not supported by that setting.
+- [ ] Activate an updated runtime in the actual VS Code editor and verify repeated editor/command operations after reload. This remaining #35 acceptance boundary is unobserved; no WSL shutdown is required by the isolated fix.
 
 ## Surprises & Discoveries
+
+- Observation: source tag 0.155.0-alpha.16 already detects the WSLg duplicate root, but `build_preflight_bwrap_argv` reconstructed options with defaults and lost the masks. Official 0.160.0 preserves the options. The matching WSLg root device/inode was confirmed on this host.
+  Evidence: upstream PR #46125 and docs/operations/evidence/issue-35-repair-result.md; isolated baseline failed with the exact error and candidate passed.
+- Observation: the first new harness attempt used an invalid Windows enum and an invalid CLI option combination. These results were inconclusive. Correcting the protocol produced a valid real-helper comparison.
+  Evidence: incident result document records both mistakes; the stored valid report uses restricted-token and a subprocess working directory.
 
 - Observation: the currently visible app-server executable reports 0.155.0-alpha.16, whereas this plan originally recorded 0.159.3. Public listener-path options do not establish control of the internal socket implicated by this error.
   Evidence: docs/operations/evidence/wsl-sandbox-20261002T004502Z.json and the current app-server help inspected on 2026-10-02. Historical executable attribution remains unresolved.
@@ -29,6 +41,10 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
   Evidence: `tools.apply_patch` probe and deletion attempt on 2026-10-01; terminal fallback removed only `.agent/execplans/.wsl-sandbox-probe`.
 
 ## Decision Log
+
+- Decision: Use the already-released upstream correction as the repair candidate, keeping the extracted patch for review rather than inventing another security-sensitive change.
+  Rationale: official 0.160.0 passed real-host regression/isolation checks. Rust is unavailable locally; installing a toolchain to duplicate an existing release is unnecessary for this selected route. Source tests were inspected, not claimed as locally executed.
+  Date/Author: 2026-10-02 / Astra
 
 - Decision: Begin with process/socket attribution and a sanitized incident record before any further host experiment or source patch.
   Rationale: prior disabled-state tests were unobserved; the actual rejected socket and historical executable identity remain unknown. Removing a sandbox security check is not an acceptable shortcut.
@@ -43,6 +59,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 
 ## Outcomes & Retrospective
 
+Repair milestone, 2026-10-02: the isolated runtime repair is verified with WSLg enabled. See [the result and activation handoff](../../docs/operations/evidence/issue-35-repair-result.md). The current editor was not replaced or reloaded, so #35 cannot yet be marked complete. The historical 0.159.3 attribution remains unknown, but the current affected binary is fingerprinted and reproduced. The generic sole-root-cause uncertainty recorded below is now narrowed to a specific source defect supported by matched failure and release recovery; active IDE integration and live dispatch remain unobserved.
+
 Update, 2026-10-02: [the detailed incident record](../../docs/operations/WSL_SANDBOX_INCIDENT.md) now separates actual traces, historical reports, failed attempts, assumptions, decisions, and missing proof. It supersedes any categorical diagnosis or assertion below that a socket override has been ruled out. This capture adds evidence, not a demonstrated repair. No new restart occurred. The original outcome below is historical.
 
 The repository now detects the known topology before a developer relies on normal app-server editing, documents a safe narrow fallback, and preserves the approval boundary. Fixture tests, the live preflight, and the full verifier passed. The actual normal patch path remained intermittent: creation of a disposable probe succeeded twice, but immediate normal deletion failed twice with the named mount error. The required durable host repair cannot be completed under current authority because the published Codex app-server help does not identify a socket-directory override and host WSL changes are explicitly out of scope. Issue #29 must remain blocked until an operator approves a vendor-supported Codex/app-server or WSL remedy.
@@ -55,6 +73,16 @@ The normal app-server sandbox mechanism sometimes fails before it can edit a rep
 
 ## Plan of Work
 
+### Targeted repair execution (#35)
+
+Use the isolated checkout `/tmp/codex-mount-patch.Nxw50i/upstream` for source investigation. Pin the baseline to public tag `rust-v0.155.0-alpha.16` (c36696937921f6f2d364ebeefcb66bc5cfa638e8) and compare upstream cb6da58876afed3ede0ab11084f67dd5394ecb48. The visible extension process executable has SHA-256 b385b08da83c598f0e6db7eea545093aeea9f2569c7994165a67c2d62cc230b4 and reports 0.155.0-alpha.16; a matching version string does not prove byte-for-byte source correspondence.
+
+First inspect `codex-rs/linux-sandbox/src/daemon_mounts.rs`, `wslg.rs`, `bwrap.rs`, and their call sites. Observe actual mount identities and socket selection without dumping credentials. Both the installed-version tag and current upstream already contain WSLg duplicate-root masking, so simply adding WSLg support is not a justified patch. Establish which failing call path omits or cannot use that mask.
+
+Before editing upstream code, identify the precise function and security invariant in this plan. Preserve reject-on-unsafe-alias behavior and test mask application order. Build only in the isolated checkout or a bounded build container; Rust is not currently on PATH. Select focused Cargo tests only after the changed crate is known and record the exact toolchain/dependency requirement. Export the final source diff and pinned base to the repository incident artifacts; do not install it over the active extension.
+
+Acceptance for #35 requires a matching before-failure, regression tests, at least ten repeated normal command/editor create-delete cycles on this host with WSLg enabled, a fresh-session check, isolation checks, and rollback. An isolated probe that does not reach the editor helper path is supporting evidence only. If active-editor integration requires restart or binary replacement, prepare the exact artifact and recovery instructions before the human handoff. Preserve all unsuccessful trials in the incident dossier. No host mount, GUI setting, or sandbox policy is changed by source inspection.
+
 First add a small standard-library script that parses Linux mountinfo records and returns a sanitized status: compatible when the target is absent or not a nested mount; incompatible when `/mnt/wslg/distro` is mounted beneath `/mnt/wslg`; unknown when mountinfo cannot be read or parsed. Make command output and exit status explicit and avoid printing environment values or device paths beyond the tested mount target.
 
 Second add focused fixture tests for compatible, incompatible, and malformed/absent mountinfo. Add an operations runbook section defining the observed facts, assumptions, the preflight command, temporary terminal fallback, and host-level remediation options. The options must identify human approval requirements: update the Codex/app-server environment or socket-location configuration if officially supported; otherwise collect diagnostics and escalate to the host/tool owner. Do not prescribe unmounting or editing WSL configuration without an approved vendor-supported procedure.
@@ -62,6 +90,8 @@ Second add focused fixture tests for compatible, incompatible, and malformed/abs
 Third run the fixture tests and canonical verifier. Run the live preflight and a harmless normal patch probe. Result: compatible fixture returned 0; incompatible fixture and live host returned 2; focused tests passed 4; canonical verifier passed 59 tests. The normal probe created its disposable file twice but immediate normal deletion failed twice before file access with the named mount error. Each exact disposable file was removed through the approved terminal fallback.
 
 ## Concrete Steps
+
+For #35 the valid real-host run used `.venv/bin/python scripts/prove_codex_wslg_repair.py --baseline /home/chris/.vscode-server/extensions/openai.chatgpt-26.5917.61114-linux-x64/bin/linux-x86_64/codex --candidate /tmp/codex-mount-patch.Nxw50i/codex-x86_64-unknown-linux-musl`. The result is preserved in `docs/operations/evidence/issue-35-runtime-comparison.json`. Five focused evidence-acceptance tests passed in 0.01 seconds. The later harness adds an explicit success exit predicate; it validates this saved report, not an invented result. `git apply --check`, isolated patch application, and isolated `git diff --check` passed against the baseline checkout. See the result document for artifact hashes, release source revision and replay instructions.
 
 From `/home/chris/template`:
 

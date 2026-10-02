@@ -1,9 +1,21 @@
 # Codex WSL sandbox mount incident record
 
 Status: unresolved. Owner: repository operator and Codex runtime maintainer.
+Update: isolated repair verified in #35; activation in the current editor remains pending.
 Started: 2026-10-02 00:45 UTC. Related issues: [#29](https://github.com/successbycs/template/issues/29), [#32](https://github.com/successbycs/template/issues/32), [#33](https://github.com/successbycs/template/issues/33), [#34](https://github.com/successbycs/template/issues/34).
 
 ## Purpose and current conclusion
+
+The latest finding supersedes the initial uncertainty below: the installed
+0.155.0-alpha.16 source drops WSLg masks in its proc preflight. OpenAI fixed
+this in PR #46125. Official 0.160.0 passed a matched real-host comparison with
+WSLg enabled: 10 sandboxed helper file cycles, 10 command cycles, denial checks
+and a fresh executor-process check. The baseline reproduced the exact error
+outside Symphony. See [the repair result](evidence/issue-35-repair-result.md),
+[valid trace report](evidence/issue-35-runtime-comparison.json), and
+[upstream patch](evidence/issue-35-upstream-preflight.patch). The active VS Code
+runtime still needs activation and post-reload verification. Initial findings
+below are retained as history, not the latest diagnosis.
 
 This is the detailed evidence record for the repeated Codex sandbox failure
 naming /mnt/wslg/distro. It preserves observations, attempted remedies,

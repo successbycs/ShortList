@@ -6,6 +6,13 @@ If Docker is unavailable in WSL, enable Docker Desktop WSL integration and rerun
 
 ## Intermittent Codex sandbox mount failure on WSL
 
+Current verified candidate: official Codex 0.160.0 fixes the observed isolated
+runtime failure while retaining WSLg and the tested sandbox restrictions.
+See [Issue 35 repair results and activation handoff](evidence/issue-35-repair-result.md).
+The active editor still requires an updated runtime and after-reload proof.
+The initial host-remedy discussion below is historical; do not disable WSLg
+or unmount paths merely to address the confirmed preflight defect.
+
 For trace evidence, attempts, reviewed assumptions, and decisions, maintain the
 [WSL sandbox incident record](WSL_SANDBOX_INCIDENT.md). Its latest observations
 take precedence over historical version assumptions below. The exact rejected

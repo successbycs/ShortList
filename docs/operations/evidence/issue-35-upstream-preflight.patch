@@ -1,0 +1,106 @@
+diff --git a/codex-rs/linux-sandbox/src/linux_run_main.rs b/codex-rs/linux-sandbox/src/linux_run_main.rs
+index 1f22911..480de98 100644
+--- a/codex-rs/linux-sandbox/src/linux_run_main.rs
++++ b/codex-rs/linux-sandbox/src/linux_run_main.rs
+@@ -422,7 +422,7 @@ fn run_bwrap_with_proc_fallback(
+     let command_cwd = command_cwd.unwrap_or(sandbox_policy_cwd);
+ 
+     if options.mount_proc
+-        && !preflight_proc_mount_support(options.network_mode)
++        && !preflight_proc_mount_support(options)
+             .unwrap_or_else(|err| exit_with_bwrap_build_error(err))
+     {
+         // Keep the retry silent so sandbox-internal diagnostics do not leak into the
+@@ -526,15 +526,13 @@ fn current_process_argv0() -> String {
+     }
+ }
+ 
+-fn preflight_proc_mount_support(network_mode: BwrapNetworkMode) -> CodexResult<bool> {
+-    let preflight_argv = build_preflight_bwrap_argv(network_mode)?;
++fn preflight_proc_mount_support(options: BwrapOptions) -> CodexResult<bool> {
++    let preflight_argv = build_preflight_bwrap_argv(options)?;
+     let stderr = run_bwrap_in_child_capture_stderr(preflight_argv);
+     Ok(!is_proc_mount_failure(stderr.as_str()))
+ }
+ 
+-fn build_preflight_bwrap_argv(
+-    network_mode: BwrapNetworkMode,
+-) -> CodexResult<crate::bwrap::BwrapArgs> {
++fn build_preflight_bwrap_argv(options: BwrapOptions) -> CodexResult<crate::bwrap::BwrapArgs> {
+     let file_system_sandbox_policy =
+         FileSystemSandboxPolicy::restricted(vec![FileSystemSandboxEntry {
+             path: FileSystemPath::Special {
+@@ -551,8 +549,8 @@ fn build_preflight_bwrap_argv(
+         Path::new("/"),
+         BwrapOptions {
+             mount_proc: true,
+-            network_mode,
+-            ..Default::default()
++            // The alias check must see the same WSL masks as the main sandbox.
++            ..options
+         },
+     )
+ }
+diff --git a/codex-rs/linux-sandbox/src/linux_run_main_tests.rs b/codex-rs/linux-sandbox/src/linux_run_main_tests.rs
+index 0f9291d..583e7b8 100644
+--- a/codex-rs/linux-sandbox/src/linux_run_main_tests.rs
++++ b/codex-rs/linux-sandbox/src/linux_run_main_tests.rs
+@@ -326,16 +326,19 @@ fn managed_proxy_preflight_argv_unshares_network() {
+         NetworkSandboxPolicy::Enabled,
+         /*allow_network_for_proxy*/ true,
+     );
+-    let argv = build_preflight_bwrap_argv(mode)
+-        .expect("build preflight argv")
+-        .args;
++    let argv = build_preflight_bwrap_argv(BwrapOptions {
++        network_mode: mode,
++        ..Default::default()
++    })
++    .expect("build preflight argv")
++    .args;
+     assert!(argv.iter().any(|arg| arg == "--"));
+     assert!(argv.iter().any(|arg| arg == "--unshare-net"));
+ }
+ 
+ #[test]
+ fn proc_mount_preflight_does_not_bind_the_full_filesystem() {
+-    let argv = build_preflight_bwrap_argv(BwrapNetworkMode::FullAccess)
++    let argv = build_preflight_bwrap_argv(BwrapOptions::default())
+         .expect("build preflight argv")
+         .args;
+ 
+@@ -349,6 +352,34 @@ fn proc_mount_preflight_does_not_bind_the_full_filesystem() {
+     assert!(!argv.windows(3).any(|window| window == ["--bind", "/", "/"]));
+ }
+ 
++#[test]
++fn proc_mount_preflight_preserves_wsl_masks() {
++    let argv = build_preflight_bwrap_argv(BwrapOptions {
++        mask_wsl_interop: true,
++        mask_wslg_distro: true,
++        ..Default::default()
++    })
++    .expect("build WSL preflight argv")
++    .args;
++
++    assert!(argv.windows(2).any(|window| window == ["--proc", "/proc"]));
++    assert!(
++        argv.windows(2)
++            .any(|window| window == ["--tmpfs", WSL_INTEROP_DIR])
++    );
++    assert!(argv.windows(6).any(|window| {
++        window
++            == [
++                "--perms",
++                "000",
++                "--tmpfs",
++                WSLG_DISTRO_ROOT,
++                "--remount-ro",
++                WSLG_DISTRO_ROOT,
++            ]
++    }));
++}
++
+ #[test]
+ fn cleanup_synthetic_mount_targets_removes_only_empty_mount_targets() {
+     let temp_dir = tempfile::TempDir::new().expect("tempdir");
