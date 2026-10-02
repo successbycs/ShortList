@@ -56,3 +56,37 @@ transition. Its result is stored in the local dashboard’s `/api/status`
 sanitized `failed` outcome, leaves the Issue in human review, and never reruns
 the completed implementation. Disable the capability again by setting
 `notifications.email.enabled: false`.
+
+## Real local capability proof
+
+To exercise the template's active local deployment boundaries and create a
+sanitized ignored result, run:
+
+```bash
+.venv/bin/python scripts/prove_deployed_software.py --output var/proofs/issue-30.json
+```
+
+The proof invokes the installed CLI with valid and invalid configuration, writes
+and reopens a disposable SQLite audit database, runs the deterministic no-op
+demo, starts the disabled-dispatch Symphony dashboard on loopback and checks
+its clean shutdown, and tests the repository Markdown checker against good and
+temporary bad input. It does not call an external provider.
+
+Prefect, PyYAML runtime, and OpenAI Agents SDK provider capabilities are not
+default deployed services. The report labels them inactive or blocked; a real
+provider request needs explicit account, credential, cost, data, and authority
+approval. Docker Compose proof is a separate operator action because Docker is
+host-owned: build an isolated project, request its loopback health endpoint,
+then stop that exact project.
+
+For the Docker boundary, use the exact isolated project name and clean it up:
+
+```bash
+docker compose --project-name issue30proof --profile symphony up --build --detach
+curl --fail http://127.0.0.1:8765/health
+docker compose --project-name issue30proof --profile symphony down
+```
+
+Expected health output is `{"status":"ok","live_dispatch":false}`. If the
+request fails, still run the exact `down` command before diagnosing the
+container logs.
