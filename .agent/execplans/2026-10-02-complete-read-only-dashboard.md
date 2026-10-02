@@ -13,7 +13,8 @@ Finish [Issue #10](https://github.com/successbycs/template/issues/10): operators
 - [x] (2026-10-02) Focused dashboard tests: 13 passed in 0.53s outside the sandbox. The same tests hit the 20-second timeout inside it; this isolates the earlier test stall to the execution environment, not a demonstrated application deadlock.
 - [x] (2026-10-02) Canonical verifier outside sandbox passed Ruff lint/format, 68 tests in 3.22s and Markdown links. Browser screenshots remain pending.
 - [x] (2026-10-02 04:14Z) Real Chromium browser loaded disposable loopback servers on ports 8876 and 8877. Populated snapshot showed all seven event kinds plus active reservation 11; empty snapshot showed no evidence. Screenshots saved and populated image visually inspected. Only browser console error was the harmless missing favicon (HTTP 404); no application JavaScript is used.
-- [ ] Run focused tests, canonical verifier and real local browser proof; commit only this task and post evidence.
+- [x] (2026-10-02) Committed implementation and both screenshots in c3240c6. Visually inspected both screenshots; owned browser and server processes stopped successfully. Rechecked Markdown links after adding the specification.
+- [x] (2026-10-02) Posted verification and screenshot locations in the Issue handoff; left open for human review, without label changes or a push.
 
 ## Surprises & Discoveries
 
@@ -32,7 +33,7 @@ The Playwright wrapper is not executable directly; invoking through bash reaches
 
 ## Outcomes & Retrospective
 
-Implemented the read-only page and safe persisted-evidence API, removed mutation routes, and passed focused and canonical tests. Browser proof used synthetic records through actual SQLite, Uvicorn HTTP and Chromium boundaries. No live worker or provider capability is inferred. Screenshot artifacts are committed with this task; final commit and GitHub handoff pending.
+Implemented the read-only page and safe persisted-evidence API, removed mutation routes, and passed focused and canonical tests. Browser proof used synthetic records through actual SQLite, Uvicorn HTTP and Chromium boundaries. No live worker or provider capability is inferred. Implementation and screenshot artifacts are committed locally in c3240c6. [GitHub review handoff](https://github.com/successbycs/template/issues/10#issuecomment-5945519708) records the evidence and local-only artifact limitation. Human review remains outstanding before the dependent #12 demonstration; no push was performed.
 
 ## Context and Orientation
 
