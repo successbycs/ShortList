@@ -1,5 +1,85 @@
 # Issue 36: Codex client message-delivery investigation
 
+## Patch development result
+
+The user subsequently requested a patch. Inspection of installed JavaScript
+found a reproducible response-contract defect. The
+`queued-follow-up-send-lock-release` handler in `out/extension.js` calls the
+lock manager but returns `undefined`. The webview's `onFetchResponse` parses
+the JSON response; `JSON.stringify(undefined)` provides no valid JSON body.
+The three latest inspected logs contained 4, 3 and 7 release-error entries.
+The newest log's sanitized exception was
+`SyntaxError: "undefined" is not valid JSON` at `onFetchResponse`.
+
+The candidate adds `return{success:true}` after the lock release. It changes
+no queue ordering, deduplication, ownership, retries, or model settings.
+The original lock is already released before parsing fails, and the queue
+caller catches the exception. Therefore this confirmed defect **does not
+establish the cause of all missing/delayed messages**. The previous statement
+that no local patch could be built was too broad.
+
+The patch builder and regression proof are:
+
+- [Python builder](../../../scripts/build_codex_queue_patch.py)
+- [Node proof using the installed handler, lock class and response parser](../../../scripts/prove_codex_queue_patch.cjs)
+- [Builder regression tests](../../../tests/unit/test_codex_queue_patch.py)
+
+From `/home/chris/template`, reproduce the build with a new output directory:
+
+```bash
+python3 scripts/build_codex_queue_patch.py \
+  --extension /home/chris/.vscode-server/extensions/openai.chatgpt-26.928.40906-linux-x64 \
+  --output /tmp/issue-36-queue-patch
+/home/chris/.nvm/versions/node/v22.22.0/bin/node \
+  scripts/prove_codex_queue_patch.cjs \
+  /home/chris/.vscode-server/extensions/openai.chatgpt-26.928.40906-linux-x64 \
+  /tmp/issue-36-queue-patch/extension.js
+/home/chris/.nvm/versions/node/v22.22.0/bin/node --check \
+  /tmp/issue-36-queue-patch/extension.js
+.venv/bin/python -m pytest -q tests/unit/test_codex_queue_patch.py
+```
+
+The output directory must not already exist; select another unused path when
+repeating. The builder refuses changed versions, changed input digests,
+ambiguous/missing handler sites, and output inside the extension installation.
+It never installs the candidate. Do not publish the generated proprietary
+bundle; only the small transformation and proof are repository artifacts.
+
+Observed on 2026-10-02: baseline JSON error reproduced; patched response
+resolved; sent-message deduplication, unsent-message retry eligibility, foreign
+lock protection and next-message lock acquisition passed. Full generated-bundle
+syntax validation passed. Six builder tests and focused Ruff checks passed.
+Two initial harness extraction/binding errors were corrected before the valid
+proof; they were test-harness mistakes, not client failures.
+
+Full verification: `timeout 45s .venv/bin/python scripts/verify.py` outside the
+sandbox passed Ruff, all 77 tests in 3.46 seconds, and Markdown links (exit 0).
+The initial sandboxed verifier was interrupted after stalling; a bounded
+verbose rerun timed out at `test_dashboard_is_read_only_and_handles_missing_database`
+(exit 124). That stall did not occur outside the sandbox. Whitespace checks passed.
+
+Input SHA-256:
+`550b03e76ac5a83cb25788aa3240ba445d0e7c7d4e76af8331442687529617ef`.
+Candidate SHA-256:
+`391f6bd1ee3b547a0d87d9464274d714b553084565a87979da4eced9fa9ecb27`.
+
+The candidate exists locally at `/tmp/issue-36-queue-patch/extension.js` and is
+not installed. Activation would replace the matching extension bundle after a
+verified backup, then require a human VS Code reload and a new session. Recovery
+would restore that exact backup only while the candidate digest still matches;
+an intervening extension update must not be overwritten. Because reload ends
+the current session, retain this evidence before activation and perform the
+after-test in a new user-directed session. No reload, install, or runtime
+configuration change occurred in this build task.
+
+Live acceptance remains unobserved: repeated queue and steer submissions must
+reach the active agent in order and without duplication, disappearances, or
+unexpected delay. Reproduce the original user-visible failure before calling
+it repaired. The isolated proof establishes the acknowledgement correction,
+not end-to-end recovery.
+
+## Earlier investigation (retained with limits)
+
 Captured 2026-10-02. This is a sanitized local investigation record for
 `successbycs/template` Issue #36. It contains no user-message text, prompts,
 conversation or session identifiers, authentication values, or raw client-log
