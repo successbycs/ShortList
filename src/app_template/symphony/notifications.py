@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import smtplib
+import ssl
 from dataclasses import dataclass
 from email.message import EmailMessage
 from typing import Protocol
@@ -50,13 +51,18 @@ class SmtpHumanReviewNotifier:
         )
         for attempt in range(1, self.settings.max_attempts + 1):
             try:
-                with smtplib.SMTP(
+                factory = smtplib.SMTP_SSL if self.settings.use_ssl else smtplib.SMTP
+                tls_options = (
+                    {"context": ssl.create_default_context()} if self.settings.use_ssl else {}
+                )
+                with factory(
                     self.settings.smtp_host,
                     self.settings.smtp_port,
                     timeout=self.settings.timeout_seconds,
+                    **tls_options,
                 ) as client:
                     if self.settings.use_starttls:
-                        client.starttls()
+                        client.starttls(context=ssl.create_default_context())
                     client.login(username, password)
                     client.send_message(message)
                 return NotificationResult("sent", "SMTP handoff sent", attempt)

@@ -50,6 +50,12 @@ Issue comments): the variables named by `smtp_username_env`,
 `SYMPHONY_SMTP_FROM`. STARTTLS is enabled by default; adjust only if the
 provider explicitly requires another configuration.
 
+For implicit TLS (typically port 465), set `use_ssl: true` and
+`use_starttls: false`. Both TLS modes verify server certificates and hostnames;
+enabling both modes is rejected. These transport settings do not enable delivery
+or load a `.env` file automatically. Host-local credential loaders must remain
+outside Git and must not execute the source file as shell code.
+
 The notifier tries at most `max_attempts` (default two) for one human-review
 transition. Its result is stored in the local dashboard’s `/api/status`
 `notifications` data. A missing or failed mail configuration records a

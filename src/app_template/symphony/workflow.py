@@ -74,8 +74,15 @@ class EmailNotificationSettings(BaseModel):
     smtp_password_env: str = "SYMPHONY_SMTP_PASSWORD"
     smtp_from_env: str = "SYMPHONY_SMTP_FROM"
     use_starttls: bool = True
+    use_ssl: bool = False
     timeout_seconds: int = Field(default=10, ge=1, le=60)
     max_attempts: int = Field(default=2, ge=1, le=3)
+
+    @model_validator(mode="after")
+    def validate_tls_mode(self) -> EmailNotificationSettings:
+        if self.use_ssl and self.use_starttls:
+            raise ValueError("Choose implicit TLS or STARTTLS, not both")
+        return self
 
 
 class NotificationSettings(BaseModel):

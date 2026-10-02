@@ -12,6 +12,9 @@ or making email availability part of task completion.
 
 ## Progress
 
+- [x] (2026-10-02) User authorized referencing the local Autonomous Framework Google SMTP .env. Added certificate-verified implicit TLS support for port 465 and configured ignored host-only `var/symphony/local_email.py` referencing the existing secrets without copying them. Preflight passed without network access. Canonical verifier passed 71 tests in 3.44s, Ruff and Markdown links.
+- [x] (2026-10-02) After the user explicitly approved the displayed recipient and payload, the controlled one-shot send returned sanitized `sent` with one attempt. Dashboard data records timestamp, Issue ID, `sent`, and attempt count only. Canonical verifier then passed 71 tests in 3.34s. Inbox confirmation remains the last required external acceptance proof.
+- [x] (2026-10-02) Repository owner confirmed receipt. The approved subject, Issue link, and handoff details were received; this completes the required real-world proof without recording message content or credentials.
 - [x] (2026-10-01 00:00Z) Re-read Issue #19, repository target, current workflow, and Scheduler/EventStore seams; claimed the Issue and recorded the progress note.
 - [x] (2026-10-01 00:00Z) Create the required short specification at `docs/specs/2026-10-01-human-review-email-notifications.md`.
 - [x] (2026-10-01 00:00Z) Add typed disabled-by-default notification configuration and a safe SMTP notifier boundary.
@@ -55,6 +58,9 @@ or making email availability part of task completion.
 
 ## Decision Log
 
+- Decision: For the user's 2026-10-02 local configuration request, use an ignored host-only launcher referencing the authorized existing .env without copying credentials. Add generic implicit TLS support because the source uses port 465. Keep the checked-in workflow disabled and do not start dispatch. Use one SMTP attempt and a stable test reservation; do not automatically replay unknown outcomes.
+  Rationale: This fulfills the explicitly authorized local send without the broader proposed Compose secret deployment or automatic pending-lease recovery. Those remain unimplemented proposals, not prerequisites for a deliberately bounded host-only send. The source repository and its Git remote were verified before reading SMTP key presence; no values were printed.
+  Date/Author: 2026-10-02 / Codex
 - Decision: Use the Python standard library `smtplib` behind a protocol and
   fake implementation rather than an email-provider dependency.
   Rationale: SMTP compatibility is required, the template must remain generic,
@@ -82,6 +88,8 @@ or making email availability part of task completion.
   Date/Author: 2026-10-01 / proposed design; requires implementation review
 
 ## Outcomes & Retrospective
+
+2026-10-02 local activation update: implicit TLS and STARTTLS now use certificate-verifying SSL contexts; conflicting transport modes are rejected. The ignored local launcher references the user's authorized SMTP source and uses one bounded attempt plus a fixed durable reservation. This configures only an explicit host-local receipt test, not a running Symphony worker or Compose deployment. Checked-in email defaults and live dispatch remain disabled. After the user explicitly approved the exact recipient and payload, Google SMTP accepted the single test delivery. The durable record is `issue_id=19`, `status=sent`, `attempts=1` at `2026-10-02T09:02:49.046845+00:00`; no credentials, message body, or transition ID are retained in the dashboard API. The repository owner confirmed inbox receipt, including the intended subject, Issue link, and handoff details. Earlier statements below describe the original implementation stage, not current commit status.
 
 Implemented an SMTP-compatible, disabled-by-default human-review notifier. It
 is invoked only after Symphony records the Issue transition to human review,
@@ -198,6 +206,8 @@ human closure.
 ## Concrete Steps
 
 All commands run from `/home/chris/template`.
+
+2026-10-02 local activation commands: `.venv/bin/python var/symphony/local_email.py preflight` passed without contacting SMTP; `git check-ignore var/symphony/local_email.py` confirmed local-only exclusion. After the user approved the exact content, `.venv/bin/python var/symphony/local_email.py send --acknowledge-external-email` printed `{"test_id":"issue19-authorized-receipt-2026-10-02","status":"sent","attempts":1}`. `.venv/bin/python var/symphony/local_email.py status` returned one sanitized record as reported in Outcomes. The final `.venv/bin/python scripts/verify.py` passed 71 tests in 3.34s, Ruff and Markdown links. Repeating the send with the same reservation cannot send a second message. Do not clear an unknown/pending reservation automatically.
 
 1. `uv run pytest tests/unit/symphony -q` should run focused unit tests without
    network access.

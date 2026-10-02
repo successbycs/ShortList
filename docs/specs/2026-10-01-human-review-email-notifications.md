@@ -42,5 +42,16 @@ environment.
 
 ## Verification
 
+On 2026-10-02, explicit local SMTP configuration was authorized. Added generic
+implicit TLS support with verified certificates and a conflict check against
+STARTTLS. Canonical verification passed 71 tests, Ruff and Markdown links.
+An ignored host-local launcher references the authorized existing secret source;
+no credentials were copied into template files. After explicit approval of the
+recipient and displayed message, Google SMTP accepted one controlled send to
+the configured recipient. The local durable record shows `sent` and one
+attempt; the repository owner confirmed inbox receipt, subject, Issue link, and
+handoff details. The original no-external-send boundary still applies to
+automated tests and template defaults.
+
 Run the focused Symphony notification tests and `uv run python scripts/verify.py`
 from the repository root. Use only fake SMTP/notifier objects in tests.
