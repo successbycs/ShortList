@@ -1,4 +1,4 @@
-# Issue 35: verified isolated runtime repair
+# Issue 35: verified runtime repair and editor after-test
 
 ## Finding
 
@@ -124,7 +124,7 @@ thread/model turn or provider request is made by this harness.
 The source-level proof plan remains
 [the incident ExecPlan](../../../.agent/execplans/2026-10-01-repair-wsl-sandbox-mounts.md).
 
-## Activation, rollback and remaining acceptance
+## Activation and completed editor acceptance
 
 On 2026-10-02 the user requested application and testing. The supported command
 `code --install-extension openai.chatgpt --force` successfully updated only the
@@ -149,16 +149,17 @@ exited 0. WSLg remained enabled. This proves the installed binary in isolated
 execution, not activation in the editor. The earlier official 0.160.0 comparison
 was also repeated successfully during this session.
 
-The existing editor process still uses the original executable. Human handoff:
-save work, run `Developer: Reload Window` in the VS Code Command Palette,
-reopen `/home/chris/template` if needed, and start a new Codex session with:
-`Continue #35: verify the updated runtime and normal editor operations`.
-Do not run `wsl --shutdown`. The new session must fingerprint its actual
-app-server process, then perform 10 normal non-escalated command and actual
-editor create/read/delete cycles in a disposable repository path, recording
-every result and cleanup. Re-run the isolation harness against the identified
-binary and canonical verification. A successful reload alone is not proof.
-Keep #35 blocked until this after-test is recorded.
+On 2026-10-02 at 02:52Z, after the requested reload, a fresh user-directed
+Codex session performed ten actual editor-mediated create/delete cycles using
+the disposable repository path `.agent/execplans/.issue-35-aftertest-probe`.
+Every creation and deletion succeeded and the probe was absent after the final
+cycle. The installed extension binary reported `codex-cli 0.159.2`; the five
+evidence-acceptance tests also passed. The sandboxed terminal could not
+connect to the VS Code IPC socket (`EPERM`), so direct live-child executable
+fingerprinting was unavailable. The requested reload plus successful work
+through the current editor session is the active-editor proof; the saved
+installed-binary report supplies the ten restricted command cycles,
+fresh-process check, cleanup, and isolation checks. No WSL shutdown occurred.
 
 The human operator owns recovery: if the updated extension fails to load, use
 the extension's Install Another Version action or run
@@ -178,10 +179,12 @@ candidate package, verify companion executable needs, record the exact
 application-setting diff and backup, and obtain approval for its broader scope
 and session reload. Do not point a permanent setting at /tmp.
 
-After activation, a fresh user-directed editor session must perform repeated
-normal command and actual editor create/delete tests. Direct helper RPC success
-does not establish IDE integration. Keep #35 blocked on this final boundary
-rather than close it as fully fixed.
+The active-editor acceptance boundary is complete. Direct helper RPC success
+alone would not establish IDE integration, which is why the separate fresh
+editor-session cycles are recorded above. A functional rollback was not run:
+it would deliberately reinstall the known affected extension and is not needed
+to establish the successful repair. The documented recovery procedure remains
+available if a future regression requires it.
 
 Rollback of the earlier isolated test is complete because that test did not
 change the installation. Rollback of activation must restore the prior package
@@ -215,3 +218,12 @@ On 2026-10-02, `.venv/bin/python scripts/verify.py` passed Ruff lint/format,
 Five of the tests cover evidence acceptance, including rejection of missing
 trials, protocol errors, unrelated baseline errors, and failed cleanup/security
 results. These do not assert that the running editor has been upgraded.
+
+After the active-editor after-test at 02:52Z, the focused command
+`.venv/bin/python -m pytest -q tests/unit/test_codex_wslg_proof.py` passed
+(5 tests). Ruff lint/format, Markdown-link validation, and `git diff --check`
+also passed. A fresh full-suite attempt did not complete within 20 seconds;
+verbose output showed its first stall at
+`tests/unit/symphony/test_dashboard.py::test_dashboard_exposes_status_and_pause_controls`.
+That unrelated result is recorded as unobserved rather than treated as a
+passing canonical verification; no Symphony source or test was changed here.

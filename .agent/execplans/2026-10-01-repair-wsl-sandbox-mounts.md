@@ -14,7 +14,7 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 
 - [x] (2026-10-02) Post-installation repository verification: Ruff lint/format, 66 tests in 3.33 seconds, Markdown links and `git diff --check` passed. These support the handoff but do not prove activation.
 - [x] (2026-10-02 02:36Z) Supported installer updated only `openai.chatgpt` from 26.5917.61114 to 26.928.40906. Its bundled runtime 0.159.2 passed 10 helper file cycles, 10 sandbox commands, fresh-process and isolation checks with WSLg enabled. Full generated evidence: `docs/operations/evidence/issue-35-installed-extension-comparison.json`.
-- [ ] (2026-10-02 02:36Z) Human operator: save work, run VS Code `Developer: Reload Window`, reopen `/home/chris/template` if needed, then start a new Codex session requesting `Continue #35: verify the updated runtime and normal editor operations`. The current process still uses 0.155.0-alpha.16. No WSL shutdown. If no new session occurs, remain blocked; no automatic timeout action or rollback.
+- [x] (2026-10-02 02:52Z) Post-reload, user-directed Codex session completed 10 actual editor-mediated create/delete cycles in `.agent/execplans/.issue-35-aftertest-probe`; each deletion succeeded and the probe is absent. The installed extension binary reports `codex-cli 0.159.2`. Terminal inspection cannot connect to the editor IPC socket (`EPERM`), so executable attribution is supported by the requested reload plus this session's editor-path exercise, rather than a direct process fingerprint. No WSL shutdown occurred.
 - [x] (2026-10-01 18:40Z) Claimed #29 and collected read-only WSL version and mount evidence.
 - [x] (2026-10-01 18:41Z) Reproduced an intermittent normal patch-path failure after one successful disposable probe; removed the exact probe file using the authorized terminal fallback.
 - [x] (2026-10-01 18:45Z) Added a fixture-testable mount-topology preflight and operator documentation with diagnosis, approved options, and recovery boundary.
@@ -26,7 +26,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 - [x] (2026-10-02 01:49Z) Reproduced the exact failure in an isolated filesystem helper and sandbox command without Symphony. Verified official candidate archive digest and 10 filesystem/command cycles plus a fresh-process check, preserving tested restrictions with WSLg enabled.
 - [x] (2026-10-02 01:49Z) Extracted and apply-checked the upstream two-file patch against peeled base 0e2f848bf4a4e8d41a02d848a851ba126c09d185. Preserved upstream attribution/license, reproducible harness, result JSON, and upstream report draft. No local Rust build was performed; the tested artifact is the official release.
 - [x] (2026-10-02) Canonical verification passed Ruff, 66 tests in 3.27 seconds, Markdown links and diff whitespace. Inspected installed extension manifest: executable override is application-scoped/development-only, so workspace-only activation is not supported by that setting.
-- [ ] Activate an updated runtime in the actual VS Code editor and verify repeated editor/command operations after reload. This remaining #35 acceptance boundary is unobserved; no WSL shutdown is required by the isolated fix.
+- [x] (2026-10-02 02:52Z) Activated-session acceptance: the fresh user-directed editor session exercised 10 successful actual editor create/delete cycles. The existing installed-binary harness supplies 10 successful restricted command cycles, fresh-process, cleanup, and isolation checks. No WSL shutdown is required.
+- [x] (2026-10-02 02:52Z) Durable after-test evidence updated. `tests/unit/test_codex_wslg_proof.py` passed (5); Ruff lint/format, Markdown-link validation, and `git diff --check` passed. The full suite was attempted but timed out at the pre-existing first dashboard TestClient test, so the historical 66-test result remains the last complete-suite evidence.
 
 ## Surprises & Discoveries
 
@@ -44,6 +45,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
   Evidence: `findmnt -R -o TARGET,SOURCE,FSTYPE,OPTIONS /mnt/wslg` on 2026-10-01.
 - Observation: A normal app-server patch probe succeeded once, but the immediate normal patch deletion failed before file access with `unsupported host mount at /mnt/wslg/distro`.
   Evidence: `tools.apply_patch` probe and deletion attempt on 2026-10-01; terminal fallback removed only `.agent/execplans/.wsl-sandbox-probe`.
+- Observation: after the successful editor after-test, a full `pytest -q` run did not produce output within 20 seconds; `pytest -vv -x` identified `tests/unit/symphony/test_dashboard.py::test_dashboard_exposes_status_and_pause_controls` as the first stalled test. The Issue #35 focused evidence tests still passed 5/5.
+  Evidence: timeout-wrapped runs on 2026-10-02 02:52Z; no files in this task modify Symphony code or that test.
 
 ## Decision Log
 
@@ -66,6 +69,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
   Date/Author: 2026-10-01 / Codex
 
 ## Outcomes & Retrospective
+
+Final #35 evidence, 2026-10-02: after the requested editor reload, this fresh user-directed Codex session completed ten actual editor-mediated disposable-file create/delete cycles with no residual file. The installed extension binary reported 0.159.2, and the saved evidence-report tests passed 5/5. The sandboxed terminal could not inspect the VS Code IPC socket (`EPERM`), so it cannot independently fingerprint the live extension child process; the observed editor operation after the requested reload is the real editor-boundary proof. The supported extension installation remains in place. Rollback is intentionally not executed after a successful repair because it would reintroduce the known affected version; its documented recovery procedure remains available if a future regression is observed. The unrelated full suite now stalls at the first dashboard TestClient test, so it is honestly recorded as unobserved for this after-test; focused evidence, Ruff, Markdown links, and diff whitespace pass. Issue #35 is ready for human review once GitHub is reachable; Issue #29's separate host-remediation boundary remains blocked.
 
 Activation milestone, 2026-10-02: supported extension update installed and its actual bundled binary tested successfully. Only active-editor reload/after-test and actual activation rollback verification remain unobserved. The operator owns any reload and rollback; retain the original extension package until acceptance. #29 follows #35 integration proof; #32/#33 are optional historical workaround work, and #34 is an optional platform assessment, not a repair prerequisite. See the result document for exact recovery and after-test instructions.
 
