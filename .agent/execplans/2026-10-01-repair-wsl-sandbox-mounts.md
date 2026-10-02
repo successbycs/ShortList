@@ -12,6 +12,9 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 
 ## Progress
 
+- [x] (2026-10-02) Post-installation repository verification: Ruff lint/format, 66 tests in 3.33 seconds, Markdown links and `git diff --check` passed. These support the handoff but do not prove activation.
+- [x] (2026-10-02 02:36Z) Supported installer updated only `openai.chatgpt` from 26.5917.61114 to 26.928.40906. Its bundled runtime 0.159.2 passed 10 helper file cycles, 10 sandbox commands, fresh-process and isolation checks with WSLg enabled. Full generated evidence: `docs/operations/evidence/issue-35-installed-extension-comparison.json`.
+- [ ] (2026-10-02 02:36Z) Human operator: save work, run VS Code `Developer: Reload Window`, reopen `/home/chris/template` if needed, then start a new Codex session requesting `Continue #35: verify the updated runtime and normal editor operations`. The current process still uses 0.155.0-alpha.16. No WSL shutdown. If no new session occurs, remain blocked; no automatic timeout action or rollback.
 - [x] (2026-10-01 18:40Z) Claimed #29 and collected read-only WSL version and mount evidence.
 - [x] (2026-10-01 18:41Z) Reproduced an intermittent normal patch-path failure after one successful disposable probe; removed the exact probe file using the authorized terminal fallback.
 - [x] (2026-10-01 18:45Z) Added a fixture-testable mount-topology preflight and operator documentation with diagnosis, approved options, and recovery boundary.
@@ -27,6 +30,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 
 ## Surprises & Discoveries
 
+- Observation: the supported extension updater installed runtime 0.159.2, not the separately tested 0.160.0. Its source tag resolves to ff6aec96948b70d94983af2641a6b67c94faeff5 and preserves full preflight options. The installed binary passed the same real-host harness. Installation did not replace the active process.
+  Evidence: installer success, extension listing, process executable inspection, and `docs/operations/evidence/issue-35-installed-extension-comparison.json` captured 2026-10-02T02:35:16.867535+00:00.
 - Observation: source tag 0.155.0-alpha.16 already detects the WSLg duplicate root, but `build_preflight_bwrap_argv` reconstructed options with defaults and lost the masks. Official 0.160.0 preserves the options. The matching WSLg root device/inode was confirmed on this host.
   Evidence: upstream PR #46125 and docs/operations/evidence/issue-35-repair-result.md; isolated baseline failed with the exact error and candidate passed.
 - Observation: the first new harness attempt used an invalid Windows enum and an invalid CLI option combination. These results were inconclusive. Correcting the protocol produced a valid real-helper comparison.
@@ -42,6 +47,9 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 
 ## Decision Log
 
+- Decision: Update only the Codex VS Code extension through its supported extension installer, following the user's explicit apply-and-test request. Do not overwrite its bundled binary or set the development-only application-wide executable override.
+  Rationale: the official release already passes isolated proof; supported packaging preserves companion executable compatibility. Baseline extension is 26.5917.61114 with runtime 0.155.0-alpha.16. If no newer package is available, report that limitation instead of silently broadening to a developer override. Before a reload, persist the result and exact recovery instructions. Rollback, if necessary, is `code --install-extension openai.chatgpt@26.5917.61114 --force` followed by a human editor reload; this is a documented recovery command, not yet a tested rollback.
+  Date/Author: 2026-10-02 / Astra
 - Decision: Use the already-released upstream correction as the repair candidate, keeping the extracted patch for review rather than inventing another security-sensitive change.
   Rationale: official 0.160.0 passed real-host regression/isolation checks. Rust is unavailable locally; installing a toolchain to duplicate an existing release is unnecessary for this selected route. Source tests were inspected, not claimed as locally executed.
   Date/Author: 2026-10-02 / Astra
@@ -58,6 +66,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
   Date/Author: 2026-10-01 / Codex
 
 ## Outcomes & Retrospective
+
+Activation milestone, 2026-10-02: supported extension update installed and its actual bundled binary tested successfully. Only active-editor reload/after-test and actual activation rollback verification remain unobserved. The operator owns any reload and rollback; retain the original extension package until acceptance. #29 follows #35 integration proof; #32/#33 are optional historical workaround work, and #34 is an optional platform assessment, not a repair prerequisite. See the result document for exact recovery and after-test instructions.
 
 Repair milestone, 2026-10-02: the isolated runtime repair is verified with WSLg enabled. See [the result and activation handoff](../../docs/operations/evidence/issue-35-repair-result.md). The current editor was not replaced or reloaded, so #35 cannot yet be marked complete. The historical 0.159.3 attribution remains unknown, but the current affected binary is fingerprinted and reproduced. The generic sole-root-cause uncertainty recorded below is now narrowed to a specific source defect supported by matched failure and release recovery; active IDE integration and live dispatch remain unobserved.
 

@@ -126,11 +126,47 @@ The source-level proof plan remains
 
 ## Activation, rollback and remaining acceptance
 
-No installed executable, VS Code setting, WSLg setting or host mount was
-changed. The active editor still needs an updated runtime. Prefer a supported
-extension update that bundles this correction. Verify the newly running
-executable and its hash/version after activation; terminal PATH alone is
-insufficient.
+On 2026-10-02 the user requested application and testing. The supported command
+`code --install-extension openai.chatgpt --force` successfully updated only the
+Codex extension from 26.5917.61114 to 26.928.40906. No manual binary replacement,
+developer executable override, WSLg setting or mount change was made.
+
+The new bundled executable is
+`/home/chris/.vscode-server/extensions/openai.chatgpt-26.928.40906-linux-x64/bin/linux-x86_64/codex`.
+It reports 0.159.2 and SHA-256
+1748767b230ebfc3d4ab7e4e254920d0c0ad9691fd8c11f190e7d44511a4a92e.
+Source tag rust-v0.159.2 resolves to ff6aec96948b70d94983af2641a6b67c94faeff5;
+its preflight preserves the full options, including WSL masks. This differs
+from the earlier standalone 0.160.0 candidate, so we tested the installed
+binary separately rather than assuming equivalence.
+
+The [installed-extension report](issue-35-installed-extension-comparison.json),
+captured 2026-10-02T02:35:16.867535+00:00, records the exact baseline failure,
+10 successful helper write/read/delete cycles, 10 successful sandbox commands,
+denied read/write and WSLg-alias checks, blocked network/outside writes/daemon
+access, fresh-process success, cleanup and unchanged canaries. The harness
+exited 0. WSLg remained enabled. This proves the installed binary in isolated
+execution, not activation in the editor. The earlier official 0.160.0 comparison
+was also repeated successfully during this session.
+
+The existing editor process still uses the original executable. Human handoff:
+save work, run `Developer: Reload Window` in the VS Code Command Palette,
+reopen `/home/chris/template` if needed, and start a new Codex session with:
+`Continue #35: verify the updated runtime and normal editor operations`.
+Do not run `wsl --shutdown`. The new session must fingerprint its actual
+app-server process, then perform 10 normal non-escalated command and actual
+editor create/read/delete cycles in a disposable repository path, recording
+every result and cleanup. Re-run the isolation harness against the identified
+binary and canonical verification. A successful reload alone is not proof.
+Keep #35 blocked until this after-test is recorded.
+
+The human operator owns recovery: if the updated extension fails to load, use
+the extension's Install Another Version action or run
+`code --install-extension openai.chatgpt@26.5917.61114 --force`, then reload.
+That restores the known affected version, not a working repair. The original
+extension directory remains present; no removal was attempted. Actual activation
+rollback is untested. If no new session starts, leave the criterion unobserved;
+there is no automatic restart, timeout action or rollback.
 
 The installed extension manifest explicitly marks chatgpt.cliExecutable as
 DEVELOPMENT ONLY, restricted, and application-scoped. It warns that manually
@@ -147,8 +183,8 @@ normal command and actual editor create/delete tests. Direct helper RPC success
 does not establish IDE integration. Keep #35 blocked on this final boundary
 rather than close it as fully fixed.
 
-Rollback of the isolated test is complete because the installed runtime never
-changed. Rollback of a future activation must restore the prior setting/package
+Rollback of the earlier isolated test is complete because that test did not
+change the installation. Rollback of activation must restore the prior package
 and verify the running executable. An editor reload ends the active session;
 use the repository handoff rule if that is required. A WSL shutdown is not
 required by the verified isolated repair.
@@ -169,6 +205,10 @@ Attach only the sanitized reproduction script/report and exact binary hashes
 if a report about extension release propagation is still needed.
 
 ## Repository verification
+
+After the supported extension installation on 2026-10-02, the canonical
+verification again passed: Ruff lint/format, 66 tests in 3.33 seconds,
+Markdown links, and `git diff --check`. No active-editor repair is inferred.
 
 On 2026-10-02, `.venv/bin/python scripts/verify.py` passed Ruff lint/format,
 66 tests in 3.27 seconds, and Markdown links. `git diff --check` passed.

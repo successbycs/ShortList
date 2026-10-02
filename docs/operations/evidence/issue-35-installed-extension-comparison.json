@@ -1,0 +1,518 @@
+{
+  "captured_at": "2026-10-02T02:35:16.867535+00:00",
+  "wslg_present": true,
+  "runs": [
+    {
+      "label": "baseline",
+      "runtime": {
+        "version": "codex-cli 0.155.0-alpha.16",
+        "sha256": "b385b08da83c598f0e6db7eea545093aeea9f2569c7994165a67c2d62cc230b4"
+      },
+      "context": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///"
+                },
+                "access": "read"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///tmp/codex-wslg-proof-49joixs2/baseline/workspace"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///tmp/codex-wslg-proof-49joixs2/baseline/denied"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///tmp/codex-wslg-proof-49joixs2/baseline/workspace",
+        "workspaceRoots": [
+          "file:///tmp/codex-wslg-proof-49joixs2/baseline/workspace"
+        ],
+        "windowsSandboxLevel": "restricted-token",
+        "useLegacyLandlock": false
+      },
+      "trials": [
+        {
+          "trial": 0,
+          "method": "fs/writeFile",
+          "passed": false,
+          "error": {
+            "code": -32603,
+            "message": "fs sandbox helper failed with status exit status: 1: error building bubblewrap command: app-server socket directory has an unsupported host mount at /mnt/wslg/distro; remove the bind-mount alias or nested mount before starting the sandbox"
+          }
+        },
+        {
+          "method": "denied_read",
+          "denied": false,
+          "error": {
+            "code": -32603,
+            "message": "fs sandbox helper failed with status exit status: 1: error building bubblewrap command: app-server socket directory has an unsupported host mount at /mnt/wslg/distro; remove the bind-mount alias or nested mount before starting the sandbox"
+          }
+        },
+        {
+          "method": "denied_write",
+          "denied": false,
+          "error": {
+            "code": -32603,
+            "message": "fs sandbox helper failed with status exit status: 1: error building bubblewrap command: app-server socket directory has an unsupported host mount at /mnt/wslg/distro; remove the bind-mount alias or nested mount before starting the sandbox"
+          }
+        },
+        {
+          "method": "wslg_alias_read",
+          "denied": false,
+          "error": {
+            "code": -32603,
+            "message": "fs sandbox helper failed with status exit status: 1: error building bubblewrap command: app-server socket directory has an unsupported host mount at /mnt/wslg/distro; remove the bind-mount alias or nested mount before starting the sandbox"
+          }
+        },
+        {
+          "trial": 0,
+          "method": "sandbox_command",
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "error building bubblewrap command: app-server socket directory has an unsupported host mount at /mnt/wslg/distro; remove the bind-mount alias or nested mount before starting the sandbox"
+        }
+      ],
+      "workspace_clean": true,
+      "canary_unchanged": true
+    },
+    {
+      "label": "candidate",
+      "runtime": {
+        "version": "codex-cli 0.159.2",
+        "sha256": "1748767b230ebfc3d4ab7e4e254920d0c0ad9691fd8c11f190e7d44511a4a92e"
+      },
+      "context": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///"
+                },
+                "access": "read"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///tmp/codex-wslg-proof-49joixs2/candidate/workspace"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///tmp/codex-wslg-proof-49joixs2/candidate/denied"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///tmp/codex-wslg-proof-49joixs2/candidate/workspace",
+        "workspaceRoots": [
+          "file:///tmp/codex-wslg-proof-49joixs2/candidate/workspace"
+        ],
+        "windowsSandboxLevel": "restricted-token",
+        "useLegacyLandlock": false
+      },
+      "trials": [
+        {
+          "trial": 0,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 0,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 0,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 1,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 1,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 1,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 2,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 2,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 2,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 3,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 3,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 3,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 4,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 4,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 4,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 5,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 5,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 5,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 6,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 6,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 6,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 7,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 7,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 7,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 8,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 8,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 8,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 9,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 9,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 9,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "method": "denied_read",
+          "denied": true,
+          "error": {
+            "code": -32600,
+            "message": "Permission denied (os error 13)"
+          }
+        },
+        {
+          "method": "denied_write",
+          "denied": true,
+          "error": {
+            "code": -32600,
+            "message": "Permission denied (os error 13)"
+          }
+        },
+        {
+          "method": "wslg_alias_read",
+          "denied": true,
+          "error": {
+            "code": -32600,
+            "message": "Permission denied (os error 13)"
+          }
+        },
+        {
+          "trial": 0,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 1,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 2,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 3,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 4,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 5,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 6,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 7,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 8,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        },
+        {
+          "trial": 9,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        }
+      ],
+      "workspace_clean": true,
+      "canary_unchanged": true
+    },
+    {
+      "label": "candidate_fresh_process",
+      "runtime": {
+        "version": "codex-cli 0.159.2",
+        "sha256": "1748767b230ebfc3d4ab7e4e254920d0c0ad9691fd8c11f190e7d44511a4a92e"
+      },
+      "context": {
+        "permissions": {
+          "type": "managed",
+          "file_system": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///"
+                },
+                "access": "read"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///tmp/codex-wslg-proof-49joixs2/candidate_fresh_process/workspace"
+                },
+                "access": "write"
+              },
+              {
+                "path": {
+                  "type": "path",
+                  "path": "file:///tmp/codex-wslg-proof-49joixs2/candidate_fresh_process/denied"
+                },
+                "access": "deny"
+              }
+            ]
+          },
+          "network": "restricted"
+        },
+        "cwd": "file:///tmp/codex-wslg-proof-49joixs2/candidate_fresh_process/workspace",
+        "workspaceRoots": [
+          "file:///tmp/codex-wslg-proof-49joixs2/candidate_fresh_process/workspace"
+        ],
+        "windowsSandboxLevel": "restricted-token",
+        "useLegacyLandlock": false
+      },
+      "trials": [
+        {
+          "trial": 0,
+          "method": "fs/writeFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 0,
+          "method": "fs/readFile",
+          "passed": true,
+          "error": null
+        },
+        {
+          "trial": 0,
+          "method": "fs/remove",
+          "passed": true,
+          "error": null
+        },
+        {
+          "method": "denied_read",
+          "denied": true,
+          "error": {
+            "code": -32600,
+            "message": "Permission denied (os error 13)"
+          }
+        },
+        {
+          "method": "denied_write",
+          "denied": true,
+          "error": {
+            "code": -32600,
+            "message": "Permission denied (os error 13)"
+          }
+        },
+        {
+          "method": "wslg_alias_read",
+          "denied": true,
+          "error": {
+            "code": -32600,
+            "message": "Permission denied (os error 13)"
+          }
+        },
+        {
+          "trial": 0,
+          "method": "sandbox_command",
+          "exit_code": 0,
+          "stdout": "{\"network_blocked\": true, \"outside_write_blocked\": true, \"daemon_hidden\": true}",
+          "stderr": ""
+        }
+      ],
+      "workspace_clean": true,
+      "canary_unchanged": true
+    }
+  ],
+  "isolated_comparison_passed": true,
+  "active_editor_verified": false
+}

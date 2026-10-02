@@ -1,10 +1,21 @@
 # Codex WSL sandbox mount incident record
 
 Status: unresolved. Owner: repository operator and Codex runtime maintainer.
-Update: isolated repair verified in #35; activation in the current editor remains pending.
+Update: supported extension 26.928.40906 installed; bundled Codex 0.159.2 passed real-host comparison. Human editor reload and normal-editor after-test remain pending in #35.
 Started: 2026-10-02 00:45 UTC. Related issues: [#29](https://github.com/successbycs/template/issues/29), [#32](https://github.com/successbycs/template/issues/32), [#33](https://github.com/successbycs/template/issues/33), [#34](https://github.com/successbycs/template/issues/34).
 
 ## Purpose and current conclusion
+
+At 2026-10-02 02:36 UTC, the supported extension installer completed the
+user-authorized update. The actual installed binary passed the complete
+comparison harness with WSLg enabled; see the
+[installed-extension proof](evidence/issue-35-installed-extension-comparison.json).
+The current app-server process still uses the old executable. Follow the
+[reload and recovery handoff](evidence/issue-35-repair-result.md) before claiming
+normal editor recovery. No WSL shutdown, unmount or GUI disable is needed.
+The #32/#33 workaround experiment and #34 platform assessment are alternatives,
+not prerequisites for this selected #35 repair. Their previous inconclusive
+results remain inconclusive; the new repair does not retroactively pass them.
 
 The latest finding supersedes the initial uncertainty below: the installed
 0.155.0-alpha.16 source drops WSLg masks in its proc preflight. OpenAI fixed
