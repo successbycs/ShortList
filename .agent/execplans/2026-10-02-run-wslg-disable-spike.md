@@ -20,6 +20,7 @@ Run one controlled, temporary host experiment: disable WSLg through the document
 - [x] (2026-10-01 22:20Z) Session A fresh baseline: live preflight returned 2; normal editor probe creation succeeded and immediate normal deletion failed with the named mount error; exact disposable file was removed through the approved fallback.
 - [ ] Session A: create bounded restoration helper and transition #32 to blocked before shutdown.
 - [x] (2026-10-02 00:16Z) The Session B helper timed out without a new session; it removed the temporary configuration and restarted WSL. The after-test remains unobserved.
+- [x] (2026-10-02 00:48Z) Corrected the stale decisive-probe decision and acceptance matrix to match observed normal-editor failure. Linked detailed diagnostics; no third restart was attempted.
 - [ ] Human recovery: reopen Ubuntu and start a new Codex session during a newly approved bounded test window.
 - [ ] Session B: re-read and claim #32, run the normal-editor after-test, signal restoration, and verify restored state.
 - [ ] Record result, verify repository, commit, and hand off for review.
@@ -41,11 +42,13 @@ Run one controlled, temporary host experiment: disable WSLg through the document
   Rationale: The experiment is diagnostic; disabling WSLg has host-wide GUI impact.
   Date/Author: 2026-10-01 / Terra
 
-- Decision: Treat a persistent app-server command request as the decisive probe, not the CLI sandbox command.
-  Rationale: The CLI sandbox previously passed while the nested mount remained.
-  Date/Author: 2026-10-01 / Astra design adopted by Terra
+- Decision: Supersede the original persistent-command acceptance rule. Require the actual normal editor create/delete operation and normal command execution; record a persistent app-server command only as supporting evidence.
+  Rationale: both lower-level probes passed while the affected editor operation failed; normal command execution now also reports the mount error.
+  Date/Author: 2026-10-02 / Astra
 
 ## Outcomes & Retrospective
+
+Detailed trace evidence, attempted fixes, assumptions and next diagnostic decisions are now in [the incident record](../../docs/operations/WSL_SANDBOX_INCIDENT.md). Socket/process attribution comes before another host experiment. Native Windows feasibility (#34) is an independent alternative, not a new prerequisite for this experiment.
 
 Two approved helper runs restored the original configuration safely. Neither collected the after-test because the WSL restart terminated Session A and no Session B connected during its bounded window. The WSLg hypothesis remains unobserved, not passed or disproved. A third host restart needs the human operator to be ready to reopen Ubuntu and begin Session B within the agreed window.
 
@@ -76,7 +79,7 @@ Windows-state action from PowerShell, after backup and diff review:
 wsl --shutdown
 ```
 
-After-state and restored-state use the same preflight and persistent app-server probe. Exact commands and results are appended below during execution.
+After-state uses the same preflight and normal editor create/delete sequence, followed by normal command execution. Record each trial and its sandbox/approval mode; a successful escalated fallback is not an accepted after-test. Repeat affected operations to assess the previously observed intermittent behavior. A persistent app-server probe is supporting evidence only. Restoration may end Session B too; a subsequent human-recovered session must verify restored state. Exact commands and results are appended during execution.
 
 
 ### Human operator recovery after the test restart
@@ -97,12 +100,14 @@ A real result is accepted only when it includes:
 | Boundary | Required evidence |
 | --- | --- |
 | Mount topology | Live preflight before, after WSLg-disable, and after restoration. |
-| Codex app-server | Persistent `command/exec` response before and after; no CLI-sandbox substitute. |
+| Normal Codex editor | Actual normal-tool create and delete results before and after; repeat trials and retain all outcomes. |
+| Normal command execution | Actual non-escalated read-only command results before and after; retain all outcomes. |
+| Supporting app-server request | Persistent `command/exec` response if collected; not decisive. |
 | Host recovery | Hash/backup evidence and restored configuration state. |
 | Repository | Canonical verifier after host recovery. |
 | Live dispatch | Not exercised; remains unobserved. |
 
-Supported means mount absent and app-server probe returns 0. Disproved means mount absent but the same error remains. Any unavailable comparison is inconclusive.
+Supported means the temporary setting is active, the nested mount is absent, and both normal editor create/delete and normal command execution pass in the documented trials. This supports only the tested configuration and sample, not permanent reliability or live dispatch. Disproved means the mount is absent but the same error remains on the affected path. Any unavailable comparison is inconclusive.
 
 ## Idempotence and Recovery
 

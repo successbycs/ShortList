@@ -1,0 +1,148 @@
+{
+  "captured_at_utc": "2026-10-02T00:45:02.457332+00:00",
+  "kernel": "6.6.87.2-microsoft-standard-WSL2",
+  "processes": [
+    {
+      "pid": 2420,
+      "executable": "<USER_HOME>/.vscode-server/extensions/openai.chatgpt-26.5917.61114-linux-x64/bin/linux-x86_64/codex",
+      "version_stdout": "codex-cli 0.155.0-alpha.16",
+      "app_server": true,
+      "cwd_class": "windows_mount",
+      "runtime_environment": {
+        "XDG_RUNTIME_DIR": "/run/user/1000/"
+      }
+    }
+  ],
+  "mounts": [
+    {
+      "target": "/mnt/wslg",
+      "root": "/",
+      "options": "rw,relatime",
+      "filesystem": "tmpfs"
+    },
+    {
+      "target": "/mnt/wslg/distro",
+      "root": "/",
+      "options": "ro,relatime",
+      "filesystem": "ext4"
+    }
+  ],
+  "log_observations": [
+    {
+      "source_relative_to_vscode_logs": "20261001T155241/exthost2/openai.chatgpt/Codex.log",
+      "counts": {
+        "error building bubblewrap command": 0,
+        "app-server socket directory has an unsupported host mount at /mnt/wslg/distro": 0,
+        "fs sandbox helper failed": 0,
+        "Starting app server": 0,
+        "app-server": 1
+      },
+      "mount_error_excerpts": [],
+      "excerpt_limit": 10,
+      "raw_lines_copied": false
+    },
+    {
+      "source_relative_to_vscode_logs": "20261001T155241/exthost3/openai.chatgpt/Codex.log",
+      "counts": {
+        "error building bubblewrap command": 10,
+        "app-server socket directory has an unsupported host mount at /mnt/wslg/distro": 10,
+        "fs sandbox helper failed": 10,
+        "Starting app server": 0,
+        "app-server": 11
+      },
+      "mount_error_excerpts": [
+        {
+          "timestamp_as_logged": "2026-10-01 16:20:54.703",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 16:21:30.950",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 16:22:05.795",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 17:01:14.883",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 18:18:38.987",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 18:36:23.784",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 18:42:03.255",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 18:43:51.194",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-01 18:45:11.706",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        },
+        {
+          "timestamp_as_logged": "2026-10-02 10:40:19.649",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        }
+      ],
+      "excerpt_limit": 10,
+      "raw_lines_copied": false
+    },
+    {
+      "source_relative_to_vscode_logs": "20261002T105632/exthost1/openai.chatgpt/Codex.log",
+      "counts": {
+        "error building bubblewrap command": 0,
+        "app-server socket directory has an unsupported host mount at /mnt/wslg/distro": 0,
+        "fs sandbox helper failed": 0,
+        "Starting app server": 0,
+        "app-server": 1
+      },
+      "mount_error_excerpts": [],
+      "excerpt_limit": 10,
+      "raw_lines_copied": false
+    },
+    {
+      "source_relative_to_vscode_logs": "20261002T105632/exthost2/openai.chatgpt/Codex.log",
+      "counts": {
+        "error building bubblewrap command": 1,
+        "app-server socket directory has an unsupported host mount at /mnt/wslg/distro": 1,
+        "fs sandbox helper failed": 1,
+        "Starting app server": 0,
+        "app-server": 2
+      },
+      "mount_error_excerpts": [
+        {
+          "timestamp_as_logged": "2026-10-02 11:17:29.178",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        }
+      ],
+      "excerpt_limit": 10,
+      "raw_lines_copied": false
+    },
+    {
+      "source_relative_to_vscode_logs": "20261002T131302/exthost1/openai.chatgpt/Codex.log",
+      "counts": {
+        "error building bubblewrap command": 1,
+        "app-server socket directory has an unsupported host mount at /mnt/wslg/distro": 1,
+        "fs sandbox helper failed": 1,
+        "Starting app server": 0,
+        "app-server": 2
+      },
+      "mount_error_excerpts": [
+        {
+          "timestamp_as_logged": "2026-10-02 13:35:50.967",
+          "error_literal": "app-server socket directory has an unsupported host mount at /mnt/wslg/distro"
+        }
+      ],
+      "excerpt_limit": 10,
+      "raw_lines_copied": false
+    }
+  ]
+}

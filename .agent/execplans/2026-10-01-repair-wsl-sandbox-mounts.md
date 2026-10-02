@@ -14,8 +14,14 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
 - [x] (2026-10-01 18:41Z) Reproduced an intermittent normal patch-path failure after one successful disposable probe; removed the exact probe file using the authorized terminal fallback.
 - [x] (2026-10-01 18:45Z) Added a fixture-testable mount-topology preflight and operator documentation with diagnosis, approved options, and recovery boundary.
 - [x] (2026-10-01 18:45Z) Ran fixture/live preflight, focused tests, canonical verification, and real normal patch probes; host-level repair remains blocked pending explicit approval.
+- [x] (2026-10-02 00:45Z) Started a detailed incident dossier and sanitized trace snapshot at the operator's request. Captured 12 matching error lines across five selected extension logs and inspected the visible app-server executable, which reports 0.155.0-alpha.16.
+- [x] (2026-10-02 00:48Z) Validated the snapshot with `python3 -m json.tool`, all Markdown links with `.venv/bin/python scripts/check_markdown_links.py`, and whitespace with `git diff --check`; all passed. No runtime recovery is claimed.
+- [ ] Resolve the historical 0.159.3 version discrepancy, trace the rejected socket, and reproduce with the same runtime outside Symphony before selecting a repair.
 
 ## Surprises & Discoveries
+
+- Observation: the currently visible app-server executable reports 0.155.0-alpha.16, whereas this plan originally recorded 0.159.3. Public listener-path options do not establish control of the internal socket implicated by this error.
+  Evidence: docs/operations/evidence/wsl-sandbox-20261002T004502Z.json and the current app-server help inspected on 2026-10-02. Historical executable attribution remains unresolved.
 
 - Observation: The WSL host reports `/mnt/wslg` as tmpfs and `/mnt/wslg/distro` as a nested read-only ext4 mount from `/dev/sdd`.
   Evidence: `findmnt -R -o TARGET,SOURCE,FSTYPE,OPTIONS /mnt/wslg` on 2026-10-01.
@@ -23,6 +29,10 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
   Evidence: `tools.apply_patch` probe and deletion attempt on 2026-10-01; terminal fallback removed only `.agent/execplans/.wsl-sandbox-probe`.
 
 ## Decision Log
+
+- Decision: Begin with process/socket attribution and a sanitized incident record before any further host experiment or source patch.
+  Rationale: prior disabled-state tests were unobserved; the actual rejected socket and historical executable identity remain unknown. Removing a sandbox security check is not an acceptable shortcut.
+  Date/Author: 2026-10-02 / Astra
 
 - Decision: Implement a repository-local detector and operator remediation design, not a host mount change.
   Rationale: The observed condition is host/session infrastructure; changing WSL mounts, `/etc/fstab`, or restarting WSL exceeds Issue authority.
@@ -32,6 +42,8 @@ This work makes the WSL mount condition behind intermittent Codex sandbox failur
   Date/Author: 2026-10-01 / Codex
 
 ## Outcomes & Retrospective
+
+Update, 2026-10-02: [the detailed incident record](../../docs/operations/WSL_SANDBOX_INCIDENT.md) now separates actual traces, historical reports, failed attempts, assumptions, decisions, and missing proof. It supersedes any categorical diagnosis or assertion below that a socket override has been ruled out. This capture adds evidence, not a demonstrated repair. No new restart occurred. The original outcome below is historical.
 
 The repository now detects the known topology before a developer relies on normal app-server editing, documents a safe narrow fallback, and preserves the approval boundary. Fixture tests, the live preflight, and the full verifier passed. The actual normal patch path remained intermittent: creation of a disposable probe succeeded twice, but immediate normal deletion failed twice with the named mount error. The required durable host repair cannot be completed under current authority because the published Codex app-server help does not identify a socket-directory override and host WSL changes are explicitly out of scope. Issue #29 must remain blocked until an operator approves a vendor-supported Codex/app-server or WSL remedy.
 
@@ -67,6 +79,8 @@ Acceptance requires a fixture-tested preflight whose incompatible result names t
 The preflight only reads mountinfo and is safe to repeat. Fixture inputs are disposable. The normal patch probe uses one exact temporary file under `.agent/execplans/`, which is removed immediately after the probe; if normal deletion fails, an authorized terminal command removes only that exact named file. The repository fallback does not alter mounts. Rollback consists of removing the added preflight, tests, and documentation; any host-level proposal must have its own approved rollback procedure.
 
 ## Artifacts and Notes
+
+Current diagnostic artifacts: `docs/operations/WSL_SANDBOX_INCIDENT.md` and `docs/operations/evidence/wsl-sandbox-20261002T004502Z.json`. The snapshot records capture time, process metadata, selected mount fields, source-relative log paths, match counts, and sanitized timestamped error excerpts. Raw logs and authentication data are excluded. Normal command execution also shows the mount failure; the incident is not limited to deletion.
 
 Evidence: WSL2 kernel `6.6.87.2-microsoft-standard-WSL2`; live preflight returned 2 for the nested target; fixture tests `4 passed`; canonical verifier reported `59 passed in 3.34s`, Ruff lint/format and Markdown links passing. Codex CLI 0.159.3 app-server help shows user config and transport options but no documented socket-directory override. The normal probe outcome was intermittent creation success followed by deletion failure. No credentials, environment dumps, full mount tables, or host configuration writes were retained.
 

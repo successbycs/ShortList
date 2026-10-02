@@ -8,7 +8,7 @@ This ExecPlan is a living document and must be maintained under `.agent/PLANS.md
 
 ## Purpose / Big Picture
 
-Determine, with a reversible real-world test, whether temporarily disabling WSLg removes `/mnt/wslg/distro` and lets the affected Codex app-server sandbox start. The result can support, disprove, or leave the hypothesis inconclusive. It is not a repair or proof that live dispatch works.
+Determine, with a reversible real-world test, whether temporarily disabling WSLg removes the nested WSLg mount and lets the affected normal Codex editor file-edit path complete a create-and-delete operation. The result can support, disprove, or leave the WSLg hypothesis inconclusive. It is not a repair or proof that live dispatch works. A separate native-Windows Codex feasibility task will assess a supported alternative without presuming a migration.
 
 ## Progress
 
@@ -17,7 +17,10 @@ Determine, with a reversible real-world test, whether temporarily disabling WSLg
 - [x] (2026-10-01 21:26Z) Verified the vendor-documented global WSLg setting and designed backup/restart/restore steps.
 - [x] (2026-10-01 21:28Z) Defined the relevant app-server boundary probe and recorded that a one-shot JSON-RPC pipe is inconclusive.
 - [x] (2026-10-01 21:30Z) Validated the completed plan: Markdown links passed and the canonical verifier passed 59 tests in 3.29 seconds.
-- [ ] (requires explicit human approval) Terra backs up the Windows WSL configuration, disables WSLg temporarily, restarts WSL, and records the after-state.
+- [x] (2026-10-02 00:40Z) Reopened the design after evidence showed a persistent app-server true command can pass while normal editor deletion still fails; corrected the decisive boundary to normal editor create/delete.
+- [x] (2026-10-02 00:48Z) Linked the detailed incident record, corrected #32's stale acceptance rule, and recorded successful Markdown/JSON/diff checks. Earlier canonical verification of the design revision passed 61 tests in 3.31 seconds. This is design evidence only.
+- [ ] ([GitHub Issue #34](https://github.com/successbycs/template/issues/34)) Run a narrow native-Windows Codex sandbox feasibility assessment before considering any migration or permanent WSLg change.
+- [ ] (requires explicit human approval) Terra backs up the Windows WSL configuration, disables WSLg temporarily, restarts WSL, and records the after-state normal-editor probe.
 - [ ] (requires explicit human approval) Terra restores the exact configuration and restarts WSL unless the human explicitly approves retention.
 - [ ] (after Terra evidence) Human review classifies the workaround.
 
@@ -38,23 +41,36 @@ Determine, with a reversible real-world test, whether temporarily disabling WSLg
 - Observation: Microsoft documents `.wslconfig` as global to WSL2; `[wsl2] guiApplications=false` switches WSLg off after WSL stops and restarts.
   Evidence: [Microsoft WSL configuration](https://learn.microsoft.com/en-us/windows/wsl/wsl-config), accessed 2026-10-01.
 
+
+- Observation: the persistent app-server true command passed while the nested mount remained, but normal editor deletion failed with the named mount error.
+  Evidence: Session A baseline committed in bcf6a54.
+
+- Observation: OpenAI documents a separate native Windows Codex sandbox with elevated and unelevated modes; it is distinct from the Linux Bubblewrap sandbox used inside WSL2.
+  Evidence: OpenAI Windows sandbox documentation, accessed 2026-10-02.
+
 ## Decision Log
 
 - Decision: Test the documented Windows-user `.wslconfig` control, never a manual unmount or `/etc/fstab` edit.
   Rationale: WSL owns the mount tree; the documented control is reversible whereas mount manipulation is unsupported.
   Date/Author: 2026-10-01 / Astra
 
-- Decision: Require both the mount preflight and a persistent app-server `command/exec` of `/bin/true` with `workspaceWrite` and network disabled.
-  Rationale: CLI sandbox success was a false-positive risk; the app-server request reaches the claimed boundary without a model turn or file write.
-  Date/Author: 2026-10-01 / Astra
+- Decision: Require the mount preflight plus the exact normal editor create/delete operation for a disposable file as the WSLg experiment decisive proof. A persistent app-server true command remains supporting evidence only.
+  Rationale: the low-level request passed even though the real editor deletion failed, so it cannot establish that the affected workflow is repaired.
+  Date/Author: 2026-10-02 / Astra
 
 - Decision: Restore WSLg by default.
   Rationale: Disabling it applies to all WSL2 distributions and removes Linux GUI support; retention requires a separate human decision.
   Date/Author: 2026-10-01 / Astra
 
+- Decision: Assess native Windows Codex in a separate feasibility task rather than fold it into the WSLg spike.
+  Rationale: the execution model, workspace access, approval setup, and sandbox are different. Combining them would make neither result interpretable.
+  Date/Author: 2026-10-02 / Astra
+
 ## Outcomes & Retrospective
 
-The design is complete. No host state changed. #32 remains blocked until a human approves a temporary global setting change and WSL restart. A successful mount/sandbox experiment still leaves live Symphony dispatch unobserved.
+See [the detailed incident record](../../docs/operations/WSL_SANDBOX_INCIDENT.md) for evidence and assumptions. #34 is an independent alternative; its creation or execution is not a prerequisite for #32. Initial socket/process diagnosis takes priority over another disruptive experiment. Any new trial must include normal command execution as well as repeated editor create/delete checks, preserve every result, and state its sample limits.
+
+The original design was complete but contained an acceptance-boundary error. This revision corrects it and adds a separate decision path for a native-Windows feasibility task. No host state changed during this revision. #32 remains blocked until a human approves a temporary global setting change and WSL restart. A successful mount/sandbox experiment still leaves live Symphony dispatch unobserved.
 
 ## Context and Orientation
 
@@ -68,6 +84,8 @@ The test changes a host file outside the repository: `%UserProfile%\.wslconfig`.
 
 ### Milestone 1: valid before-state
 
+The decisive probe uses the normal Codex editor tool to create then immediately delete one uniquely named disposable repository file. Record both tool results and verify no probe path remains in git status. The lower-level app-server request is supporting evidence only.
+
 From `/home/chris/template`, run:
 
 ```bash
@@ -80,7 +98,7 @@ Then use a disposable persistent JSON-RPC client against `codex app-server`. It 
 {"method":"command/exec","id":1,"params":{"command":["/bin/true"],"cwd":"/home/chris/template","sandboxPolicy":{"type":"workspaceWrite","networkAccess":false},"timeoutMs":10000}}
 ```
 
-Keep stdin open until response id 1 or a bounded timeout. This must not create a thread, invoke a model, edit a file, use network, contact GitHub, or enable dispatch. Exit code 0 is passed; the exact mount error is failed; missing response/protocol error is inconclusive and must be fixed before changing WSLg.
+Keep stdin open until response id 1 or a bounded timeout. This must not create a thread, invoke a model, edit a file, use network, contact GitHub, or enable dispatch. Its result is supporting evidence only: it cannot pass or fail the WSLg hypothesis by itself.
 
 ### Milestone 2: human approval
 
@@ -101,13 +119,13 @@ Preserve unrelated configuration. Change only the effective `[wsl2]` `guiApplica
 guiApplications=false
 ```
 
-Display the diff, then run `wsl --shutdown` from Windows PowerShell. Start a new WSL terminal, rerun the preflight and identical persistent app-server probe, then run the canonical verifier only when services are stable.
+Display the diff, then run `wsl --shutdown` from Windows PowerShell. Start a new WSL terminal and new user-directed Codex session, rerun the preflight and the same normal-editor create/delete probe while the setting remains active, then run the canonical verifier only when services are stable. The optional app-server probe may be repeated but cannot replace the editor probe.
 
 ### Milestone 4: classify and restore
 
-- **Supported:** preflight is compatible and persistent app-server probe exits 0.
-- **Disproved:** WSLg is disabled and nested mount absent, but same mount error remains.
-- **Inconclusive:** setting did not apply, mount state is unreadable, the probe is incomplete, or another environment error prevents comparison.
+- **Supported:** WSLg is disabled, the nested mount is absent or the preflight is compatible, and the normal editor creates then deletes the disposable file without the mount error.
+- **Disproved:** WSLg is disabled and the nested mount is absent, but the same normal-editor mount error remains.
+- **Inconclusive:** the setting did not apply, the mount state is unreadable, the normal-editor comparison was not captured, or another environment error prevents comparison.
 
 Restore by default. Compare the current file with the expected spike version before writing. If it differs unexpectedly, stop for human direction. Restore the exact backup; if no original file existed, remove only the spike-created file. Run `wsl --shutdown`, restart WSL, rerun the preflight, and record restoration. Do not auto-delete the host backup.
 
@@ -131,8 +149,10 @@ The plan is accepted if a novice can identify the exact host change, temporary i
 | --- | --- | --- |
 | Repository mount preflight | passed | Live exit 2 observed. |
 | CLI sandbox | passed but non-decisive | `codex sandbox -- /bin/true` passed with mount present. |
-| Affected app-server sandbox | unobserved | Normal errors were intermittent; one-shot protocol probe incomplete. |
+| Persistent app-server command | passed but non-decisive | A true command can pass while the normal editor fails. |
+| Affected normal editor sandbox | failed before-state; after-state unobserved | Creation succeeded and immediate deletion failed with the named mount error. |
 | WSLg-disable effect | blocked | Requires host-wide approval and restart. |
+| Native Windows Codex alternative | unobserved | Requires a separate feasibility task and human approval for any Windows sandbox setup. |
 | Live Symphony dispatch | unobserved | Separate end-to-end proof required. |
 
 ## Idempotence and Recovery

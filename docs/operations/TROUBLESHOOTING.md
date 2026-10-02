@@ -6,6 +6,12 @@ If Docker is unavailable in WSL, enable Docker Desktop WSL integration and rerun
 
 ## Intermittent Codex sandbox mount failure on WSL
 
+For trace evidence, attempts, reviewed assumptions, and decisions, maintain the
+[WSL sandbox incident record](WSL_SANDBOX_INCIDENT.md). Its latest observations
+take precedence over historical version assumptions below. The exact rejected
+socket and sole root cause remain unresolved; a topology warning is not proof
+that disabling WSLg repairs the affected operation.
+
 If a normal Codex file-edit operation fails before touching the repository with
 `unsupported host mount at /mnt/wslg/distro`, first run the read-only preflight:
 
