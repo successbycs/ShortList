@@ -227,3 +227,15 @@ verbose output showed its first stall at
 `tests/unit/symphony/test_dashboard.py::test_dashboard_exposes_status_and_pause_controls`.
 That unrelated result is recorded as unobserved rather than treated as a
 passing canonical verification; no Symphony source or test was changed here.
+
+## GitHub review handoff
+
+The configured GitHub target and `origin` remote are both
+`successbycs/template`. At the completion handoff on 2026-10-02 02:55Z,
+`gh auth status` reported that the active `successbycs` token is invalid.
+Accordingly, the Issue was not re-read, commented on, or transitioned to
+`status:human-review`. Restore access with `gh auth refresh -h github.com`
+(or an equivalent approved credential repair), re-read Issue #35, then post
+the evidence summary and change only its task-status label to
+`status:human-review`, preserving all unrelated labels. This record does not
+authorize a GitHub write while authentication remains invalid.
