@@ -19,7 +19,8 @@ Run one controlled, temporary host experiment: disable WSLg through the document
 - [x] (2026-10-01 22:08Z) Ran diff, Markdown-link, and canonical verification after the documentation update; 59 tests passed in 3.31 seconds.
 - [x] (2026-10-01 22:20Z) Session A fresh baseline: live preflight returned 2; normal editor probe creation succeeded and immediate normal deletion failed with the named mount error; exact disposable file was removed through the approved fallback.
 - [ ] Session A: create bounded restoration helper and transition #32 to blocked before shutdown.
-- [ ] Human recovery: reopen Ubuntu and start a new Codex session.
+- [x] (2026-10-02 00:16Z) The Session B helper timed out without a new session; it removed the temporary configuration and restarted WSL. The after-test remains unobserved.
+- [ ] Human recovery: reopen Ubuntu and start a new Codex session during a newly approved bounded test window.
 - [ ] Session B: re-read and claim #32, run the normal-editor after-test, signal restoration, and verify restored state.
 - [ ] Record result, verify repository, commit, and hand off for review.
 
@@ -46,7 +47,7 @@ Run one controlled, temporary host experiment: disable WSLg through the document
 
 ## Outcomes & Retrospective
 
-The first host trial restored the original configuration but did not capture the after-test because its required restart terminated Session A. The compliance model and this plan now require a two-session handoff. The actual WSLg result remains unobserved pending the separately recorded Session A and Session B sequence.
+Two approved helper runs restored the original configuration safely. Neither collected the after-test because the WSL restart terminated Session A and no Session B connected during its bounded window. The WSLg hypothesis remains unobserved, not passed or disproved. A third host restart needs the human operator to be ready to reopen Ubuntu and begin Session B within the agreed window.
 
 ## Context and Orientation
 
@@ -106,6 +107,9 @@ Supported means mount absent and app-server probe returns 0. Disproved means mou
 ## Idempotence and Recovery
 
 Do not run a second host change until the original file has been restored. Back up before editing. Preserve unrelated configuration. If the temporary file differs unexpectedly before restoration, stop rather than overwrite it. If the test causes an unexpected WSL problem, restore the backup from Windows PowerShell, run `wsl --shutdown`, and reopen WSL. Do not delete the host backup automatically.
+
+- Observation: The second helper timed out while preserving host recovery.
+  Evidence: 2026-10-02 host log recorded temporary configuration, WSL restart, Session B timeout, removal, and final restart; current preflight is incompatible again.
 
 ## Artifacts and Notes
 
