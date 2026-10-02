@@ -18,6 +18,7 @@ An ExecPlan does not grant permission for destructive actions, production access
 
 ## Working conventions
 
+- Before target-dependent operations, follow [Session scope and execution target](docs/harness/CODEX_OPERATING_MODEL.md#session-scope-and-execution-target).
 - Preserve unrelated and pre-existing changes.
 - Prefer small, additive, testable changes and record observable evidence.
 - Treat configuration, Docker, deployment, and agent-runtime setup as absent until they are implemented and verified; documentation is not proof of enforcement.
