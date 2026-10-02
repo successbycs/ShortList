@@ -8,6 +8,8 @@ Finish [Issue #10](https://github.com/successbycs/template/issues/10): operators
 
 ## Progress
 
+- [x] (2026-10-02) Queue audit found and repaired the read-only API omission of notification status required by #19. Restored only timestamp, Issue ID, status and attempts through the existing read-only connection. Expanded reopened-database test proves all four delivery states, private-data exclusion and byte-for-byte unchanged SQLite after reads. Canonical verifier passed 68 tests in 3.24s, Ruff and Markdown links.
+- [x] (2026-10-02) Real loopback HTTP recheck returned one synthetic sent delivery with one attempt and exactly four permitted fields. No SMTP call occurred; the disposable server was stopped.
 - [x] (2026-10-02) Read live Issue, current service, tests and Compose configuration. Preserve the separate uncommitted label-policy cleanup.
 - [x] (2026-10-02) Implemented read-only HTML/API, read-only SQLite access, no POST controls, escaped text, direct bind validation and guide.
 - [x] (2026-10-02) Focused dashboard tests: 13 passed in 0.53s outside the sandbox. The same tests hit the 20-second timeout inside it; this isolates the earlier test stall to the execution environment, not a demonstrated application deadlock.
@@ -18,12 +20,17 @@ Finish [Issue #10](https://github.com/successbycs/template/issues/10): operators
 
 ## Surprises & Discoveries
 
+Follow-up audit found `docs/operations/LOCAL_RUNBOOK.md` and #19 require `/api/status` notification outcomes. Removing that field was a regression, not a necessary part of removing HTTP mutation controls. Restore bounded delivery metadata without free-text detail or transition identifiers.
+
 The existing dashboard includes POST pause/resume/tick controls contrary to the current Issue scope. EventStore already provides allow-listed operational fields; legacy run summaries contain free text and must not be rendered as trusted markup.
 
 The Playwright wrapper is not executable directly; invoking through bash reaches Windows npx, which fails to locate its Node installation in this environment. Browser proof needs a Linux CLI path. No packages were changed by these failed attempts.
 
 ## Decision Log
 
+- Decision: Preserve sanitized notification metadata in the read-only JSON API.
+  Rationale: #19 and the local runbook depend on delivery visibility; removing HTTP controls does not require removing safe delivery evidence.
+  Date/Author: 2026-10-02 / Codex
 - Decision: Use a small server-rendered HTML page and existing SQLite operations, removing HTTP execution controls.
   Rationale: No frontend dependencies or external calls are needed for a read-only inspection surface.
   Date/Author: 2026-10-02 / Codex
@@ -32,6 +39,8 @@ The Playwright wrapper is not executable directly; invoking through bash reaches
   Date/Author: 2026-10-02 / Codex
 
 ## Outcomes & Retrospective
+
+Follow-up regression audit restored the `notifications` JSON field required by #19. This is delivery-record visibility only, not evidence of actual inbox receipt. All four known statuses are covered by the reopened-database test; real HTTP was checked using a synthetic sent record. The HTML screenshots remain accurate because the page is unchanged.
 
 Implemented the read-only page and safe persisted-evidence API, removed mutation routes, and passed focused and canonical tests. Browser proof used synthetic records through actual SQLite, Uvicorn HTTP and Chromium boundaries. No live worker or provider capability is inferred. Implementation and screenshot artifacts are committed locally in c3240c6. [GitHub review handoff](https://github.com/successbycs/template/issues/10#issuecomment-5945519708) records the evidence and local-only artifact limitation. Human review remains outstanding before the dependent #12 demonstration; no push was performed.
 
@@ -44,6 +53,8 @@ Implemented the read-only page and safe persisted-evidence API, removed mutation
 Implement an escaped HTML table at `/`, expose only sanitized durable operations plus active reservations at `/api/status`, and remove the three POST controls. Test every requested event kind, reopening persistence, empty state, HTML escaping and refused mutation routes. Add `docs/guides/SYMPHONY_DASHBOARD.md` with startup, refresh, data provenance and limits. Validate direct loopback configuration without breaking existing container binding.
 
 ## Concrete Steps
+
+Follow-up on 2026-10-02: `.venv/bin/python scripts/verify.py` passed. The disposable `/tmp/issue10-browser-server.py populated 8876` fixture additionally called `claim_notification("10", "private-transition")` and `complete_notification("10", "private-transition", NotificationResult("sent", "private-mail-detail", 1))`. A standard-library `urllib.request.urlopen("http://127.0.0.1:8876/api/status")` check asserted one sent row, attempts equal to one, exact keys `created_at`, `issue_id`, `status`, `attempts`, and no `private-` values anywhere in the response. It printed `HTTP notification evidence: passed; one sanitized fixture delivery, no SMTP`. SIGINT stopped the owned server and its session exited successfully.
 
 From `/home/chris/template`, run `.venv/bin/pytest -q tests/unit/symphony/test_dashboard.py`, `.venv/bin/python scripts/verify.py`, and `git diff --check`. Use the Playwright CLI against a disposable loopback server seeded with all seven event kinds; record browser output and stop the owned process after proof.
 

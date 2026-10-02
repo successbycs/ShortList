@@ -161,7 +161,11 @@ class EventStore:
 
     def dashboard_snapshot(self) -> dict[str, object]:
         """Read an existing database without migration, creation or free-text run data."""
-        snapshot: dict[str, object] = {"operations": [], "active_reservations": []}
+        snapshot: dict[str, object] = {
+            "operations": [],
+            "active_reservations": [],
+            "notifications": [],
+        }
         if not self.database.exists():
             return snapshot
         with sqlite3.connect(self.database.resolve().as_uri() + "?mode=ro", uri=True) as db:
@@ -186,6 +190,21 @@ class EventStore:
                     for row in db.execute(
                         "SELECT issue_id FROM symphony_reservations "
                         "WHERE status = 'active' ORDER BY issue_id"
+                    )
+                ]
+            if "symphony_notification_deliveries" in tables:
+                snapshot["notifications"] = [
+                    {
+                        "created_at": created,
+                        "issue_id": issue_id,
+                        "status": status,
+                        "attempts": attempts,
+                    }
+                    for created, issue_id, status, attempts in db.execute(
+                        "SELECT created_at, issue_id, status, attempts "
+                        "FROM symphony_notification_deliveries "
+                        "WHERE status IN ('pending', 'sent', 'disabled', 'failed') "
+                        "ORDER BY id DESC LIMIT 100"
                     )
                 ]
         return snapshot

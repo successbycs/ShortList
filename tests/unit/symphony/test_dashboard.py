@@ -63,7 +63,11 @@ def test_dashboard_is_read_only_and_handles_missing_database(tmp_path: Path) -> 
     )
     client = TestClient(service.dashboard())
     assert client.get("/health").json()["status"] == "ok"
-    assert client.get("/api/status").json() == {"operations": [], "active_reservations": []}
+    assert client.get("/api/status").json() == {
+        "operations": [],
+        "active_reservations": [],
+        "notifications": [],
+    }
     assert "No operational evidence yet" in client.get("/").text
     for route in ("pause", "resume", "tick"):
         assert client.post(f"/api/{route}").status_code == 404
@@ -83,6 +87,14 @@ def test_dashboard_renders_reopened_evidence_without_legacy_secrets(tmp_path: Pa
     store.stop_reservation("10", "human_review")
     store.reserve("11")
     store.append(notification_record(), RunResult(True, "PRIVATE_RUN_CONTENT"))
+    for status in ("pending", "sent", "disabled", "failed"):
+        store.claim_notification("10", f"PRIVATE_TRANSITION_{status}")
+        if status != "pending":
+            store.complete_notification(
+                "10",
+                f"PRIVATE_TRANSITION_{status}",
+                NotificationResult(status, "PRIVATE_MAIL_DETAIL", 1),
+            )
     before = database.read_bytes()
     service = SymphonyService(
         load_workflow(path), EmptyTracker(), EmptyRunner(), EventStore(database)
@@ -91,6 +103,17 @@ def test_dashboard_renders_reopened_evidence_without_legacy_secrets(tmp_path: Pa
     snapshot = client.get("/api/status").json()
     assert {row["kind"] for row in snapshot["operations"]} == set(EventStore._OPERATION_FIELDS)
     assert snapshot["active_reservations"] == ["11"]
+    assert {row["status"] for row in snapshot["notifications"]} == {
+        "pending",
+        "sent",
+        "disabled",
+        "failed",
+    }
+    for row in snapshot["notifications"]:
+        assert set(row) == {"created_at", "issue_id", "status", "attempts"}
+        assert row["attempts"] == (0 if row["status"] == "pending" else 1)
+    assert "PRIVATE_MAIL_DETAIL" not in str(snapshot)
+    assert "PRIVATE_TRANSITION" not in str(snapshot)
     page = client.get("/").text
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
     assert "<script>alert(1)</script>" not in page
