@@ -9,9 +9,12 @@ import shutil
 import sqlite3
 import subprocess
 from datetime import UTC, datetime
+from html import escape
+from ipaddress import ip_address
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 
 from app_template.symphony.domain import Issue, RunRecord, RunResult
 from app_template.symphony.notifications import (
@@ -155,6 +158,37 @@ class EventStore:
             {"created_at": row[0], "issue_id": row[1], "kind": row[2], **json.loads(row[3])}
             for row in rows
         ]
+
+    def dashboard_snapshot(self) -> dict[str, object]:
+        """Read an existing database without migration, creation or free-text run data."""
+        snapshot: dict[str, object] = {"operations": [], "active_reservations": []}
+        if not self.database.exists():
+            return snapshot
+        with sqlite3.connect(self.database.resolve().as_uri() + "?mode=ro", uri=True) as db:
+            tables = {row[0] for row in db.execute("SELECT name FROM sqlite_master")}
+            if "symphony_operational_events" in tables:
+                operations = []
+                for created, issue_id, kind, raw in db.execute(
+                    "SELECT created_at, issue_id, kind, details_json "
+                    "FROM symphony_operational_events ORDER BY id DESC LIMIT 100"
+                ):
+                    try:
+                        details = self._safe_details(kind, json.loads(raw))
+                    except (ValueError, TypeError):
+                        continue
+                    operations.append(
+                        {"created_at": created, "issue_id": issue_id, "kind": kind, **details}
+                    )
+                snapshot["operations"] = operations
+            if "symphony_reservations" in tables:
+                snapshot["active_reservations"] = [
+                    row[0]
+                    for row in db.execute(
+                        "SELECT issue_id FROM symphony_reservations "
+                        "WHERE status = 'active' ORDER BY issue_id"
+                    )
+                ]
+        return snapshot
 
     def append(self, record: RunRecord, result: RunResult | None) -> None:
         with self._connect() as connection:
@@ -397,42 +431,67 @@ class SymphonyService:
 
         @app.get("/api/status")
         def status() -> dict[str, object]:
-            return {
-                **self.scheduler.snapshot(),
-                "events": self.store.recent(),
-                "operations": self.store.recent_operations(),
-                "notifications": self.store.recent_notifications(),
-            }
+            return self.store.dashboard_snapshot()
 
-        @app.post("/api/pause")
-        def pause() -> dict[str, bool]:
-            self.scheduler.paused = True
-            return {"paused": True}
-
-        @app.post("/api/resume")
-        def resume() -> dict[str, bool]:
-            self.scheduler.paused = False
-            return {"paused": False}
-
-        @app.post("/api/tick")
-        async def tick() -> dict[str, object]:
-            if not self.workflow.config.runtime.live_dispatch:
-                raise HTTPException(
-                    status_code=409, detail="live dispatch is disabled by WORKFLOW.md"
+        @app.get("/", response_class=HTMLResponse)
+        def index() -> str:
+            snapshot = self.store.dashboard_snapshot()
+            rows = []
+            for operation in snapshot["operations"]:
+                details = {
+                    key: value
+                    for key, value in operation.items()
+                    if key not in {"created_at", "issue_id", "kind"}
+                }
+                cells = [
+                    operation["created_at"],
+                    operation["issue_id"],
+                    operation["kind"],
+                    json.dumps(details, sort_keys=True),
+                ]
+                rows.append(
+                    "<tr>" + "".join(f"<td>{escape(str(cell))}</td>" for cell in cells) + "</tr>"
                 )
-            await self.tick()
-            return self.scheduler.snapshot()
+            reservations = escape(
+                ", ".join(str(item) for item in snapshot["active_reservations"]) or "None"
+            )
+            body = "".join(rows) or '<tr><td colspan="4">No operational evidence yet.</td></tr>'
+            return (
+                '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                '<meta name="viewport" content="width=device-width, initial-scale=1">'
+                "<title>Symphony evidence</title><style>"
+                "body{font:16px system-ui;margin:2rem;color:#172b4d;background:#f5f7fa}"
+                "table{border-collapse:collapse;width:100%;background:white}"
+                "td,th{text-align:left;padding:.7rem;border:1px solid #cbd2dc;"
+                "overflow-wrap:anywhere}a{color:#0645ad}"
+                "</style></head><body><h1>Symphony operational evidence</h1>"
+                "<p>Read-only • Last 100 recorded events, newest first. "
+                "Refresh to read current evidence. This is not a live worker heartbeat.</p>"
+                '<p><a href="/">Refresh</a> · <a href="/api/status">JSON evidence</a></p>'
+                f"<p>Active reservations: {reservations}</p>"
+                "<table><caption>Persisted operations</caption><thead><tr>"
+                "<th>Recorded (UTC)</th><th>Issue</th><th>Event</th><th>Details</th>"
+                f"</tr></thead><tbody>{body}</tbody></table></body></html>"
+            )
 
         return app
 
     def run_dashboard(self) -> None:
         import uvicorn
 
+        host = os.environ.get(
+            "SYMPHONY_DASHBOARD_HOST", self.workflow.config.runtime.dashboard_host
+        )
+        container_bind = host == "0.0.0.0" and Path("/.dockerenv").exists()
+        try:
+            loopback = host == "localhost" or ip_address(host).is_loopback
+        except ValueError:
+            loopback = False
+        if not (loopback or container_bind):
+            raise ValueError("Dashboard requires loopback or the container-only 0.0.0.0 bind")
         uvicorn.run(
             self.dashboard(),
-            host=os.environ.get(
-                "SYMPHONY_DASHBOARD_HOST", self.workflow.config.runtime.dashboard_host
-            ),
+            host=host,
             port=self.workflow.config.runtime.dashboard_port,
         )
 

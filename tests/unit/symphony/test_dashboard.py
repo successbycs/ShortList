@@ -55,7 +55,7 @@ def notification_record() -> RunRecord:
     )
 
 
-def test_dashboard_exposes_status_and_pause_controls(tmp_path: Path) -> None:
+def test_dashboard_is_read_only_and_handles_missing_database(tmp_path: Path) -> None:
     path = tmp_path / "WORKFLOW.md"
     path.write_text("---\ntracker:\n  repository: owner/repo\n---\nwork\n", encoding="utf-8")
     service = SymphonyService(
@@ -63,8 +63,39 @@ def test_dashboard_exposes_status_and_pause_controls(tmp_path: Path) -> None:
     )
     client = TestClient(service.dashboard())
     assert client.get("/health").json()["status"] == "ok"
-    assert client.post("/api/pause").json() == {"paused": True}
-    assert client.get("/api/status").json()["paused"] is True
+    assert client.get("/api/status").json() == {"operations": [], "active_reservations": []}
+    assert "No operational evidence yet" in client.get("/").text
+    for route in ("pause", "resume", "tick"):
+        assert client.post(f"/api/{route}").status_code == 404
+    assert not (tmp_path / "events.db").exists()
+
+
+def test_dashboard_renders_reopened_evidence_without_legacy_secrets(tmp_path: Path) -> None:
+    path = tmp_path / "WORKFLOW.md"
+    path.write_text("---\ntracker:\n  repository: owner/repo\n---\nwork\n", encoding="utf-8")
+    database = tmp_path / "events.db"
+    store = EventStore(database)
+    store.record_operation("observation", "10", {"known": True, "source": "github"})
+    store.record_operation("claim", "10", {"status_label": "claimed"})
+    store.record_operation("reviewed_revision", "10", {"revision": "<script>alert(1)</script>"})
+    store.record_operation("admission_decision", "10", {"decision": "accepted"})
+    store.reserve("10")
+    store.stop_reservation("10", "human_review")
+    store.reserve("11")
+    store.append(notification_record(), RunResult(True, "PRIVATE_RUN_CONTENT"))
+    before = database.read_bytes()
+    service = SymphonyService(
+        load_workflow(path), EmptyTracker(), EmptyRunner(), EventStore(database)
+    )
+    client = TestClient(service.dashboard())
+    snapshot = client.get("/api/status").json()
+    assert {row["kind"] for row in snapshot["operations"]} == set(EventStore._OPERATION_FIELDS)
+    assert snapshot["active_reservations"] == ["11"]
+    page = client.get("/").text
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
+    assert "<script>alert(1)</script>" not in page
+    assert "PRIVATE_RUN_CONTENT" not in page + str(snapshot)
+    assert database.read_bytes() == before
 
 
 def test_event_store_persists_across_instances(tmp_path: Path) -> None:
@@ -144,10 +175,22 @@ def test_dashboard_honours_container_host_override(tmp_path: Path, monkeypatch) 
     monkeypatch.setenv("SYMPHONY_DASHBOARD_HOST", "0.0.0.0")
     service = SymphonyService.from_workflow(path)
 
-    with patch.object(uvicorn, "run") as run:
+    with patch.object(uvicorn, "run") as run, patch.object(Path, "exists", return_value=True):
         service.run_dashboard()
 
     assert run.call_args.kwargs["host"] == "0.0.0.0"
+
+
+def test_dashboard_rejects_public_host_bind(tmp_path: Path, monkeypatch) -> None:
+    path = tmp_path / "WORKFLOW.md"
+    path.write_text("---\ntracker:\n  repository: owner/repo\n---\nwork\n", encoding="utf-8")
+    service = SymphonyService.from_workflow(path)
+    monkeypatch.setenv("SYMPHONY_DASHBOARD_HOST", "0.0.0.0")
+    with (
+        patch.object(Path, "exists", return_value=False),
+        pytest.raises(ValueError, match="loopback"),
+    ):
+        service.run_dashboard()
 
 
 def test_host_factory_is_the_only_constructor_with_execution_adapters(
