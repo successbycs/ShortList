@@ -117,10 +117,16 @@ The system also refuses private/internal targets, limits unsafe redirects, and
 applies layered abuse and cost controls. Those controls must include Cloudflare
 edge DDoS/WAF protection where available, a server-validated bot check on the
 form, and a server-enforced request limit keyed to the submitting IP address as
-well as the normalised domain. The MVP 1 free entitlement is no more than
-**three accepted domain-assessment requests per normalised email address**.
-Chris's approved internal test email address is exempt from that entitlement.
-The IP limit and exact pre-admission thresholds remain to be approved.
+well as the normalised domain. The email entitlement does not control the
+pre-email teaser cost: those pre-admission controls apply before any costly
+work. The MVP 1 free entitlement is **three requested Minimum Assessment report
+deliveries per normalised email address for the lifetime of MVP 1**. A request
+uses an allowance when a syntactically valid email address asks the service to
+deliver a report; it is not a daily allowance. A system delivery failure is
+handled by the report-delivery policy and does not require a second allowance.
+Chris's approved internal test email address is exempt only from this
+entitlement. The IP limit and exact pre-admission thresholds remain to be
+approved.
 
 ### 3.2 Business record and assessment run
 
@@ -132,11 +138,16 @@ event, subject to the approved privacy policy.
   domain is the unique field for customer records: no two customer records may
   have the same normalised domain.
 - An **assessment run** represents one dated attempt to assess that domain.
-- A customer may have multiple assessment runs, emails, paid reports, and
-  support events over time.
+- A **recipient record** represents one normalised email address requesting a
+  report. Its report-delivery consent, optional marketing consent, attribution,
+  entitlement use, delivery events, and support events are private to that
+  recipient.
+- A customer may have multiple assessment runs and recipients over time.
 
-The domain uniquely identifies the customer record, but it must not be the
-sole unique identifier for every run or report.
+The domain uniquely identifies the customer record, but it is never an identity
+or report-access key. A recipient may request a public domain already requested
+by another recipient, subject to their own entitlement; that request must never
+reveal the earlier recipient, consent, attribution, report, or delivery state.
 
 ### 3.2.1 Visitor and abuse-event record
 
@@ -254,13 +265,22 @@ Report-delivery consent and optional marketing consent must be separate:
 - the email address is required for requested report delivery;
 - marketing consent is optional, unchecked by default, and separately stored.
 
-An email address may use up to three MVP 1 free domain-assessment requests.
-When that entitlement is exhausted, MVP 1 directs the requester to send
-feedback to the SuccessByCS support address; it does not silently run a fourth
-free assessment. When MVP 2 is live, the equivalent state may instead offer a
-clearly labelled Basic Assessment purchase route. The internal Chris test
-address is allowlisted for unlimited test requests and must not be disclosed in
-the public experience.
+An email address may request up to three Minimum Assessment report deliveries
+for the lifetime of MVP 1. When that entitlement is exhausted, MVP 1 directs
+the requester to send feedback to the SuccessByCS support address; it does not
+silently run a fourth free assessment. When MVP 2 is live, the equivalent state
+may instead offer a clearly labelled Basic Assessment purchase route.
+
+If the same normalised email requests the same normalised domain again, the
+system does not run a new assessment and does not use another allowance. It may
+automatically resend one retained PDF attachment if the original report remains
+available and is no more than 30 days old. After that window, the customer is
+given the support route; MVP 1 does not create a permanent report portal. This
+repeat path must not disclose whether another recipient has requested the same
+domain. The internal Chris test address is allowlisted for unlimited report
+requests, but only through secret server-side configuration. It still passes
+domain safety, bot, IP/domain rate, and overall spend controls, and it is never
+shown in browser code, source control, or public messages.
 
 The free email contains the domain, Auckland date/time, business summary, buyer
 hypotheses and evidence, the dated AI-search test/observed ordering, a few
@@ -278,12 +298,38 @@ visual review before public release; a technically generated PDF alone is not
 acceptance evidence.
 
 The report-delivery timer starts when PDF/report generation is triggered and is
-recorded in UTC. The same escalation policy applies to the MVP 1 Minimum
-Assessment PDF and the future MVP 2 Basic Assessment: use bounded automatic
-retries; if delivery has not completed within two hours, send the recipient an
-honest apology/update email and send Chris a private Discord alert with the
-run identifier and failure state. This alert is an operational notification,
-not a promise that normal delivery requires manual work.
+recorded in UTC. A delivery is customer-facing **sent** only when the email
+provider accepts the PDF attachment for delivery; provider acceptance is not
+proof that an inbox received or read it.
+
+The same escalation policy applies to the MVP 1 Minimum Assessment PDF and the
+future MVP 2 Basic Assessment:
+
+1. Make one initial delivery attempt, then retry temporary generation, storage,
+   or provider-handoff failures no more than three times, approximately 5, 20,
+   and 60 minutes after the report trigger.
+2. Do not retry an invalid/malformed email, attachment-size limit, unsafe or
+   invalid stored report, or permanent provider rejection. Record its
+   reason-coded terminal failure immediately.
+3. At exactly two hours after the trigger, if the provider has not accepted the
+   report, mark the delivery attempt `escalated`, attempt one plain-language
+   apology/update email to the recipient, and send Chris a private Discord
+   alert. Stop automatic retries for that attempt. The apology attempt may
+   itself fail and must be recorded honestly.
+
+The customer wording is: “We’re still preparing your ShortList assessment and
+will update you shortly.” It must not promise manual repair or a completion
+time. The private Discord alert contains only the run ID, domain, masked or
+hashed recipient identifier, failure stage/reason code, retry count,
+trigger/deadline timestamps, and a private operational-record identifier. It
+must not include report/PDF content, credentials, or full customer data. This
+alert is an operational notification, not a promise that normal delivery
+requires manual work.
+
+The one permitted resend of a retained report within 30 days is a new,
+recipient-specific delivery attempt with its own timer, states, retries, and
+escalation. It does not create a new assessment run or consume a new email
+entitlement.
 
 ### 3.8 Website design and voice
 
@@ -341,15 +387,19 @@ support, measure, and improve the requested assessment:
 - tested AI-search question, complete response, ordered surfaced results,
   available citations/source URLs, model/search context, and outcome;
 - email address when provided;
-- free-entitlement counter and allowlist decision for the normalised email
-  address;
+- free-entitlement counter, request timestamp, duplicate decision, resend
+  decision, and allowlist decision for the normalised email address;
 - separate report-delivery and marketing-consent records;
+- private recipient/report-delivery records that link a recipient to only their
+  own delivery events and stored attachment;
 - pilot outreach contact source, consent basis/evidence, consent timestamp,
   delivery, feedback, and suppression/unsubscribe records where applicable;
 - rate-limit events;
 - assessment and email-delivery status; and
-- automated failure reason, retry state, report-trigger timestamp, and
-  support/Discord-notification status where applicable.
+- recipient-specific delivery-attempt ID, state, safe reason code, retry
+  number, UTC trigger/transition/deadline timestamps, provider-acceptance
+  reference where available, and support/Discord-notification status where
+  applicable.
 
 The report document itself must be retained with its assessment run, including
 the generated PDF, template version, generation timestamp, and integrity-safe
@@ -386,7 +436,10 @@ MVP 1 does not include:
 | M1-AC-04 | The submitted business is absent, mentioned, or described inaccurately. | The teaser states the observed outcome and cites/records the tested response. |
 | M1-AC-05 | A visitor chooses to receive the free assessment without marketing consent. | The email is delivered or receives the defined delivery-failure escalation; no optional marketing consent is stored. |
 | M1-AC-06 | Website analysis or search cannot complete. | The visitor receives an honest automated outcome, the run is stored with a reason, and a support route is offered without promising manual fulfilment. |
-| M1-AC-07 | An email address has already used its three free MVP 1 requests. | The system does not run a fourth free assessment, records the entitlement decision, and shows the MVP 1 feedback route or the future MVP 2 Basic Assessment route when available. |
+| M1-AC-07 | An email address has already used its three lifetime MVP 1 report requests. | The system does not run a fourth free assessment, records the entitlement decision, and shows the MVP 1 feedback route or the future MVP 2 Basic Assessment route when available. |
+| M1-AC-07a | The same normalised email requests the same normalised domain again within 30 days. | The system does not create a new assessment run or consume another allowance; it may resend the retained recipient-specific PDF attachment without exposing other recipients. |
+| M1-AC-07b | A different normalised email requests a domain already requested by someone else. | The request is evaluated against the new recipient's own allowance. The response, stored records, and delivered report do not disclose any earlier recipient, consent, attribution, report, or delivery state. |
+| M1-AC-07c | A visitor repeats pre-email submissions or concurrent costly attempts. | Server-side bot, IP, domain, concurrency, spend, and bounded-fetch controls limit the work before an email entitlement could apply; each refusal is safely reason-coded. |
 | M1-AC-08 | A site provides a service-area suburb. | The system determines eligibility from the versioned Auckland suburb dataset and records the match or an honest unable-to-determine outcome. |
 | M1-AC-09 | Visitor enters an incorrectly formatted domain name. | The system rejects it before external processing or customer-record creation and explains the required format. |
 | M1-AC-10 | One source IP repeatedly submits the form. | The bot check and server-side IP/domain limits prevent excessive processing, record the decision, and return a safe rate-limit response. |
@@ -397,7 +450,10 @@ MVP 1 does not include:
 | M1-AC-15 | A representative mobile and desktop visitor completes the MVP journey. | The approved Loveable design is recognisably ShortList rather than a generic template, uses purposeful small-business/search/AI visual references, and remains clear and accessible through submission, result, consent, and failure states. |
 | M1-AC-16 | The 10-business lawn-mowing pilot recruits a company by email or sends it a report. | The recipient has recorded consent before the commercial email is sent; the sender is identified, a functional unsubscribe route is included, and the feedback outcome is retained. |
 | M1-AC-17 | A business owner arrives at the live site and requests their own assessment. | They can complete the self-service domain, teaser, and opt-in email journey without pilot outreach or manual intervention. |
-| M1-AC-18 | A triggered PDF report has not completed delivery within two hours. | The run records its failure/retry state, the recipient receives an honest apology/update email, and Chris receives a private Discord alert; the product does not falsely report delivery. |
+| M1-AC-18 | A triggered PDF report has not received provider acceptance within two hours. | The delivery attempt records its UTC trigger, transition/deadline timestamps, state, safe reason code, and retry count; it is marked `escalated`, one apology/update attempt is made, Chris receives the limited private Discord alert, retries stop, and the product does not falsely report inbox delivery. |
+| M1-AC-18a | A temporary generation, storage, or provider-handoff failure occurs. | The system makes no more than three retries at approximately 5, 20, and 60 minutes after the trigger, retaining a reason-coded, recipient-specific delivery-attempt history. |
+| M1-AC-18b | A malformed email, attachment-size limit, unsafe/invalid stored report, or permanent provider rejection occurs. | The system records an immediate terminal failure and does not retry indefinitely; any two-hour escalation/apology outcome is recorded honestly. |
+| M1-AC-18c | A retained report is resent within the allowed 30-day window. | The resend is a new delivery attempt with its own timer and bounded retries; it does not create an assessment run or consume a new entitlement. |
 
 ## 8. Decisions still needed before requirements approval
 
