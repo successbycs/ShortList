@@ -24,6 +24,8 @@ old template scheduler with evidence from the chosen upstream runtime.
 
 - Observation: Upstream Symphony v0.0.3 makes a deliberate `symphony:ready` queue gate practical: the verified #39 dashboard reported no active, blocked, or retrying sessions while no Issue carried that label.
   Evidence: `GET /api/v1/state` during #39 returned zero for all counts; #39 evidence comment `5976416984`.
+- Observation: The first #42 attempt proved upstream dispatch and workspace creation, but Codex CLI `0.159.3` refused the configured `approval_policy.reject` variant before any agent turn.
+  Evidence: the preserved upstream log reports `Invalid request: unknown variant reject, expected one of untrusted, on-request, granular, never`; the dashboard reported GH-42 retries and zero tokens.
 
 ## Decision Log
 
@@ -38,6 +40,9 @@ old template scheduler with evidence from the chosen upstream runtime.
   Date/Author: 2026-10-04 / Codex and repository owner.
 - Decision: The upstream workspace hook clones the committed local checkout by default for this local proof.
   Rationale: #39's integration commits are intentionally unpushed. A local Git clone brings the exact committed baseline to the isolated workspace while excluding uncommitted changes; the GitHub tracker remains the task source.
+  Date/Author: 2026-10-04 / Codex.
+- Decision: Use Codex's supported granular approval policy with every approval category set to `false`.
+  Rationale: This preserves the intended upstream non-interactive rejection behaviour while matching the installed app-server's current schema; it does not broaden permissions or silently accept approvals.
   Date/Author: 2026-10-04 / Codex.
 
 ## Outcomes & Retrospective
@@ -84,6 +89,10 @@ the child review handoff and stop its scheduler. Restart the same pinned binary
 against the same workflow and capture its state. Compare the preserved
 workspace and tracker eligibility with the fact that blocked-session maps are
 in memory. Do not claim exact session continuation.
+
+The first attempt used `var/symphony-upstream/workspaces/GH-42` and is preserved
+for diagnosis. The corrected retry will set `SYMPHONY_WORKSPACE_ROOT` to a new
+ignored workspace directory rather than removing or overwriting that evidence.
 
 ## Concrete Steps
 
