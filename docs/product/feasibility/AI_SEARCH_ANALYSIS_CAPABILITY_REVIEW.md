@@ -77,6 +77,26 @@ provider selection, or a claim that every entry has the same search capability.
 Each entry must still pass official capability and pricing capture before it can
 enter the live-test shortlist.
 
+## Mandatory per-configuration qualification
+
+Every one of the 67 entries must be classified against the ShortList workflow;
+the candidate list alone is not evidence of eligibility. The qualification
+record for each entry must answer all of the following.
+
+| Gate | Required evidence | Possible outcome |
+| --- | --- | --- |
+| Server-side implementation | Official documentation shows a supported API route suitable for a commercial server-side integration. | eligible, conditional, or excluded |
+| Search path | Official documentation shows either a native server-side web-search/grounding tool **or** a compatible, separately named retrieval-provider path. Consumer-chat browsing is not evidence. | native search, paired retrieval required, or no supported path |
+| Provenance | The selected search path returns usable source URLs/citations or retains the underlying sources used to form the result. | passes, conditional, or fails |
+| Structured website analysis | Official documentation and an observed response show that the configuration can return the required schema from supplied public-page evidence. | passes, conditional, or fails |
+| Useful result | A controlled test produces a helpful Auckland business result and a grounded website assessment under the published rubric below. | passes, conditional, or fails |
+| Cost and operation | The test captures real usage, total cost, latency, timeout/failure behaviour, and server-only secret handling. | passes, conditional, or fails |
+
+“Paired retrieval required” is valid only when the resulting combination is
+tested and priced as one workflow. It must name both the retrieval provider and
+analysis model. We will not imply that a text-only model has searched the web
+when it has not.
+
 | # | Provider | Candidate model configuration |
 | ---: | --- | --- |
 | 1 | OpenAI | GPT-6 Astra — low effort |
@@ -95,57 +115,57 @@ enter the live-test shortlist.
 | 14 | OpenAI | GPT-6 Luna — no reasoning |
 | 15 | OpenAI | GPT-6 Luna — low effort |
 | 16 | OpenAI | GPT-6 Luna — medium effort |
-| 17 | Google | Gemini 3.8 Flash |
-| 18 | Google | Gemini 3.7 Flash |
-| 19 | Google | Gemini 3.6 Flash |
-| 20 | Google | Gemini 3.5 Flash |
-| 21 | Google | Gemini 3.5 Flash-Lite |
-| 22 | Google | Gemini 3.1 Flash-Lite |
-| 23 | Google | Gemini 3.1 Pro Preview |
-| 24 | Google | Gemini 3 Flash Preview |
-| 25 | Google | Gemini 2.5 Pro |
-| 26 | Google | Gemini 2.5 Flash |
-| 27 | Google | Gemini 2.5 Flash-Lite |
-| 28 | Mistral | Mistral Large 3 |
-| 29 | Mistral | Mistral Medium 3.5 |
-| 30 | Mistral | Mistral Small 4 |
-| 31 | Mistral | Ministral 3 14B |
-| 32 | Mistral | Ministral 3 8B |
-| 33 | Mistral | Ministral 3 3B |
-| 34 | Mistral | Magistral Medium 1.2 |
-| 35 | Mistral | Magistral Small 1.2 |
-| 36 | Mistral | Mistral Medium 3.1 |
-| 37 | Mistral | Mistral Small 3.2 |
-| 38 | Mistral | Devstral 2 |
-| 39 | Anthropic | Claude Opus 4.7 |
-| 40 | Anthropic | Claude Sonnet 4.6 |
-| 41 | Anthropic | Claude Haiku 4.5 |
-| 42 | Cohere | Command A+ |
-| 43 | Cohere | Command A |
-| 44 | Cohere | Command R7B |
-| 45 | Cohere | Command R |
-| 46 | xAI | Grok 4.7 — standard endpoint, low effort |
-| 47 | xAI | Grok 4.7 — standard endpoint, medium effort |
-| 48 | xAI | Grok 4.7 — standard endpoint, high effort |
-| 49 | xAI | Grok 4.7 — standard endpoint, xhigh effort |
-| 50 | xAI | Grok 4.7 — US regional endpoint, high effort |
-| 51 | DeepSeek | DeepSeek-V4.1-Flash |
-| 52 | DeepSeek | DeepSeek-V4-Pro-0813 |
-| 53 | Moonshot AI | Kimi K3 |
-| 54 | Moonshot AI | Kimi K2.6 — thinking mode |
-| 55 | Moonshot AI | Kimi K2.6 — non-thinking mode |
-| 56 | OpenAI | GPT-5.6 Sol |
-| 57 | OpenAI | GPT-5.6 Luna |
-| 58 | OpenAI | GPT-5.5 |
-| 59 | OpenAI | GPT-5.5 Pro |
-| 60 | OpenAI | GPT-5.4 |
-| 61 | OpenAI | GPT-5.4 Mini |
-| 62 | OpenAI | GPT-5.4 Pro |
-| 63 | OpenAI | GPT-5.2 |
-| 64 | OpenAI | GPT-5.2 Pro |
-| 65 | OpenAI | GPT-5 |
-| 66 | OpenAI | GPT-5 Mini |
-| 67 | OpenAI | GPT-5 Nano |
+| 17 | OpenAI | GPT-5.6 Sol |
+| 18 | OpenAI | GPT-5.6 Luna |
+| 19 | OpenAI | GPT-5.5 |
+| 20 | OpenAI | GPT-5.5 Pro |
+| 21 | OpenAI | GPT-5.4 |
+| 22 | OpenAI | GPT-5.4 Mini |
+| 23 | OpenAI | GPT-5.4 Pro |
+| 24 | OpenAI | GPT-5.2 |
+| 25 | OpenAI | GPT-5.2 Pro |
+| 26 | OpenAI | GPT-5 |
+| 27 | OpenAI | GPT-5 Mini |
+| 28 | OpenAI | GPT-5 Nano |
+| 29 | Google | Gemini 3.8 Flash |
+| 30 | Google | Gemini 3.7 Flash |
+| 31 | Google | Gemini 3.6 Flash |
+| 32 | Google | Gemini 3.5 Flash |
+| 33 | Google | Gemini 3.5 Flash-Lite |
+| 34 | Google | Gemini 3.1 Flash-Lite |
+| 35 | Google | Gemini 3.1 Pro Preview |
+| 36 | Google | Gemini 3 Flash Preview |
+| 37 | Google | Gemini 2.5 Pro |
+| 38 | Google | Gemini 2.5 Flash |
+| 39 | Google | Gemini 2.5 Flash-Lite |
+| 40 | Mistral | Mistral Large 3 |
+| 41 | Mistral | Mistral Medium 3.5 |
+| 42 | Mistral | Mistral Small 4 |
+| 43 | Mistral | Ministral 3 14B |
+| 44 | Mistral | Ministral 3 8B |
+| 45 | Mistral | Ministral 3 3B |
+| 46 | Mistral | Magistral Medium 1.2 |
+| 47 | Mistral | Magistral Small 1.2 |
+| 48 | Mistral | Mistral Medium 3.1 |
+| 49 | Mistral | Mistral Small 3.2 |
+| 50 | Mistral | Devstral 2 |
+| 51 | Anthropic | Claude Opus 4.7 |
+| 52 | Anthropic | Claude Sonnet 4.6 |
+| 53 | Anthropic | Claude Haiku 4.5 |
+| 54 | Cohere | Command A+ |
+| 55 | Cohere | Command A |
+| 56 | Cohere | Command R7B |
+| 57 | Cohere | Command R |
+| 58 | xAI | Grok 4.7 — standard endpoint, low effort |
+| 59 | xAI | Grok 4.7 — standard endpoint, medium effort |
+| 60 | xAI | Grok 4.7 — standard endpoint, high effort |
+| 61 | xAI | Grok 4.7 — standard endpoint, xhigh effort |
+| 62 | xAI | Grok 4.7 — US regional endpoint, high effort |
+| 63 | DeepSeek | DeepSeek-V4.1-Flash |
+| 64 | DeepSeek | DeepSeek-V4-Pro-0813 |
+| 65 | Moonshot AI | Kimi K3 |
+| 66 | Moonshot AI | Kimi K2.6 — thinking mode |
+| 67 | Moonshot AI | Kimi K2.6 — non-thinking mode |
 
 The OpenAI 5.x entries are included for coverage, not presumed suitable for a
 new production dependency. The pricing pass must record their then-current API
@@ -165,7 +185,7 @@ than a single-model choice.
 ### 2. Controlled quality test: a smaller comparable shortlist
 
 Documentation cannot tell us whether a result is meaningful for ShortList.
-After the 67-configuration screen, the evidence should nominate a small shortlist for
+Each configuration that passes the documentary search-path gate must undergo
 the same, approved live test. Each result will be scored against a published
 rubric:
 
@@ -179,7 +199,15 @@ rubric:
 
 The rubric must be applied to the same public, non-sensitive test set and
 reviewed before any provider is declared preferable. A real result is evidence
-for that exact time, prompt, model, and configuration only.
+for that exact time, prompt, model, retrieval configuration, and configuration
+only.
+
+The live test is not 67 unrelated chat prompts. It is a repeatable ShortList
+workflow test: the same dated Auckland business-type question, the same
+public-page evidence for website analysis, recorded sources, and the same
+schema. An entry fails if it cannot make the relevant search provenance visible,
+cannot produce the required analysis format, or produces an unhelpful or
+unsupported result under the agreed rubric.
 
 ## Cost comparison: two units, not one
 

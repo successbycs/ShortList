@@ -25,10 +25,17 @@ requirements.
 - [x] (2026-10-05) Define the initial named 67-configuration market screen,
   including OpenAI Astra, Terra, and Luna, in
   `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
-- [ ] Collect and normalize official API capability and pricing evidence for 20
+- [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
-- [ ] Obtain product-owner approval for the normalized request profile, live-test
-  shortlist, test set, and total spend cap before invoking any billable API.
+- [ ] For each of the 67 configurations, record the server-side API route,
+  native-search or named paired-retrieval path, provenance support, structured
+  output support, pricing, and availability/deprecation status.
+- [ ] Obtain product-owner approval for the normalized request profile, public
+  test set, search/retrieval pairing rules, and total spend cap before invoking
+  any billable API.
+- [ ] Run the approved, identical workflow test for each configuration that
+  passes the documented search-path gate; record the quality-rubric result,
+  sources, usage, cost, latency, and failure outcome.
 - [ ] Define neutral, reproducible evaluation inputs and a safe local evidence
   format; obtain any required product-owner authority before making billable or
   live provider calls.
@@ -78,6 +85,14 @@ requirements.
   from Codex development sessions, and create a useful capability/cost range
   within one provider family.
   Date/Author: 2026-10-05 / Chris's clarification, recorded by Codex.
+- Decision: Require a documented search-path gate and an observed usefulness
+  test for every configuration before it can be marked viable for ShortList.
+  Rationale: API access or generic text quality does not prove that a model can
+  obtain dated, source-backed Auckland evidence or produce a useful grounded
+  assessment. A model may qualify only as part of a named retrieval-plus-
+  analysis workflow.
+  Date/Author: 2026-10-05 / Chris's clarified acceptance requirement, recorded
+  by Codex.
 
 ## Outcomes & Retrospective
 
