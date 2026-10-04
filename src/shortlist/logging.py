@@ -62,7 +62,7 @@ class JsonFormatter(logging.Formatter):
 
 def configure_logging(level: str = "INFO") -> logging.Logger:
     """Configure the template logger without touching the root logger."""
-    logger = logging.getLogger("app_template")
+    logger = logging.getLogger("shortlist")
     logger.handlers.clear()
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())

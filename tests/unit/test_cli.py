@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from app_template.audit import AuditStore
-from app_template.cli import main
+from shortlist.audit import AuditStore
+from shortlist.cli import main
 
 
 def test_health_redacts_diagnostic_token(monkeypatch, capsys) -> None:  # type: ignore[no-untyped-def]

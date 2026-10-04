@@ -1,5 +1,5 @@
 [project]
-name = "app-template"
+name = "shortlist"
 version = "0.1.0"
 description = "Reusable Python-first project template self-test harness"
 readme = "README.md"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-app-template = "app_template.cli:main"
+shortlist = "shortlist.cli:main"
 
 [dependency-groups]
 dev = [
@@ -28,7 +28,7 @@ requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/app_template"]
+packages = ["src/shortlist"]
 
 [tool.pytest.ini_options]
 addopts = "-ra -W error::DeprecationWarning"
@@ -48,4 +48,4 @@ indent-style = "space"
 [tool.app-template.github]
 # The repository that a user-started Codex session may inspect or update.
 # `scripts/bootstrap_template.py` requires a replacement value for copied projects.
-repository = "successbycs/template"
+repository = "successbycs/ShortList"

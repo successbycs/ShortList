@@ -1,4 +1,4 @@
-# App Template
+# shortlist
 
 A generic Python-first project template with a local, Docker-based development harness. It contains no product-domain logic, external integrations, or optional services by default.
 

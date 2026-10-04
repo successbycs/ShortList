@@ -7,10 +7,10 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
-from app_template.adapters import NoOpAdapter
-from app_template.audit import AuditStore
-from app_template.config import ConfigurationError, load_settings
-from app_template.logging import configure_logging, set_correlation_id
+from shortlist.adapters import NoOpAdapter
+from shortlist.audit import AuditStore
+from shortlist.config import ConfigurationError, load_settings
+from shortlist.logging import configure_logging, set_correlation_id
 
 
 def _parser() -> argparse.ArgumentParser:

@@ -4,7 +4,7 @@
 tracker:
   kind: github
   provider:
-    repo: successbycs/template
+    repo: successbycs/ShortList
     token: $GITHUB_TOKEN
   active_states: [open]
   terminal_states: [closed]

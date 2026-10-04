@@ -1,4 +1,4 @@
-from app_template import __version__
+from shortlist import __version__
 
 
 def test_package_exposes_version() -> None:

@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from app_template.audit import AuditStore
+from shortlist.audit import AuditStore
 
 ROOT = Path(__file__).resolve().parents[1]
 PROOF_ROOT = ROOT / "var" / "proofs"
@@ -67,7 +67,7 @@ def prove() -> list[dict[str, str]]:
         )
         invalid = temporary / "invalid.toml"
         invalid.write_text("unknown_key = true\n", encoding="utf-8")
-        cli = [sys.executable, "-m", "app_template.cli"]
+        cli = [sys.executable, "-m", "shortlist.cli"]
 
         isolated_environment = proof_environment()
         code, output = command(

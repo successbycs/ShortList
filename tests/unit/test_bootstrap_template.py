@@ -47,7 +47,7 @@ def test_dry_run_preserves_files(copied_template: Path, capsys: pytest.CaptureFi
 
     assert '"status": "dry-run"' in capsys.readouterr().out
     assert (copied_template / "pyproject.toml").read_text(encoding="utf-8") == original
-    assert (copied_template / "src" / "app_template").is_dir()
+    assert (copied_template / "src" / "shortlist").is_dir()
 
 
 def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> None:
@@ -65,7 +65,7 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert main(arguments) == 0
     assert main(arguments) == 0
     assert (copied_template / "src" / "demo_app").is_dir()
-    assert not (copied_template / "src" / "app_template").exists()
+    assert not (copied_template / "src" / "shortlist").exists()
     assert 'name = "demo-app"' in (copied_template / "pyproject.toml").read_text(encoding="utf-8")
     assert 'repository = "example-owner/demo-app"' in (
         copied_template / "pyproject.toml"
@@ -124,7 +124,7 @@ def test_invalid_name_and_conflict_fail_without_overwrite(copied_template: Path)
     ]
     assert main(invalid_name) == 2
     assert main(conflict) == 2
-    assert (copied_template / "src" / "app_template").is_dir()
+    assert (copied_template / "src" / "shortlist").is_dir()
 
 
 def test_invalid_github_repository_fails_without_changes(copied_template: Path) -> None:
@@ -140,4 +140,4 @@ def test_invalid_github_repository_fails_without_changes(copied_template: Path) 
     ]
 
     assert main(arguments) == 2
-    assert (copied_template / "src" / "app_template").is_dir()
+    assert (copied_template / "src" / "shortlist").is_dir()

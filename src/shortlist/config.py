@@ -23,7 +23,7 @@ class AppSettings(BaseModel):
 
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
-    app_name: str = Field(default="app-template", min_length=1, max_length=80)
+    app_name: str = Field(default="shortlist", min_length=1, max_length=80)
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     audit_database_path: Path = Path("var/audit.sqlite3")
     diagnostic_token: SecretStr | None = None

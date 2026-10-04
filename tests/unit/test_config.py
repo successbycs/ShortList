@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from app_template.config import ConfigurationError, load_settings
+from shortlist.config import ConfigurationError, load_settings
 
 
 def test_toml_environment_and_override_precedence(tmp_path: Path) -> None:

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from app_template.audit import AuditEvent, AuditStore, UnsupportedSchemaVersion
+from shortlist.audit import AuditEvent, AuditStore, UnsupportedSchemaVersion
 
 
 def test_event_persists_across_store_instances(tmp_path: Path) -> None:

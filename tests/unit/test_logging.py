@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 
-from app_template.logging import (
+from shortlist.logging import (
     REDACTED,
     JsonFormatter,
     redact,
