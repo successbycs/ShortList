@@ -35,6 +35,85 @@ Pricing is a documented signal, not a ShortList budget or a promise. It can
 change and must be rechecked immediately before any live test or provider
 selection.
 
+## Expanded 20-model evaluation
+
+**Working assumption:** “AI CI implementation” means a server-side,
+commercially usable API integration for this product. It does not mean a
+consumer-chat subscription, a browser automation workaround, or a model that
+can generate code but has no suitable runtime API. Chris should correct this
+interpretation if “CI” means something else.
+
+The comparison will have two deliberately separate stages.
+
+### 1. Documentation screen: 20 named model configurations
+
+The next evidence update will catalogue 20 currently offered, server-side
+model configurations across multiple providers. Each entry must have a direct
+official source and record:
+
+- model and provider identity, availability date checked, and API endpoint;
+- commercial/API eligibility and any material access limitation;
+- web-search or retrieval method, source/citation support, and location control;
+- structured-output support and usable context limit;
+- published input, output, tool/search, storage, and any mandatory platform
+  charges; and
+- whether it is suitable for search, website analysis, or only one part of the
+  assessment.
+
+The screen explicitly includes OpenAI **Astra**, **Terra**, and **Luna** where
+their current API availability and pricing are documented. They provide a
+useful high-capability, balanced, and cost-sensitive comparison within one
+provider family. OpenAI documents latest models as available through the
+Responses API and SDKs, and documents Astra with web-search and structured-
+output support; the exact model IDs, availability, and current pricing will be
+captured against the official model catalogue at the time of the screen.
+
+Twenty models are a market screen, not a promise that all twenty are
+interchangeable candidates. A model without source-backed retrieval cannot by
+itself satisfy the dated-search result. A search provider can still be paired
+with a different analysis model, which creates a provider *combination* rather
+than a single-model choice.
+
+### 2. Controlled quality test: a smaller comparable shortlist
+
+Documentation cannot tell us whether a result is meaningful for ShortList.
+After the 20-model screen, the evidence should nominate a small shortlist for
+the same, approved live test. Each result will be scored against a published
+rubric:
+
+| Dimension | Passing evidence |
+| --- | --- |
+| Auckland relevance | The response uses the stated Auckland context and records any location limitation. |
+| Source provenance | It retains usable source URLs/citations and makes clear what is observed versus inferred. |
+| Meaningful business result | It answers the fixed business question without inventing unsupported companies, claims, or certainty. |
+| Website assessment quality | Required structured fields are complete, grounded in supplied public-page evidence, and useful to a small-business owner. |
+| Operability | Server-side secret boundary, bounded inputs/outputs, usage data, latency, and reason-coded failure can be recorded. |
+
+The rubric must be applied to the same public, non-sensitive test set and
+reviewed before any provider is declared preferable. A real result is evidence
+for that exact time, prompt, model, and configuration only.
+
+## Cost comparison: two units, not one
+
+The review will report both of these, in USD and with the retrieval date:
+
+1. **1,000 provider API calls:** a normalized request profile applied to every
+   eligible model. This makes published per-token and per-tool prices
+   comparable, but is not a customer journey.
+2. **1,000 completed Minimum Assessments:** the observed full workflow cost,
+   including each search/retrieval call, website-analysis call, model tokens,
+   retries, and any required storage or delivery step. This is the product
+   decision measure.
+
+Before calculating either number, the review must lock one explicit request
+profile: input-token allowance, output-token allowance, whether retrieval is a
+separate call, maximum search queries, and whether reasoning/tool tokens count
+inside the cap. Otherwise a “price for 1,000 calls” comparison would be false
+precision. Provider prices and tool charging rules differ: for example,
+OpenAI lists web search separately from model tokens, Gemini documents
+grounding/search charges separately from model tokens, and Perplexity separates
+retrieval and generated-answer pricing.
+
 ## What is deliberately not concluded
 
 - No provider is selected.

@@ -19,6 +19,13 @@ requirements.
   evidence for candidate web-search and structured-analysis capabilities;
   record the documentation-only comparison in
   `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
+- [x] (2026-10-05) Expand the evidence design to a 20-model official-documentation
+  screen, a smaller controlled quality shortlist, and separate 1,000-API-call
+  from 1,000-completed-assessment cost measures.
+- [ ] Collect and normalize official API capability and pricing evidence for 20
+  named model configurations.
+- [ ] Obtain product-owner approval for the normalized request profile, live-test
+  shortlist, test set, and total spend cap before invoking any billable API.
 - [ ] Define neutral, reproducible evaluation inputs and a safe local evidence
   format; obtain any required product-owner authority before making billable or
   live provider calls.
@@ -37,6 +44,10 @@ requirements.
   customer-facing runtime candidate.
   Evidence: GitHub #23 non-goals and `docs/product/REQUIREMENTS.md`
   MVP1-SEC-001.
+- Observation: A provider API-call price is not the cost of a completed
+  ShortList assessment when the assessment uses more than one capability.
+  Evidence: `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`,
+  “Cost comparison: two units, not one”.
 
 ## Decision Log
 
@@ -51,6 +62,19 @@ requirements.
   Rationale: The observed answer from one prompt/time/provider is a dated
   result, not a stable rank or a provider endorsement.
   Date/Author: 2026-10-04 / Chris's approved requirements, recorded by Codex.
+- Decision: Screen 20 documented model configurations, then test only a
+  comparable shortlist under an approved cap.
+  Rationale: Documentation can establish eligible technical options and public
+  pricing, whereas meaningful Auckland results, quality, and real workflow
+  cost need observed evidence. Testing all screened entries would conflate
+  market research with an unbounded billable experiment.
+  Date/Author: 2026-10-05 / Chris's requested review scope, recorded by Codex.
+- Decision: Include OpenAI Astra, Terra, and Luna in the 20-model screen where
+  their current API availability and pricing are documented.
+  Rationale: They are server-side model candidates as well as models familiar
+  from Codex development sessions, and create a useful capability/cost range
+  within one provider family.
+  Date/Author: 2026-10-05 / Chris's clarification, recorded by Codex.
 
 ## Outcomes & Retrospective
 
