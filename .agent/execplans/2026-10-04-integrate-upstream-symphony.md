@@ -18,7 +18,7 @@ a code-changing task.
 - [x] (2026-10-04 04:03Z) Add a reproducible, checksum-verified host installer and the upstream workflow configuration.
 - [x] (2026-10-04 04:03Z) Replace local scheduler operator instructions, specification, and readiness policy with the upstream lifecycle and dashboard instructions.
 - [ ] (2026-10-04 04:03Z) Obtain explicit operator acknowledgement of upstream's preview warning, then run the bounded dashboard/GitHub-read proof without dispatching an Issue.
-- [ ] (2026-10-04 04:03Z) Record durable evidence in GitHub Issue #39 and this plan; leave #39 open for review.
+- [x] (2026-10-04 04:06Z) Record implementation evidence and the outstanding acknowledgement in GitHub Issue #39; leave #39 open for review.
 
 ## Surprises & Discoveries
 
@@ -44,7 +44,13 @@ a code-changing task.
 
 ## Outcomes & Retrospective
 
-Pending. The intended outcome is an upstream-only operational configuration and an observed dashboard/GitHub-read proof with no task dispatch.
+The pinned installation, upstream configuration, and operator instructions are
+implemented in local commit `560964f`. The verified v0.0.3 binary requires an
+explicit upstream preview acknowledgement before it will parse the workflow or
+bind its dashboard. The repository owner has not yet made that risk decision,
+so the real dashboard/GitHub-read acceptance proof is pending rather than
+claimed. Evidence and the required acknowledgement are recorded in GitHub Issue
+#39; the Issue remains open for review.
 
 ## Context and Orientation
 
@@ -134,6 +140,9 @@ blocked or failed rather than falling back to the custom scheduler.
 The GitHub record for this work is Issue #39. No token, full worker transcript,
 or downloaded binary is committed. The release version and hash are committed
 in the installer so a reviewer can reproduce the host setup.
+
+On 2026-10-04 the issue received the implementation and blocker record at
+`https://github.com/successbycs/template/issues/39#issuecomment-5976386698`.
 
 ## Interfaces and Dependencies
 
