@@ -44,6 +44,9 @@ requirements.
 - [x] (2026-10-05) Capture first xAI, DeepSeek, and Kimi evidence: document
   Grok 4.7's native tool path, retain DeepSeek as paired retrieval only, and
   distinguish Kimi's model API from its separate source-returning search API.
+- [x] (2026-10-05) Define the proposed, no-cost reproducible live-test protocol
+  and per-attempt evidence record; leave every economic, product, and
+  usefulness decision explicitly unapproved pending Chris's review.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,
@@ -56,9 +59,9 @@ requirements.
   passes the documented search-path gate; record the quality-rubric result,
   sources, usage, cost, latency, and failure outcome. Record configurations
   that fail the documentary gate as excluded without a paid live test.
-- [ ] Define neutral, reproducible evaluation inputs and a safe local evidence
-  format; obtain any required product-owner authority before making billable or
-  live provider calls.
+- [ ] Obtain product-owner authority for the protocol's neutral evaluation
+  inputs and safe evidence format before making billable or live provider
+  calls. The protocol exists, but its decision fields are deliberately blank.
 - [ ] Compare candidate capabilities, record observed limits and public wording,
   and recommend a viable direction or product-promise narrowing.
 - [ ] Update requirements/Issue #23 with evidence and leave the decision open
