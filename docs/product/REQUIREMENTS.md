@@ -1,6 +1,6 @@
 # ShortList MVP 1 requirements
 
-**Status:** canonical review draft for product-owner approval
+**Status:** approved MVP 1 baseline (product-owner approval recorded in #1 and #2 on 2026-10-04)
 **Owner:** Chris / SuccessByCS
 **Last reconciled:** 2026-10-04
 **Detailed decision record:** [MVP 1 requirements candidate](MVP_1_REQUIREMENTS_CANDIDATE.md)
