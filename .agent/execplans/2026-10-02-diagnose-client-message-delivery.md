@@ -28,6 +28,10 @@ exact verification gap in the Issue.
 
 ## Progress
 
+- [x] (2026-10-04, client date) User authorized installation and testing. Registration and digests reverified; installed atomically with a persistent verified backup. Installed-byte regression, syntax and six builder tests passed.
+- [x] (2026-10-04, client date) Saved exact reload and rollback instructions in the Issue 36 evidence artifact.
+- [ ] (2026-10-04, client date) Human reload and new-session live queue/steer test remain necessary; delivery recovery is unobserved.
+
 - [x] (2026-10-02 09:18Z) Traced repeated local lock-release failures to an undefined response and the installed webview JSON parser.
 - [x] (2026-10-02 09:23Z) Built the guarded bundle at `/tmp/issue-36-queue-patch/extension.js`; reproduced baseline SyntaxError and verified patched acknowledgement using installed code.
 - [x] (2026-10-02 09:23Z) Six builder tests, lock semantics checks, full bundle syntax, Ruff and Markdown links passed. Live client activation and message-delivery recovery remain unobserved.
@@ -42,6 +46,12 @@ exact verification gap in the Issue.
 - [x] (2026-10-02 09:30Z) Re-read Issue #36 and posted the sanitized evidence handoff at issue comment 5948934385; Issue #36 remains open for human review.
 
 ## Surprises & Discoveries
+
+- Observation: The registered extension still matches the tested version and
+  original digest despite the later client date. Installed-byte tests pass
+  after replacement. Runtime activation cannot be inferred from disk contents.
+  Evidence: `extensions.json`, SHA-256 checks and postinstallation Node proof
+  recorded in `docs/operations/evidence/issue-36-client-delivery-20261002.md`.
 
 - Observation: The three most recent extension logs contain 4, 3, and 7
   occurrences respectively of the lock-release failure at capture. The newest
@@ -61,6 +71,14 @@ exact verification gap in the Issue.
   Evidence: `gh issue view 26683 --repo openai/codex --json url,state,createdAt,updatedAt,closedAt,labels,comments,title` on 2026-10-02; source link recorded in the evidence artifact.
 
 ## Decision Log
+
+- Decision: Apply the existing tested candidate to the registered extension,
+  preserving the original under `/home/chris/.local/state/codex-patches/issue-36-26.928.40906`.
+  Rationale: The user explicitly authorized installation and testing; the
+  package still matches the original digest. Use an atomic replacement with
+  preserved file permissions, and hash-guarded rollback. No further installation
+  permission is needed beyond filesystem escalation.
+  Date/Author: 2026-10-04 / Codex
 
 - Decision: Build a minimal offline patch returning `{success:true}` from the
   release handler, pinning version and full bundle digest. Test the real
@@ -84,6 +102,15 @@ exact verification gap in the Issue.
   Date/Author: 2026-10-02 / Codex
 
 ## Outcomes & Retrospective
+
+Installation milestone on 2026-10-04: the requested patch is installed on disk
+with a persistent verified original backup and guarded restoration helper at
+`/home/chris/.local/state/codex-patches/issue-36-26.928.40906`.
+The postinstallation proof against installed bytes, syntax check and six
+builder tests passed. Live activation awaits the human's `Developer: Reload
+Window` and new-session follow-up. Exact after-test and rollback instructions
+are in the evidence artifact. Earlier build-stage “not installed” statements
+below are historical and superseded by this installation result.
 
 Patch milestone: built a minimal, digest-pinned candidate correcting an observed
 JSON acknowledgement defect. The proof executes installed JavaScript in an
@@ -133,6 +160,15 @@ The workspace currently has an unrelated untracked `.playwright-cli/`
 directory. It must remain untouched.
 
 ## Plan of Work
+
+Installation continuation: verify the registered package in extensions.json,
+validate candidate and original digests, preserve the original bundle and the
+webview parser used by the proof under the persistent backup directory, then
+atomically replace only the installed `out/extension.js`. Run the existing proof
+with the backup root as baseline and the installed file as candidate, plus
+syntax validation. Save exact backup and reload instructions before handing
+off. A human reload is required because the running extension has already
+loaded its JavaScript and the current session cannot survive its own reload.
 
 Authorized patch milestone: add `scripts/build_codex_queue_patch.py` to verify
 the installed version and SHA-256, then generate a patched `extension.js` in a

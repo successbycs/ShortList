@@ -1,6 +1,68 @@
 # Issue 36: Codex client message-delivery investigation
 
+## Installation on 2026-10-04 (Pacific/Auckland client date)
+
+The user explicitly requested installation and testing. The VS Code Server
+registration still selected `openai.chatgpt-26.928.40906-linux-x64`. The
+installed bundle and candidate matched the original and candidate digests
+recorded below. A fresh preinstallation proof passed.
+
+Installed the candidate by atomic replacement of
+`/home/chris/.vscode-server/extensions/openai.chatgpt-26.928.40906-linux-x64/out/extension.js`,
+preserving its permissions. The installed SHA-256 is
+`391f6bd1ee3b547a0d87d9464274d714b553084565a87979da4eced9fa9ecb27`.
+The verified original, package manifest and proof's webview parser are backed
+up under `/home/chris/.local/state/codex-patches/issue-36-26.928.40906`.
+No other extension file was replaced. This is a local custom patch;
+an official extension update can replace it.
+
+Postinstallation commands, from `/home/chris/template`, all exited zero:
+
+```bash
+/home/chris/.nvm/versions/node/v22.22.0/bin/node \
+  scripts/prove_codex_queue_patch.cjs \
+  /home/chris/.local/state/codex-patches/issue-36-26.928.40906 \
+  /home/chris/.vscode-server/extensions/openai.chatgpt-26.928.40906-linux-x64/out/extension.js
+/home/chris/.nvm/versions/node/v22.22.0/bin/node --check \
+  /home/chris/.vscode-server/extensions/openai.chatgpt-26.928.40906-linux-x64/out/extension.js
+.venv/bin/python -m pytest -q tests/unit/test_codex_queue_patch.py
+```
+
+The baseline again reproduced SyntaxError, the installed candidate returned
+the JSON acknowledgement, and the lock semantics checks passed. Six builder
+tests passed in 0.03 seconds. This exercises the installed bytes in isolation;
+activation in the already-running extension and live delivery remain unobserved.
+
+Human recovery/activation action: save work, open the VS Code command palette,
+run `Developer: Reload Window`, reopen this workspace, and start a new Codex
+session with: “Continue Issue #36 post-reload verification. Verify the installed
+patch, then test queued and steering messages with me.” Do not shut down WSL.
+The current session cannot perform its own after-reload test.
+
+In that new session, confirm the registered extension and installed digest,
+then send three uniquely numbered test messages while the agent is active,
+first using Queue and then Steer. Record submission times, receipt order,
+duplicates, missing messages, and whether queue waits end after the active
+turn finishes. Check only new log entries for the exact lock-release JSON
+error. Queued delivery is intentionally deferred until turn completion;
+steering may wait for a safe execution boundary. Repeat without another reload.
+Absence of the log error alone does not prove the user-visible issue fixed.
+
+If the extension fails after reload, use an ordinary WSL terminal to restore
+the verified original (the helper refuses an intervening update):
+
+```bash
+python3 /home/chris/.local/state/codex-patches/issue-36-26.928.40906/install-or-restore.py restore
+```
+
+Then run `Developer: Reload Window` again. The backup and helper are outside
+`/tmp` and survive a reboot. Actual live rollback has not been exercised.
+Leave Issue #36 open until the live tests are recorded.
+
 ## Patch development result
+
+The following describes the earlier build milestone; the installation result
+above supersedes its historical “not installed” status.
 
 The user subsequently requested a patch. Inspection of installed JavaScript
 found a reproducible response-contract defect. The
