@@ -23,17 +23,6 @@ def _parser() -> argparse.ArgumentParser:
     demo.add_argument(
         "--no-op", action="store_true", required=True, help="Required safety acknowledgement"
     )
-    symphony = subcommands.add_parser("symphony", help="Run the GitHub-first Symphony service")
-    symphony_subcommands = symphony.add_subparsers(dest="symphony_command", required=True)
-    validate = symphony_subcommands.add_parser("validate-workflow", help="Validate WORKFLOW.md")
-    validate.add_argument("--workflow", type=Path, default=Path("WORKFLOW.md"))
-    serve = symphony_subcommands.add_parser("serve", help="Start the long-running scheduler")
-    serve.add_argument("--workflow", type=Path, default=Path("WORKFLOW.md"))
-    preflight = symphony_subcommands.add_parser(
-        "preflight", help="Check local runtime prerequisites without exposing credentials"
-    )
-    preflight.add_argument("--workflow", type=Path, default=Path("WORKFLOW.md"))
-    preflight.add_argument("--require-dispatch", action="store_true")
     return parser
 
 
@@ -66,25 +55,6 @@ def _record_result(command: str, config_path: Path | None) -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
-        if args.command == "symphony":
-            from app_template.symphony.service import SymphonyService
-            from app_template.symphony.workflow import load_workflow
-
-            workflow = load_workflow(args.workflow)
-            if args.symphony_command == "validate-workflow":
-                print(json.dumps({"status": "ok", "workflow": str(workflow.path)}, sort_keys=True))
-                return 0
-            service = SymphonyService.from_host_workflow(args.workflow)
-            if args.symphony_command == "preflight":
-                result = service.preflight()
-                print(json.dumps(result, sort_keys=True))
-                if args.require_dispatch and not result["dispatch_ready"]:
-                    return 2
-                return 0
-            import asyncio
-
-            asyncio.run(service.serve())
-            return 0
         if args.command == "health":
             settings = load_settings(config_path=args.config)
             correlation_id = set_correlation_id()

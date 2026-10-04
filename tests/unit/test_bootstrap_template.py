@@ -70,10 +70,10 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert 'repository = "example-owner/demo-app"' in (
         copied_template / "pyproject.toml"
     ).read_text(encoding="utf-8")
-    service = copied_template / "src" / "demo_app" / "symphony" / "service.py"
-    assert "from demo_app.symphony.domain import RunRecord, RunResult" in service.read_text(
-        encoding="utf-8"
-    )
+    assert not (copied_template / "src" / "demo_app" / "symphony").exists()
+    assert (copied_template / "WORKFLOW.md").is_file()
+    assert (copied_template / "scripts" / "install_upstream_symphony.sh").is_file()
+    assert (copied_template / "scripts" / "run_upstream_symphony_dashboard.sh").is_file()
     proof = copied_template / "scripts" / "prove_deployed_software.py"
     assert "from demo_app.audit import AuditStore" in proof.read_text(encoding="utf-8")
     result = subprocess.run(
@@ -85,6 +85,15 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
         text=True,
     )
     assert result.stdout.strip() == "0.1.0"
+    cli_help = subprocess.run(
+        [sys.executable, "-m", "demo_app.cli", "--help"],
+        cwd=copied_template,
+        env={**os.environ, "PYTHONPATH": str(copied_template / "src")},
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert "symphony" not in cli_help.stdout
 
 
 def test_invalid_name_and_conflict_fail_without_overwrite(copied_template: Path) -> None:
