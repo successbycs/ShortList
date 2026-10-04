@@ -26,7 +26,8 @@ a secret, or implement the public website.
 - [x] (2026-10-05 00:15Z) Confirmed `docs/product/REQUIREMENTS.md` and
   `docs/product/GLOSSARY.md`, the only repository-relative links used by the
   new SDD, exist; `git diff --check` remains clean.
-- [ ] Commit/push the SDD and record an evidence handoff in GitHub without
+- [x] (2026-10-05 00:20Z) Committed and pushed the SDD as `6705b5f` (`docs:
+  add ShortList MVP 1 SDD`), then recorded the evidence/handoff in #6 without
   closing the Issue.
 
 ## Surprises & Discoveries
@@ -71,6 +72,9 @@ decisions, and dependency order visible without claiming a configured service.
 It enables #7, #24, and #28 to start as their separate design tasks. It does
 not make #5 dispatch-eligible; only #8 can supply its bounded code packet after
 the required design and foundation work.
+
+The human-review evidence is GitHub #6 comment
+`https://github.com/successbycs/ShortList/issues/6#issuecomment-5985551460`.
 
 ## Context and Orientation
 
