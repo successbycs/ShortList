@@ -28,8 +28,7 @@ requirements.
 ## Surprises & Discoveries
 
 - Observation: The approved customer journey uses the generic term
-  “AI-search test”; it explicitly forbids calling a result ChatGPT Search until
-  the selected provider capability makes that statement truthful.
+  “AI-search test”; the product owner controls its public terminology.
   Evidence: `docs/product/REQUIREMENTS.md` MVP1-JNY-003 and
   `docs/product/MVP_1_REQUIREMENTS_CANDIDATE.md` section 3.4.
 - Observation: Codex is a development tool in this repository, not a
@@ -45,10 +44,10 @@ requirements.
   provenance, citations, or location context; each boundary needs independent
   evidence.
   Date/Author: 2026-10-04 / Chris's approved requirements, recorded by Codex.
-- Decision: Do not make a customer-facing or official-provider ranking claim
-  until reproducible evidence supports exact wording.
-  Rationale: The observed answer from one prompt/time/provider is not a stable
-  rank or a provider endorsement.
+- Decision: Record the product-owner-approved customer terminology alongside
+  reproducible capability evidence.
+  Rationale: The observed answer from one prompt/time/provider is a dated
+  result, not a stable rank or a provider endorsement.
   Date/Author: 2026-10-04 / Chris's approved requirements, recorded by Codex.
 
 ## Outcomes & Retrospective

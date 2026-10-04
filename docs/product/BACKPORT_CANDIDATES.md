@@ -43,6 +43,6 @@ commercial decisions.
 ## ShortList-specific exclusions
 
 Do not backport the following into V1: Auckland scope, lawn-mowing cohorts,
-ChatGPT Search assessment rules, outbound-email consent policy, product data
+ShortList AI-search assessment rules, outbound-email consent policy, product data
 models, Loveable design direction, Cloudflare choices, or ShortList report
 requirements. Those are application decisions, not reusable template policy.

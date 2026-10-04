@@ -47,7 +47,7 @@ The supplied draft describes:
 | Product name | The source says GEO Check; the active product name is ShortList. |
 | Customer scope | The source lists many local-business types; a first vertical remains undecided. |
 | Free AI-search component | The product needs basic AI-search value, but the exact query count, evidence standard, and safe fallback are unapproved. |
-| Paid-report timing | The source calls live ChatGPT Search the first MVP core; the current staged direction places paid purchase in MVP 2. |
+| Paid-report timing | The source calls live AI-search the first MVP core; the current staged direction places paid purchase in MVP 2. |
 | Price | The source proposes NZ$47 including GST. The owner previously stated price is unknown and needs a pricing-assessment task. No price is approved. |
 | Delivery promise | The source proposes delivery within 24 hours. The owner has required full automation; the permitted latency, failure response, and customer wording are unapproved. |
 | Consent | The source combines free-report delivery and optional ongoing guidance in one control. Delivery consent and marketing consent need to remain distinct. |

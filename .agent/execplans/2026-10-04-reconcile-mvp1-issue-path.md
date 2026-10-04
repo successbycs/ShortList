@@ -59,19 +59,19 @@ and what remains unresolved before implementation.
   Rationale: MVP 1 validates free inbound value and email/report delivery;
   paid conversion is MVP 2 and outreach is later controlled learning.
   Date/Author: 2026-10-04 / Chris, recorded by Codex.
-- Decision: Name the customer-visible search only as a defined AI-search test
-  until #23 qualifies a provider capability and public wording.
-  Rationale: A runtime provider has not been selected, so calling every result
-  a ChatGPT Search result would be an unverified public claim.
-  Date/Author: 2026-10-04 / Codex, applying Chris's recorded decision.
+- Decision: The product owner defines the customer-visible search terminology;
+  #23 supplies evidence about the selected capability.
+  Rationale: Product terminology is a product-owner decision, not an agent
+  restriction.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
 
 ## Outcomes & Retrospective
 
 The reviewed delivery path is now a native GitHub dependency graph with two
 missing work packets added: #27 owns MVP 1 free PDF delivery and #28 owns the
 public website experience/visual acceptance. #12 is clearly deferred MVP 2
-work, and it no longer blocks the free inbound path. The candidate no longer
-claims an unselected provider's result as a ChatGPT Search result. The operator
+work, and it no longer blocks the free inbound path. The candidate records that
+the product owner controls customer-facing terminology. The operator
 guide now points to the copied project's configured tracker target, while the
 upstream `symphony:ready` gate remains unchanged. All work is intentionally
 open for human review.

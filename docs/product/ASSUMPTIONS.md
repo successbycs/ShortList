@@ -6,7 +6,7 @@
 | ID | Assumption | Impact if false | Validation method | Owner | Status |
 | --- | --- | --- | --- | --- | --- |
 | ASM-001 | Owners see enough value in the teaser to provide an email for the Minimum Assessment. | The free journey does not establish demand. | Measure completed teaser-to-email conversion and feedback in approved cohorts. | Product owner | Unvalidated |
-| ASM-002 | A defined AI-search capability can provide evidence, provenance, location context, acceptable cost, and truthful public wording. | Narrow or remove the AI-search promise. | #23 bounded feasibility assessment. | Product/design owner | Unvalidated |
+| ASM-002 | A defined AI-search capability can provide evidence, provenance, location context, acceptable cost, and product-owner-approved terminology. | Narrow or remove the AI-search promise. | #23 bounded feasibility assessment. | Product/design owner | Unvalidated |
 | ASM-003 | Public website evidence is sufficient to produce useful, qualified buyer hypotheses for a meaningful proportion of submitted sites. | More requests receive an honest insufficient-evidence result. | Representative evaluation set and acceptance review. | Product owner | Unvalidated |
 | ASM-004 | A professional PDF attachment is an appropriate initial report format. | Adopt a later approved delivery/access approach; do not add one implicitly. | Visual review and delivery evidence. | Product/design owner | Partially decided |
 | ASM-005 | Three lifetime free report requests per email and pre-admission controls balance value, cost, and abuse. | Adjust only through a reviewed requirement change. | Observe entitlement, abuse, cost, and support evidence after launch. | Product owner | Unvalidated |

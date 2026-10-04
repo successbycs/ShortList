@@ -48,9 +48,9 @@ cohort, the system must state that eligibility cannot be determined rather than
 presenting an Auckland-specific assessment as fact.
 
 The product must not claim a permanent, universal, official ChatGPT/OpenAI, or
-provider rank. It may show only the observed order returned by one precisely
-defined AI-search test at a stated date and time. #23 must establish the actual
-capability and truthful public wording before a provider is named.
+provider rank. It may show the observed order returned by one precisely defined
+AI-search test at a stated date and time. #23 must establish the actual
+capability and the product owner approves the public terminology.
 
 ### 2.1 Pilot recruitment and feedback
 
@@ -217,16 +217,14 @@ example: “What are the top three lawn-mowing companies in Auckland today?”
 Lawn mowing is illustrative only; the question changes with business type.
 Suburb-level, buyer-situation, and other segmented comparisons belong to the
 future paid Basic Assessment, not the free MVP 1 result. The selected
-model/search capability and the public name of the test remain subject to #23;
-the public journey must not call it a ChatGPT Search test unless the observed
-capability makes that statement truthful.
+model/search capability remains subject to #23. The product owner decides the
+public name and terminology for the test.
 
 The immediate teaser and free email show:
 
 - the exact Auckland-wide business-type question tested;
 - the date and time in Pacific/Auckland;
-- the model/search context available to the product, using only approved
-  truthful provider wording;
+- the model/search context and terminology approved by the product owner;
 - the first three businesses surfaced in the returned response, in the observed
   order; and
 - whether the submitted business was surfaced, how it was described, and
