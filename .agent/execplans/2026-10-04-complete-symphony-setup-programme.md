@@ -14,6 +14,7 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 - [x] (2026-10-04 02:31Z) Revalidated #10 in locked Docker: 13 focused dashboard tests and the 77-test canonical verifier passed; the loopback HTTP proof passed while dispatch stayed false.
 - [x] (2026-10-04 02:36Z) Repaired the proof harness's ambient Compose audit-path interference, added a focused regression test, and re-ran its full local proof with zero failed supported rows.
 - [x] (2026-10-04 03:44Z) Retired #10’s non-required dashboard UI while preserving event/reservation recovery; dependent Issue contracts require update before #12.
+- [x] (2026-10-04 03:57Z) Enforced one effective worker in `WORKFLOW.md` and typed defaults; focused scheduler/workflow evidence passed before #12 preparation.
 - [ ] Execute the dedicated safe #12 demonstration only after its human-review and dedicated-Issue prerequisites are satisfied; record its external GitHub boundary result.
 - [ ] Complete #13, #16, and #24 in that order, with their required reviews and evidence.
 - [x] (2026-10-04 02:45Z) Diagnosed the available #21 evidence without sending mail: the only local durable delivery is Issue #19, `sent`, one attempt, at 2026-10-02T09:02:49Z; #19 records recipient-confirmed receipt. The checked-in notifier is deliberately disabled, so no evidence links #21's report to a Symphony transition.

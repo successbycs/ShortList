@@ -172,6 +172,21 @@ def test_overlapping_code_packets_are_not_dispatched_together(tmp_path: Path) ->
     assert not scheduler._eligible(second, {"src/shared"})
 
 
+def test_default_workflow_admits_only_one_independent_worker(tmp_path: Path) -> None:
+    first = Issue("1", "#1", "First", None, "open", labels=("status:ready", "symphony:ready"))
+    second = Issue("2", "#2", "Second", None, "open", labels=("status:ready", "symphony:ready"))
+    scheduler = Scheduler(
+        workflow(tmp_path), FakeTracker(first, second), FakeRunner([RunResult(True, "done")])
+    )
+
+    async def execute() -> None:
+        await scheduler.tick()
+        assert set(scheduler.running) == {"1"}
+        await asyncio.gather(*scheduler.running.values())
+
+    asyncio.run(execute())
+
+
 def test_unscoped_work_is_serialized_against_all_packets(tmp_path: Path) -> None:
     unscoped = Issue("1", "#1", "Unscoped", None, "open")
     scoped = Issue("2", "#2", "Scoped", None, "open", code_packets=("src/app",))

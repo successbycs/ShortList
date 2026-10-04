@@ -22,6 +22,7 @@ def test_workflow_loads_repository_contract(tmp_path: Path) -> None:
     assert workflow.config.workspace.root == (tmp_path.parent / "var/symphony/workspaces").resolve()
     assert workflow.config.tracker.required_labels == ("status:ready", "symphony:ready")
     assert workflow.config.task_contract.unscoped_code_packet_policy == "serialize"
+    assert workflow.config.agent.max_concurrent_agents == 1
 
 
 def test_workflow_rejects_unknown_settings_and_empty_prompt(tmp_path: Path) -> None:
