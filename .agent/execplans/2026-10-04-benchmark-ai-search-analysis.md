@@ -47,6 +47,10 @@ requirements.
 - [x] (2026-10-05) Define the proposed, no-cost reproducible live-test protocol
   and per-attempt evidence record; leave every economic, product, and
   usefulness decision explicitly unapproved pending Chris's review.
+- [x] (2026-10-05) Expand OpenAI documentary evidence to all 28 named
+  configurations: record GPT-6 native-search/structured-output paths and keep
+  older/pro variants partial where the exact model page does not establish the
+  complete workflow.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,
