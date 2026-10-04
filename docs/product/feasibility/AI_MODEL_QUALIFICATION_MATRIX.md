@@ -33,29 +33,35 @@ the register records only cited documentation and its limits.
 
 ## Individual evidence capture: OpenAI first pass
 
-All entries below are **partial** rather than viable. The cited official model
-pages establish a server-side Responses API route, structured outputs, and
-native web-search support. They do not establish Auckland usefulness,
-provenance quality in the ShortList workflow, latency, or a normalized
-per-assessment cost.
+### What this means in plain English
 
-| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Remaining documentary work | Observed state |
-| --- | --- | --- | --- | --- | --- |
-| 1–4 | GPT-6 Astra — low, medium, high, max effort | [Model catalogue](https://developers.openai.com/api/docs/models), [model page](https://developers.openai.com/api/docs/models/gpt-6-astra) | Responses API; structured outputs; web search; low/medium/high/xhigh/max effort; US$10/M input and US$50/M output listed. | web-search tool price, citation payload/retention, Auckland location control, selected-account availability, and normalized cost | not tested |
-| 5–7 | GPT-6.1 Sol — low, medium, high effort | [Model catalogue](https://developers.openai.com/api/docs/models), [model page](https://developers.openai.com/api/docs/models/gpt-6.1-sol) | Responses API; structured outputs; web search; low/medium/high/xhigh/max effort; US$2/M input and US$10/M output listed. | web-search tool price, citation payload/retention, Auckland location control, selected-account availability, and normalized cost | not tested |
-| 8–10 | GPT-6 Sol — low, medium, high effort | [Model catalogue](https://developers.openai.com/api/docs/models), [model page](https://developers.openai.com/api/docs/models/gpt-6-sol) | Responses API with built-in tools; structured outputs; web search; US$2/M input and US$10/M output listed. | exact selected effort/availability, web-search tool price, citation payload/retention, Auckland location control, and normalized cost | not tested |
-| 11–13 | GPT-5.6 Terra, no/low/medium effort | [Model page](https://developers.openai.com/api/docs/models/gpt-5.6-terra) | Responses API; structured outputs; web search; US$2/M input and US$12/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
-| 14–16 | GPT-6 Luna — no, low, medium effort | [Model catalogue](https://developers.openai.com/api/docs/models), [model page](https://developers.openai.com/api/docs/models/gpt-6-luna) | Responses API; structured outputs; web search; none/low/medium/high/xhigh/max effort; US$0.10/M input and US$0.50/M output listed. | web-search tool price, citation payload/retention, Auckland location control, selected-account availability, and normalized cost | not tested |
-| 17 | GPT-5.6 Sol | [Model page](https://developers.openai.com/api/docs/models/gpt-5.6-sol) | Responses API; structured outputs; web search; US$4/M input and US$20/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
-| 18 | GPT-5.6 Luna | [Model page](https://developers.openai.com/api/docs/models/gpt-5.6-luna) | Responses API; structured outputs; web search documented | exact price extraction, citation behaviour, location control, current availability, and normalized cost | not tested |
-| 19 | GPT-5.5 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.5) | Responses API; structured outputs; web search; US$5/M input and US$30/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
-| 20 | GPT-5.5 Pro | [Model page](https://developers.openai.com/api/docs/models/gpt-5.5-pro) | Model page lists US$30/M input and US$180/M output. | Responses/web-search/structured-output compatibility, citation behaviour, availability/deprecation state, location control, tool cost, and normalized cost | not tested |
-| 21 | GPT-5.4 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.4) | Responses API; structured outputs; web search; US$2.50/M input and US$15/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
-| 22 | GPT-5.4 Mini | [Model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini) | Responses API; structured outputs; web search; US$0.75/M input and US$4.50/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
-| 23 | GPT-5.4 Pro | [Model page](https://developers.openai.com/api/docs/models/gpt-5.4-pro) | Model page lists US$30/M input and US$180/M output. | Responses/web-search/structured-output compatibility, citation behaviour, availability/deprecation state, location control, tool cost, and normalized cost | not tested |
-| 24 | GPT-5.2 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.2) | Responses API and structured outputs documented | native web-search support is not established by this cited page; pricing, availability, and other gates remain open | not tested |
-| 25 | GPT-5.2 Pro | [Model page](https://developers.openai.com/api/docs/models/gpt-5.2-pro) | Model page is current catalogue evidence for the named API model. | API route, web-search and structured-output support, pricing, citation behaviour, availability/deprecation state, location control, tool cost, and normalized cost | not tested |
-| 26–28 | GPT-5; GPT-5 Mini; GPT-5 Nano | [All-model catalogue](https://developers.openai.com/api/docs/models/all) | Catalogue lists these as previous GPT-5 family models, distinct from current GPT-6 models. | exact API/tool/structured-output support, pricing, availability/deprecation state, citation behaviour, location control, and normalized cost | not tested |
+OpenAI has the clearest documented building blocks for ShortList: several
+current models are described as supporting the server-side Responses API, web
+search, and structured output. That makes them sensible **future design
+candidates**, not chosen providers. This Issue made no provider request, so it
+does not prove that any one of them produces a useful Auckland result or a good
+website assessment.
+
+The simple answer is: OpenAI's current GPT-6 and GPT-5.6 family has the most
+complete paperwork; GPT-5.4 is also documented; older and Pro entries have
+gaps. Nothing here is a recommendation to buy, configure, or use a model.
+
+### What the documentation says
+
+| Candidate IDs | Plain-English position | Documented model price (input / output) | Important gap |
+| --- | --- | --- | --- |
+| 1–4 | **GPT-6 Astra**: documented API, web search, structured output, and several effort settings. | US$10 / $50 per million tokens | Tool cost, citation storage, Auckland control, account availability, and real-world output are not established here. |
+| 5–7 | **GPT-6.1 Sol**: same documented building blocks, at a lower listed token price than Astra. | US$2 / $10 per million tokens | Same gaps as Astra. |
+| 8–10 | **GPT-6 Sol**: documented API, built-in tools, structured output, and web search. | US$2 / $10 per million tokens | Exact effort availability and the same operational gaps remain. |
+| 11–13 | **GPT-5.6 Terra**: documented API, web search, and structured output. | US$2 / $12 per million tokens | Tool cost, citation behaviour, location control, availability, and actual results are unknown. |
+| 14–16 | **GPT-6 Luna**: documented API, web search, structured output, and several effort settings at the lowest listed token price in this group. | US$0.10 / $0.50 per million tokens | Low price is not proof of a useful result or total assessment cost. |
+| 17–19 | **GPT-5.6 Sol, GPT-5.6 Luna, GPT-5.5**: each has documented API, structured-output, and web-search support. | Sol: US$4 / $20; Luna: price not yet extracted; GPT-5.5: US$5 / $30 per million tokens | The same tool, location, availability, and real-world behaviour gaps remain. |
+| 21–22 | **GPT-5.4 and GPT-5.4 Mini**: documented API, web search, and structured output. | GPT-5.4: US$2.50 / $15; Mini: US$0.75 / $4.50 per million tokens | The same operational and output-quality gaps remain. |
+| 20 and 23 | **GPT-5.5 Pro and GPT-5.4 Pro**: pricing is documented, but the full ShortList capability route is not yet evidenced in this review. | US$30 / $180 per million tokens | API, web search, structured output, availability, and lifecycle evidence are incomplete. |
+| 24–25 | **GPT-5.2 and GPT-5.2 Pro**: some catalogue/API evidence exists. | Not fully extracted | The required search and structured-output route is not established. |
+| 26–28 | **GPT-5, GPT-5 Mini, GPT-5 Nano**: older family entries retained for comparison. | Not fully extracted | Exact current API/tool support, lifecycle, and pricing evidence are incomplete. |
+
+Official sources: [OpenAI model catalogue](https://developers.openai.com/api/docs/models), [GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra), [GPT-6.1 Sol](https://developers.openai.com/api/docs/models/gpt-6.1-sol), [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol), [GPT-5.6 Terra](https://developers.openai.com/api/docs/models/gpt-5.6-terra), [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), [GPT-5.6 Sol](https://developers.openai.com/api/docs/models/gpt-5.6-sol), [GPT-5.6 Luna](https://developers.openai.com/api/docs/models/gpt-5.6-luna), [GPT-5.5](https://developers.openai.com/api/docs/models/gpt-5.5), [GPT-5.4](https://developers.openai.com/api/docs/models/gpt-5.4), and [all models](https://developers.openai.com/api/docs/models/all).
 
 ## Individual evidence capture: Google Gemini first pass
 
