@@ -1,6 +1,6 @@
 # ShortList MVP 1 software design document
 
-**Status:** design baseline for review; no service is configured or deployed  
+**Status:** approved MVP 1 design baseline; no service is configured or deployed
 **Owner:** Chris / SuccessByCS  
 **Design Issue:** [#6](https://github.com/successbycs/ShortList/issues/6)  
 **Canonical requirements:** [REQUIREMENTS.md](REQUIREMENTS.md)

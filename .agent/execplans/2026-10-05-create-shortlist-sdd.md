@@ -32,6 +32,9 @@ a secret, or implement the public website.
 - [x] (2026-10-05 00:30Z) Added the product-design evidence directory,
   mockup/review-register guidance, and SDD link so #28 has a durable home for
   exported Loveable/mockup artefacts.
+- [x] (2026-10-05 00:35Z) Chris approved the MVP 1 SDD, feature list,
+  technology-decision position, and design-evidence structure in the Codex
+  session; record the decision in #6 and leave Issue closure to Chris.
 
 ## Surprises & Discoveries
 
@@ -80,6 +83,10 @@ The human-review evidence is GitHub #6 comment
 `https://github.com/successbycs/ShortList/issues/6#issuecomment-5985551460`.
 Design evidence is organised in `docs/product/design/README.md`; no mockup has
 been added or approved yet.
+
+Chris approved the SDD on 2026-10-05. The remaining work is deliberately
+separated into #7 (contracts), #24 (safe/data/access design), and #28 (website
+experience); the Project owner closes #6 after reviewing this record.
 
 ## Context and Orientation
 
