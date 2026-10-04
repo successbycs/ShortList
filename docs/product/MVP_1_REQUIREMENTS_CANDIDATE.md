@@ -1,7 +1,8 @@
 # ShortList MVP 1 — Requirements Candidate
 
-**Status:** candidate for product-owner review | **Owner:** Chris / SuccessByCS
-| **Created:** 2026-10-04
+**Status:** detailed decision record supporting the canonical review draft in
+[`REQUIREMENTS.md`](REQUIREMENTS.md) | **Owner:** Chris / SuccessByCS |
+**Created:** 2026-10-04
 
 This is the proposed MVP 1 scope for ShortList. It is based on the discovery
 records and current owner Q&A. It is not implementation authority, a public

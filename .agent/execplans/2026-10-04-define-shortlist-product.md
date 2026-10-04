@@ -33,7 +33,13 @@ OpenAI, process payments, send email, or create public pages.
 - [x] (2026-10-04 09:55Z) Product owner set two acquisition channels: inbound self-service via the live website and later consent-gated pilot outreach. The live self-service journey is now the first delivery priority.
 - [x] (2026-10-04 10:05Z) Documented the generic Symphony operating model in the ShortList README and recorded it as a V1-template backport candidate, explicitly excluding ShortList product decisions.
 - [x] (2026-10-04 10:20Z) Product owner set MVP 1 free entitlement to three domain-assessment requests per normalised email address, with an internal Chris test allowlist. Applied the same bounded-retry, two-hour apology, and private Discord escalation policy to MVP 1 PDF delivery and future MVP 2 report delivery.
-- [ ] (requires product-owner review) Confirm the MVP boundary, unresolved commercial decisions, and requirement wording.
+- [x] (2026-10-04 13:05Z) Product owner closed #21 and #22. Deliberately
+  replaced the stale paid-MVP draft in `docs/product/REQUIREMENTS.md` with a
+  canonical review draft that maps the agreed MVP 1 baseline to stable IDs,
+  owners, priorities, and observable evidence; deferred choices remain visible.
+- [ ] (requires product-owner review) Approve or amend the canonical MVP 1
+  requirements draft in Issue #1, then progress to Issue #2 for formal scope
+  approval.
 - [ ] (after requirements approval) Create the MVP scope, architecture, assumptions, user stories, data/prompt contracts, and delivery plan as separate reviewed documents.
 - [ ] (after product-definition approval) Propose dependency-ordered GitHub milestones and Issues; do not create them without explicit approval.
 
@@ -62,6 +68,13 @@ OpenAI, process payments, send email, or create public pages.
 - Decision: Draft requirements before selecting providers or implementing architecture.
   Rationale: Product value, customer journey, boundaries, acceptance evidence, and commercial claims must be agreed before Cloudflare, OpenAI, Stripe, email, database, or PDF implementation choices can be responsibly specified.
   Date/Author: 2026-10-04 / Codex with Chris's direction.
+- Decision: Replace the known stale draft rather than merge it into the MVP 1
+  baseline.
+  Rationale: It made paid NZ$47, Stripe, and manual-recovery commitments that
+  conflict with the approved free inbound MVP 1 decisions. The former detailed
+  candidate remains as the decision record supporting the canonical review
+  draft.
+  Date/Author: 2026-10-04 / Chris's authorised Issue #1 continuation, recorded by Codex.
 
 ## Outcomes & Retrospective
 
