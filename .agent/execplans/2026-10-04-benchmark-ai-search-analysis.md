@@ -25,6 +25,9 @@ requirements.
 - [x] (2026-10-05) Define the initial named 67-configuration market screen,
   including OpenAI Astra, Terra, and Luna, in
   `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
+- [x] (2026-10-05) Create the durable provider-level evidence register at
+  `docs/product/feasibility/AI_MODEL_QUALIFICATION_MATRIX.md`; preserve every
+  individual configuration as pending until exact official evidence is captured.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,
