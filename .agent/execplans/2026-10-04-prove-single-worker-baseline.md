@@ -11,8 +11,9 @@ Before enabling the requested multi-worker Symphony runtime, establish one trust
 - [x] (2026-10-04 03:55Z) Changed checked-in and typed default concurrency from two to one and added a regression test for two independent eligible Issues.
 - [x] (2026-10-04 03:57Z) Focused scheduler/workflow suite passed 12 tests and workflow validation passed. Full canonical verification remains to run after the dedicated test Issue preparation is recorded.
 - [x] (2026-10-04 04:00Z) Created dedicated child Issue [#38](https://github.com/successbycs/template/issues/38) under #12 with no labels and an explicit no-general-dispatch safety contract.
-- [ ] Run the revised #12 clean scheduler/restart/dedicated-Issue proof only after its external test target and authority are confirmed.
-- [ ] Record the result in #12, the verification matrix, and this plan; leave dispatch false.
+- [x] (2026-10-04 04:08Z) Completed the disabled-dispatch baseline against #38: live GitHub observation, durable reservation/reopen/worker-stop proof, and a sanitized #38 evidence comment. No task was claimed or executed.
+- [ ] Obtain explicit authority for the separately bounded live #38 execution before attempting it; leave dispatch false until then.
+- [ ] Record any authorized live result in #12, the verification matrix, and this plan; leave dispatch false afterward.
 
 ## Surprises & Discoveries
 
@@ -27,10 +28,13 @@ Before enabling the requested multi-worker Symphony runtime, establish one trust
 
 ## Outcomes & Retrospective
 
-Local default enforcement is implemented and focused-tested but does not
-demonstrate a real GitHub workflow. The first accidental check attempted to pass
-`WORKFLOW.md` to Ruff and failed parsing; the corrected Python-only lint passed
-and the failure is not counted as a product check.
+The disabled-dispatch baseline is complete: local default enforcement,
+single-admission/recovery tests, a host preflight, a live #38 observation, and
+a durable reservation/reopen/stop record. The parent Issue #12 is not complete:
+no real implementation task or temporary live dispatch was attempted. The first
+accidental check attempted to pass `WORKFLOW.md` to Ruff and failed parsing; the
+corrected Python-only lint passed and the failure is not counted as a product
+check.
 
 ## Context and Orientation
 
@@ -66,6 +70,14 @@ Local tests are repeatable. The dedicated test Issue will be explicitly named an
 ## Artifacts and Notes
 
 Store exact test counts, dedicated Issue URL, local commit `dede0fb`, and external observations in this plan and #12. Do not include credentials, prompts, transcripts, or email content.
+
+Executed baseline evidence: host preflight returned `live_dispatch: False`,
+both executables present, authenticated GitHub access, and `dispatch_ready:
+True`; a disabled scheduler tick returned without admission. A live #38
+observation was persisted to `var/symphony/issue-12-proof.sqlite3`, reservation
+reopen was asserted before the explicit stop, and the final record was
+`worker_stop`. The sanitized handoff is
+https://github.com/successbycs/template/issues/38#issuecomment-5975930788.
 
 ## Interfaces and Dependencies
 
