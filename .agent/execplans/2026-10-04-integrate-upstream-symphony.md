@@ -17,8 +17,8 @@ a code-changing task.
 - [x] (2026-10-04 00:00Z) Confirm the official upstream stable release and inspect the existing local runtime and documentation.
 - [x] (2026-10-04 04:03Z) Add a reproducible, checksum-verified host installer and the upstream workflow configuration.
 - [x] (2026-10-04 04:03Z) Replace local scheduler operator instructions, specification, and readiness policy with the upstream lifecycle and dashboard instructions.
-- [ ] (2026-10-04 04:03Z) Obtain explicit operator acknowledgement of upstream's preview warning, then run the bounded dashboard/GitHub-read proof without dispatching an Issue.
-- [x] (2026-10-04 04:06Z) Record implementation evidence and the outstanding acknowledgement in GitHub Issue #39; leave #39 open for review.
+- [x] (2026-10-04 04:06Z) Obtain explicit operator acknowledgement of upstream's preview warning, then run the bounded dashboard/GitHub-read proof without dispatching an Issue.
+- [x] (2026-10-04 04:08Z) Record implementation and dashboard-proof evidence in GitHub Issue #39; leave #39 open for review.
 
 ## Surprises & Discoveries
 
@@ -45,12 +45,13 @@ a code-changing task.
 ## Outcomes & Retrospective
 
 The pinned installation, upstream configuration, and operator instructions are
-implemented in local commit `560964f`. The verified v0.0.3 binary requires an
-explicit upstream preview acknowledgement before it will parse the workflow or
-bind its dashboard. The repository owner has not yet made that risk decision,
-so the real dashboard/GitHub-read acceptance proof is pending rather than
-claimed. Evidence and the required acknowledgement are recorded in GitHub Issue
-#39; the Issue remains open for review.
+implemented in local commit `560964f`. The repository owner explicitly
+acknowledged the upstream preview warning. Upstream v0.0.3 served its dashboard
+at `http://127.0.0.1:8765/`, and `GET /api/v1/state` returned HTTP 200 with
+zero running, blocked, and retrying workers. GitHub read was scoped to the
+configured repository; no open Issue had `symphony:ready`, so no task could
+dispatch. Evidence is recorded in GitHub Issue #39, which remains open for
+review. #40 is the next dependency-gated task.
 
 ## Context and Orientation
 
@@ -122,8 +123,8 @@ zero task dispatches. A static parser or mock alone is insufficient.
 | Capability | Proof | Result |
 | --- | --- | --- |
 | Reproducible installation | Dry run and SHA-256 verification of v0.0.3 asset | Passed: `ea35…35ee` verified |
-| Upstream configuration | v0.0.3 starts with committed workflow after preview acknowledgement | Pending acknowledgement |
-| Dashboard and GitHub read | Official executable returns loopback state with no task session | Pending acknowledgement |
+| Upstream configuration | v0.0.3 starts with committed workflow after preview acknowledgement | Passed |
+| Dashboard and GitHub read | Official executable returns loopback state with no task session | Passed: HTTP 200; all counts zero |
 | Code-changing task / restart | Deliberately excluded; Issue #40 | Not run |
 
 ## Idempotence and Recovery
@@ -141,8 +142,9 @@ The GitHub record for this work is Issue #39. No token, full worker transcript,
 or downloaded binary is committed. The release version and hash are committed
 in the installer so a reviewer can reproduce the host setup.
 
-On 2026-10-04 the issue received the implementation and blocker record at
-`https://github.com/successbycs/template/issues/39#issuecomment-5976386698`.
+On 2026-10-04 the issue received the implementation record at
+`https://github.com/successbycs/template/issues/39#issuecomment-5976386698`;
+the dashboard proof is recorded in a follow-up comment.
 
 ## Interfaces and Dependencies
 
