@@ -10,7 +10,7 @@ workspace:
   root: ../var/symphony/workspaces
   timeout_seconds: 60
 agent:
-  # #12 establishes one-worker safety; #24 may raise this only after all gates pass.
+  # Symphony is deliberately single-worker; parallel allocation is out of scope.
   max_concurrent_agents: 1
   max_attempts: 2
   terra_model: gpt-5.6-terra

@@ -47,7 +47,7 @@ class WorkspaceSettings(BaseModel):
 
 class AgentSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    max_concurrent_agents: int = Field(default=1, ge=1, le=32)
+    max_concurrent_agents: int = Field(default=1, ge=1, le=1)
     max_attempts: int = Field(default=2, ge=1, le=10)
     terra_model: str = "gpt-5.6-terra"
     astra_model: str = "gpt-6-astra"
