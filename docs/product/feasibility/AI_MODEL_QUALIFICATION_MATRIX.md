@@ -159,6 +159,27 @@ performs web search.
 | 65 | Kimi K3 (`kimi-k3`) | [API overview](https://www.kimi.ai/help/kimi-api/api-overview), [Web Search API](https://www.kimi.ai/academy/best-practices-for-web-search), [JSON mode](https://www.kimi.ai/help/kimi-api/api-model-capabilities) | Chat Completions API is documented; K3 has a stated 1M-token context. Kimi documents valid-JSON mode. Its separate Web Search API returns source URLs and dates. | partial — confirm K3-to-Search API pairing and commercial pricing, source/citation presentation, location controls, search timeout/cost, and normalized combined cost | not tested |
 | 66–67 | Kimi K2.6 — thinking and non-thinking modes | [API overview](https://www.kimi.ai/help/kimi-api/api-overview), [Web Search API](https://www.kimi.ai/academy/best-practices-for-web-search), [JSON mode](https://www.kimi.ai/help/kimi-api/api-model-capabilities) | K2.6 is documented with thinking and non-thinking modes; the same separate Kimi Web Search API and JSON mode are documented. | partial — exact endpoint/model-mode pairing, commercial pricing, source/citation presentation, location controls, search timeout/cost, and normalized combined cost | not tested |
 
+## Qualification status checkpoint
+
+The following is a count of the recorded states, not a quality ranking:
+
+| Documentary state | Configuration count | Consequence |
+| --- | ---: | --- |
+| partial | 62 | Do not run a billable test. Complete missing exact capability, provenance, pricing, availability and/or paired-retrieval evidence. |
+| excluded | 5 | Do not run a billable test. These are Mistral IDs 46–50, which its current catalogue lists as deprecated. |
+| documentary pass | 0 | No live-test candidate has passed every documentary gate. |
+| observed pass/fail | 0 | No provider call has been authorised or made. |
+
+Two independent gates remain before an observed test starts:
+
+1. The configuration must reach `documentary pass` through exact cited evidence
+   in this matrix; and
+2. Chris must approve the spend, workload, usefulness, retrieval, timeout and
+   retry fields in [AI model qualification test protocol](AI_MODEL_TEST_PROTOCOL.md).
+
+An approval cannot turn a `partial` configuration into a test candidate; a
+documentary pass cannot authorise spending.
+
 ## Required fields for each individual configuration
 
 The next collection pass expands each candidate ID into these fields. It must

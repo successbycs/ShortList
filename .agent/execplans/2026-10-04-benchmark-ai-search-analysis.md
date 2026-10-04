@@ -51,6 +51,10 @@ requirements.
   configurations: record GPT-6 native-search/structured-output paths and keep
   older/pro variants partial where the exact model page does not establish the
   complete workflow.
+- [x] (2026-10-05) Audit the full matrix: 62 configurations are partial, five
+  deprecated Mistral configurations are excluded, and no configuration is a
+  documentary pass or observed result. Record both gates that prevent an
+  accidental paid test.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,
