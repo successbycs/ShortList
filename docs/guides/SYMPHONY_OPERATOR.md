@@ -1,102 +1,87 @@
-# Symphony Operator Guide
+# Upstream Symphony Operator Guide
 
-**Status:** active template | **Owner:** operator | **Update:** scheduler, workflow, or recovery changes.
+**Status:** active template | **Owner:** operator | **Update:** upstream release, workflow, or operation change.
 
-Symphony is an optional, GitHub-first scheduler for a template repository. It
-is disabled in the checked-in configuration. It has no dashboard and does not
-start, claim, or change GitHub work until an operator deliberately enables a
-reviewed configuration outside this guide's safe baseline.
+This repository uses the official OpenAI Symphony reference executable rather
+than a repository-owned scheduler. It polls the configured GitHub Issues queue,
+creates one isolated workspace per eligible Issue, and starts `codex app-server`
+there. Its own optional loopback dashboard is the supported operational view.
+
+The checked-in integration pins upstream `v0.0.3` for Linux x86_64. Symphony is
+prototype software intended for evaluation by its upstream authors. Do not treat
+the template integration as a hardened unattended production service.
 
 ## Safe baseline
 
-`WORKFLOW.md` is the source of the scheduler contract. The current baseline
-has all of these properties:
+`WORKFLOW.md` is upstream configuration with Markdown prompt instructions. Its
+safe baseline is deliberately narrow:
 
-- `runtime.live_dispatch: false` — calling `symphony serve` cannot admit work
-  while this value is false.
-- `agent.max_concurrent_agents: 1` — the checked-in safe baseline is one
-  worker. Any future increase requires the separate #24 safety qualification.
-- GitHub queue admission requires both `status:ready` and `symphony:ready`.
-  Do not add, remove, or use labels as a shortcut around user-started coding
-  work or a human approval gate.
-- Email notification is disabled. It is never a prerequisite for a completed
-  implementation and must not be enabled without explicit provider, recipient,
-  and send authority.
+- It targets only `successbycs/template` and uses a `GITHUB_TOKEN` supplied at
+  process start; no credential belongs in Git.
+- An Issue must be open and have `symphony:ready` before it is a candidate.
+  Symphony reads that label; it does not change labels, assign work, close an
+  Issue, or create eligibility itself.
+- `agent.max_concurrent_agents: 1` limits the upstream scheduler to one active
+  worker.
+- Codex runs in `workspace-write` sandbox mode. Network access is enabled for
+  normal repository setup, but approvals and MCP elicitation are rejected.
+- The worker workspace and runtime logs live below ignored `var/`; they are not
+  the repository checkout.
 
-The proposed short form `app-template symphony run --issue <number>` is **not
-implemented**. Until a separately approved implementation exists, the only
-supported Symphony commands are workflow validation, prerequisite inspection,
-and the disabled scheduler service described below.
+An empty eligible queue is the normal safe state. Starting the service in that
+state proves connectivity and the dashboard only; it does not prove task
+execution. The dedicated #40 proof is the only authorized first dispatch.
 
-## Lifecycle
+## Install and start the dashboard
 
-For an eligible, explicitly enabled scheduler run, the service observes an
-open GitHub Issue, applies its admission rules, obtains a local SQLite
-reservation, prepares an isolated Git worktree, and invokes one Codex worker.
-It then records a sanitized result, releases the reservation, and hands a
-successful task to human review. The scheduler's normal queue path uses labels;
-that label-changing path is deliberately distinct from a user-directed,
-single-Issue safety demonstration.
-
-Local scheduler evidence is stored under `var/symphony/` and is ignored by Git.
-It may contain Issue IDs, status, model names, timing, sanitized summaries, and
-worker lifecycle metadata. It must not contain prompts, full transcripts,
-credentials, or email content.
-
-## Fresh-operator walkthrough
-
-Run these commands from the repository root. They validate the real checked-in
-contract without enabling a worker or changing GitHub.
+Run from the repository root on Linux x86_64. The installer downloads the exact
+official v0.0.3 release and verifies its published SHA-256 before making it
+executable below ignored `var/tools/`.
 
 ```bash
-.venv/bin/python -m app_template.cli symphony validate-workflow
-.venv/bin/python -m app_template.cli symphony preflight --require-dispatch
+scripts/install_upstream_symphony.sh --dry-run
+scripts/install_upstream_symphony.sh
+SYMPHONY_UNSAFE_PREVIEW_ACK="I understand" \\
+  GITHUB_TOKEN="$(gh auth token)" scripts/run_upstream_symphony_dashboard.sh
 ```
 
-Expected results are a JSON workflow validation result, followed by a JSON
-preflight result containing `live_dispatch: false` and `dispatch_ready: true`.
-The second command only checks for host `codex`, authenticated `gh`, and the
-configuration; it does not dispatch a task. If the host tools or GitHub
-authentication are absent, it exits non-zero with no task mutation. Resolve
-those prerequisites before any separately approved demonstration.
+The final command stays in the foreground and does not write the token to a
+file. Its acknowledgement is intentionally required by upstream before the
+launcher passes the upstream preview-warning flag. It serves the dashboard at <http://127.0.0.1:8765/> and its JSON state at
+<http://127.0.0.1:8765/api/v1/state>. Stop it with `Ctrl-C` in the same
+terminal. Use `SYMPHONY_DASHBOARD_PORT`, `SYMPHONY_WORKSPACE_ROOT`, or
+`SYMPHONY_LOGS_ROOT` only when an operator needs a different host-local path or
+port; never commit their values if they contain sensitive locations.
 
-Do not run `app-template symphony serve` as a background or unattended process
-from this guide. The checked-in configuration makes it inert, and changing that
-configuration requires a reviewed operational change with a named target and
-clear external authority.
+Before any start, confirm `codex` and `gh auth status` work on the host. The
+upstream binary also requires `git`. Failure to start is a safe failure: no
+Issue becomes eligible merely because the process was attempted. Never set the
+acknowledgement automatically in a shell profile, service definition, or CI;
+the person starting each preview must make that explicit decision.
 
-## Bounded #12 demonstration
+## Dashboard and restart behaviour
 
-The completed #12 baseline used the dedicated disposable GitHub Issue #38. It
-proved one real Codex worker in an isolated worktree, with a durable
-reservation/event lifecycle, a clean worktree, disabled dispatch before and
-afterward, and no label changes. Its evidence is recorded in #38 and #12.
+The dashboard and JSON API are supplied by upstream Symphony, not by this
+template. `GET /api/v1/state` is the concise machine-readable operational
+state; `GET /api/v1/refresh` asks upstream to refresh its tracker view.
 
-That demonstration is not a general scheduler activation and must not be
-re-run as a substitute for a real task. It establishes the one-worker safety
-baseline before any separately qualified capacity increase.
+Upstream keeps active blocked-session state in memory. If the process stops,
+that map is cleared; after restart it polls GitHub again and can reconsider a
+still-open eligible Issue. Preserved workspaces and logs may assist diagnosis,
+but this integration intentionally does not add a duplicate SQLite event store
+or claim-recovery layer. Do not assume a stopped Codex turn has a durable
+upstream session resume. #40 records the actual observed restart behaviour.
 
-## Recovery
+## Bounded task proof and recovery
 
-If a process ends after reserving an Issue, leave the SQLite database in place.
-On restart, the scheduler reloads active reservations and refuses duplicate
-work. Inspect the affected Issue, the local event/reservation record, and the
-isolated worktree. Record the outcome in the normal recovery process; do not
-delete the database or the worktree to clear a fence.
+Do not add `symphony:ready` to an Issue or start the service against an eligible
+Issue except under the approved #40 proof or a later explicitly authorized
+operation. A worker may use the upstream `github_api` tool with the permissions
+of the temporary GitHub token, so every eligible Issue needs clear scope and
+human review.
 
-If a worker requests approval, fails due to its environment, or cannot make a
-fresh GitHub observation, treat it as blocked. Do not retry by changing labels,
-enabling dispatch broadly, or starting another worker. Preserve the evidence
-and obtain the required human decision.
-
-## Human-review handoff
-
-After a bounded run, record the exact command, result, durable-event location,
-worktree state, GitHub mutation scope, and whether dispatch remains disabled in
-the relevant Issue and its ExecPlan. Leave successful work open for human
-review. Do not push, merge, deploy, close Issues, or send email unless the
-operator has separately authorized that action.
-
-For broader local-operation guidance, see
-[LOCAL_RUNBOOK](../operations/LOCAL_RUNBOOK.md). The policy for user-started
-GitHub work is [GITHUB_ISSUE_WORKFLOW](../harness/GITHUB_ISSUE_WORKFLOW.md).
+If Symphony or Codex blocks, stop the foreground process, preserve ignored logs
+and the workspace, and record the state in the relevant GitHub Issue. Do not
+start duplicate services, delete a workspace, or use a label change to force a
+retry. The normal coding-session policy remains
+[GITHUB_ISSUE_WORKFLOW](../harness/GITHUB_ISSUE_WORKFLOW.md).

@@ -1,7 +1,11 @@
 # Human-review email notifications
 
 **Issue:** [#19](https://github.com/successbycs/template/issues/19)
-**Status:** implementation
+**Status:** historical implementation; retired from the upstream Symphony target
+
+> The upstream-only decision recorded in #39–#41 retires this optional custom
+> SMTP capability with the duplicate Python runtime. This document remains as
+> historical evidence only; it is not a current product requirement.
 
 ## Outcome
 

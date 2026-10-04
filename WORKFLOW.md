@@ -1,50 +1,47 @@
 ---
+# This is the official OpenAI Symphony v0.0.3 workflow format. It is consumed
+# by the upstream executable, not by the template's transitional Python code.
 tracker:
-  repository: successbycs/template
-  required_labels: [status:ready, symphony:ready]
+  kind: github
+  provider:
+    repo: successbycs/template
+    token: $GITHUB_TOKEN
   active_states: [open]
   terminal_states: [closed]
-polling:
-  interval_seconds: 30
+  # Queue admission is deliberate. Symphony reads this label but never adds,
+  # removes, assigns, closes, or otherwise mutates an Issue to make it eligible.
+  required_labels: [symphony:ready]
 workspace:
-  root: ../var/symphony/workspaces
-  timeout_seconds: 60
+  # The launcher supplies an absolute, ignored path for each host checkout.
+  root: $SYMPHONY_WORKSPACE_ROOT
+hooks:
+  after_create: |
+    git clone --depth 1 https://github.com/successbycs/template.git .
 agent:
-  # The checked-in safe baseline is one worker; #24 governs any future increase.
   max_concurrent_agents: 1
-  max_attempts: 2
-  terra_model: gpt-5.6-terra
-  astra_model: gpt-6-astra
-  turn_timeout_seconds: 3600
-  retry_backoff_seconds: 5
-runtime:
-  # Must be explicitly enabled only after the dedicated Issue test is reviewed.
-  live_dispatch: false
-notifications:
-  email:
-    # Delivery is opt-in. Configure host and the named runtime environment
-    # variables before enabling it; never put credentials in this file.
-    enabled: false
-    human_review_email: chris@successbycs.com
-    smtp_host: null
-    smtp_port: 587
-    smtp_username_env: SYMPHONY_SMTP_USERNAME
-    smtp_password_env: SYMPHONY_SMTP_PASSWORD
-    smtp_from_env: SYMPHONY_SMTP_FROM
-    use_starttls: true
-    timeout_seconds: 10
-    max_attempts: 2
-task_contract:
-  ready_label: status:ready
-  eligibility_label: symphony:ready
-  terra_label: agent:terra
-  astra_label: agent:astra
-  # Empty code-packet declarations serialize work; they never create unsafe parallelism.
-  unscoped_code_packet_policy: serialize
+  max_turns: 20
+codex:
+  command: codex app-server
+  approval_policy:
+    reject:
+      sandbox_approval: true
+      rules: true
+      mcp_elicitations: true
+  thread_sandbox: workspace-write
+  turn_sandbox_policy:
+    type: workspaceWrite
+    networkAccess: true
 ---
 
-You are the implementation worker for one GitHub Issue. Work only inside the
-assigned Symphony workspace and code packet. Use Terra for normal implementation.
-After two evidence-bearing failures, preserve logs and state for Astra to create
-and review an ExecPlan; Terra executes that repair and resumes the original task.
-Do not push, merge, close Issues, deploy, or operate outside the task authority.
+You are working on GitHub Issue {{ issue.identifier }} in the configured
+repository.
+
+Title: {{ issue.title }}
+
+Description:
+{{ issue.description }}
+
+Read the repository guidance and the Issue before changing code. Keep the work
+within the Issue's authority. Run relevant verification, record concise evidence
+in the Issue, and stop for human review. Do not push, merge, deploy, close the
+Issue, or broaden scope without explicit authorization.

@@ -9,10 +9,9 @@ from the request, actual dependencies, and acceptance evidence.
 
 ## Symphony runtime eligibility (separate from coding sessions)
 
-An Issue is eligible for continuous Symphony dispatch only when it is open and
-has both `status:ready` and `symphony:ready`. The first declares that the task
-is sufficiently defined; the second is an explicit operator opt-in to
-automation. Creating an Issue or adding it to a Project never enables it.
+An Issue is eligible for deliberately started upstream Symphony dispatch only
+when it is open and has `symphony:ready`. This is an explicit operator opt-in
+to automation. Creating an Issue or adding it to a Project never enables it.
 
 Before applying `symphony:ready`, confirm that the Issue has:
 
@@ -23,7 +22,5 @@ Before applying `symphony:ready`, confirm that the Issue has:
 - no unsatisfied native GitHub dependency; and
 - the required specification artifact for its declared SDD tier.
 
-Use `agent:terra` only while Terra is the active implementation or repair
-runner. Use `agent:astra` only for the two-failure diagnosis, ExecPlan, or
-review path. Model labels are operational metadata; GitHub Assignees remain
-human accountability.
+The upstream workflow selects Codex execution; it does not route work through
+repository-defined model labels. GitHub Assignees remain human accountability.
