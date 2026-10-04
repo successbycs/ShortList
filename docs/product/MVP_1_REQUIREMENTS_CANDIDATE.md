@@ -1,0 +1,400 @@
+# ShortList MVP 1 — Requirements Candidate
+
+**Status:** candidate for product-owner review | **Owner:** Chris / SuccessByCS
+| **Created:** 2026-10-04
+
+This is the proposed MVP 1 scope for ShortList. It is based on the discovery
+records and current owner Q&A. It is not implementation authority, a public
+offer, an approved price, or a promise that a provider capability exists.
+
+## 1. What MVP 1 is proving
+
+MVP 1 tests whether an Auckland-region small-business owner will:
+
+1. enter a public business domain;
+2. receive immediate, automated, useful evidence about how the business appears
+   to customers and ChatGPT Search; and
+3. provide an email address to receive a free Minimum ShortList Assessment.
+
+It does **not** test payment conversion yet. The paid Basic Assessment and
+Stripe payment are MVP 2. Consulting is a potential MVP 3 offer.
+
+Validation runs in cohorts of **10 eligible businesses**. Each cohort is
+reviewed before the next begins, so the product owner can inspect completion,
+email-capture, usefulness, failure, cost, and abuse evidence before widening
+the sample or moving to the next vertical. The numerical success threshold is
+still to be agreed; a cohort of ten is the unit of learning, not proof of a
+market by itself.
+
+## 2. Customer and scope
+
+The intended audience is small businesses that serve the **Auckland region
+only**. The initial validation cohort is **10 Auckland lawn-mowing
+businesses**. This is the first, narrow subcohort within landscaping and garden
+maintenance. After it has been reviewed, the planned validation sequence is:
+
+1. Further Auckland landscaping and garden-maintenance businesses if the
+   first lawn-mowing cohort supports it.
+2. Auckland exterior-cleaning businesses, including house washing, roof
+   washing, gutter cleaning, and pressure washing.
+3. Auckland residential painters, including interior and exterior painting.
+
+These are deliberate validation cohorts, not a claim that every Auckland
+business type is supported from day one. If the public website does not provide
+enough evidence that the business serves Auckland and belongs to the active
+cohort, the system must state that eligibility cannot be determined rather than
+presenting an Auckland-specific assessment as fact.
+
+The product must not claim a permanent, universal, or official ChatGPT/OpenAI
+rank. It may show the observed order returned by one precisely defined ChatGPT
+Search test at a stated date and time.
+
+### 2.1 Pilot recruitment and feedback
+
+The first cohort is recruited to test interest in the Minimum ShortList
+Assessment and gather feedback. An email that promotes even a free assessment
+is potentially a commercial electronic message in New Zealand. The pilot must
+not send an unsolicited commercial email merely because an address is public
+or has been collected from a website.
+
+ShortList has two distinct acquisition channels:
+
+1. **Inbound self-service:** a business owner finds the live website, submits
+   their own domain, sees the teaser, and elects to provide an email for the
+   requested free assessment.
+2. **Pilot outreach:** a business is approached for feedback and receives any
+   commercial email only after a recorded consent basis exists.
+
+The first delivery priority is the live self-service website. Pilot outreach
+is a separate, later activity and must not delay the inbound journey.
+
+Before any recruitment or report email is sent, the pilot must have a recorded
+lawful consent basis for that address. Safe candidate channels are an existing
+consented contact, a referral that establishes consent, an inbound opt-in, or
+a non-email conversation (for example a phone call) in which the business asks
+to receive the assessment by email. The exact channel and consent wording must
+be approved before outreach begins.
+
+For every outreach candidate and recipient, retain the business/domain,
+contact source, consent basis and evidence, consent time, message/report status,
+feedback request/outcome, and any do-not-contact/unsubscribe status. Every
+commercial email must accurately identify the sender and provide a functional,
+free unsubscribe route. An unsubscribe must suppress future commercial email
+within the applicable timeframe.
+
+## 3. MVP 1 customer journey
+
+```text
+Public domain
+    ↓
+Automated website review
+    ↓
+Immediate teaser, including one dated ChatGPT Search test
+    ↓
+Email capture after value is shown
+    ↓
+Free Minimum ShortList Assessment by email
+    ↓
+Future Basic Assessment offer; no payment in MVP 1
+```
+
+### 3.1 Domain entry
+
+The first page asks only for a public website/domain and provides a `Check my
+website` action. It does not request an email before showing value. The MVP is
+limited to Auckland-region businesses. Eligibility is determined against a
+maintained, deterministic suburb reference dataset in the product database—not
+an AI guess, a postcode shortcut, or ad-hoc free text. Each assessment records
+the matched suburb (where evidenced), matching outcome, and dataset version.
+A site that clearly serves another region must receive an honest out-of-scope
+outcome; if Auckland eligibility cannot be established, the result must say so.
+
+The system must validate the input before any fetch, search, or customer-record
+creation. Incorrectly formatted domain names are rejected with a clear message.
+The system also refuses private/internal targets, limits unsafe redirects, and
+applies layered abuse and cost controls. Those controls must include Cloudflare
+edge DDoS/WAF protection where available, a server-validated bot check on the
+form, and a server-enforced request limit keyed to the submitting IP address as
+well as the normalised domain. A proposed initial policy is no more than three
+completed submissions for a normalised domain in one Auckland calendar day;
+the IP limit and exact thresholds remain to be approved.
+
+### 3.2 Business record and assessment run
+
+Every accepted, syntactically valid submission must be stored. Rejected
+malformed input may be retained only as a non-customer validation/rate-limit
+event, subject to the approved privacy policy.
+
+- A **customer record** represents a normalised primary domain. The normalised
+  domain is the unique field for customer records: no two customer records may
+  have the same normalised domain.
+- An **assessment run** represents one dated attempt to assess that domain.
+- A customer may have multiple assessment runs, emails, paid reports, and
+  support events over time.
+
+The domain uniquely identifies the customer record, but it must not be the
+sole unique identifier for every run or report.
+
+### 3.2.1 Visitor and abuse-event record
+
+Use Cloudflare Web Analytics for free, privacy-first aggregate page and
+referrer measurement. It is not sufficient for assessment attribution because
+it does not capture UTM query parameters or custom conversion events. The
+product must therefore store a small first-party attribution record as part of
+its normal application data—not a separate analytics application.
+
+On the visitor's first landing page, capture the landing path, HTTP referrer
+where supplied, and recognised UTM fields (`utm_source`, `utm_medium`,
+`utm_campaign`, `utm_term`, and `utm_content`). Preserve that attribution
+through the domain and email journey, then link it to the assessment run and
+customer record when they are created. Do not accept arbitrary query parameters
+as analytics data.
+
+The product also records lightweight visitor events for page visit, form view,
+validation failure, bot-check result, submission, rate-limit decision, and
+email-capture outcome. It must use a pseudonymous visitor identifier and a
+privacy-minimised representation of the source IP address; raw IP retention,
+retention period, and consent wording require approval. This is for conversion
+measurement, abuse protection, and support diagnosis—not customer profiling or
+advertising.
+
+### 3.2.2 Time, AI cost, and secret boundaries
+
+All machine timestamps are stored in UTC using a standard unambiguous format
+(ISO 8601 with `Z`). Every customer-facing report, email, and operator view
+converts them to Pacific/Auckland time, including daylight-saving changes.
+
+Every AI request has approved maximum input and output token limits, a timeout,
+and a per-assessment cost ceiling. The system records usage and a limit-exceeded
+outcome without exposing provider responses or secrets unnecessarily.
+
+Neither the domain nor email form may expose an AI-provider API key, backend
+credential, or any access to Codex. The browser sends only the minimum form
+data to a controlled server endpoint. Provider credentials remain server-side
+secrets, are never placed in browser code or reports, and are never returned in
+an error, log, or API response. Codex is not an application dependency or a
+customer-accessible capability.
+
+### 3.3 Automated website review
+
+For an accessible public site, the system produces a structured assessment with:
+
+- business name;
+- apparent services/business type;
+- apparent Auckland service area or a statement that this cannot be determined;
+- plain-language website summary;
+- up to three likely buyer situations/ICPs, each marked as an inference and
+  supported by page-level website evidence;
+- observed evidence of reviews, projects/case studies, owner/team identity,
+  locations, contact details, FAQs, pricing/quote guidance, and
+  credentials/memberships; and
+- a small number of evidence-based strengths and opportunities.
+
+The product must not invent demographic personas, missing website content, or
+customer outcomes. A buyer situation is a hypothesis based on the website, not
+a verified fact about the business's customers.
+
+### 3.4 Dated ChatGPT Search teaser
+
+Each successful free assessment runs **one** live, defined ChatGPT Search test:
+an Auckland-wide question based on the evidence-supported business type. For
+example: “What are the top three lawn-mowing companies in Auckland today?”
+Lawn mowing is illustrative only; the question changes with business type.
+Suburb-level, buyer-situation, and other segmented comparisons belong to the
+future paid Basic Assessment, not the free MVP 1 result.
+
+The immediate teaser and free email show:
+
+- the exact Auckland-wide business-type question tested;
+- the date and time in Pacific/Auckland;
+- the model/search context available to the product;
+- the first three businesses surfaced in the returned response, in the observed
+  order; and
+- whether the submitted business was surfaced, how it was described, and
+  whether the available evidence is insufficient to determine this reliably.
+
+The customer-facing qualifier is:
+
+> This is the order returned in this specific dated ChatGPT Search test. Results
+> may vary with question wording, time, location, and future search behaviour.
+
+The system records the full tested question, response, returned ordering,
+available citations/source URLs, model/search context, run timestamp, and
+extraction result. If fewer than three businesses are returned, it reports the
+actual number rather than inventing results.
+
+### 3.5 Immediate preview
+
+Before email capture, the visitor sees a concise teaser containing:
+
+- how the website currently appears to describe the business;
+- likely buyer situations/ICPs and the evidence supporting them;
+- one Auckland-wide business-type question tested;
+- the dated ChatGPT Search result summary; and
+- a limited number of evidence-based strengths or opportunities.
+
+The preview must be useful without becoming the entire free report. It must not
+make a fixed ranking claim or promise enquiries/revenue.
+
+### 3.6 Email capture and free Minimum ShortList Assessment
+
+After the preview, the visitor may provide a work email to receive the free
+Minimum ShortList Assessment.
+
+Report-delivery consent and optional marketing consent must be separate:
+
+- the email address is required for requested report delivery;
+- marketing consent is optional, unchecked by default, and separately stored.
+
+The free email contains the domain, Auckland date/time, business summary, buyer
+hypotheses and evidence, the dated ChatGPT Search test/observed ordering, a few
+evidence-based opportunities, and a clear future Basic Assessment offer.
+
+### 3.7 Professional PDF report
+
+The Minimum ShortList Assessment is also retained as a polished PDF report.
+The PDF must use an approved, professional visual template with readable
+typography, consistent branding, accessible contrast, sensible page breaks,
+and a clear distinction between observed evidence and inference. It must show
+the assessment's Auckland-local display time while retaining the source UTC
+timestamp in stored data. A representative set of reports must pass human
+visual review before public release; a technically generated PDF alone is not
+acceptance evidence.
+
+### 3.8 Website design and voice
+
+The first website-design exploration will be created in Loveable.dev. It must
+not result in a generic AI/SaaS template. The approved experience should feel
+distinctive, quirky, warm, and credible to a small Auckland business owner,
+with purposeful small-business iconography and light visual humour about the
+internet, AI, and search. Humour must support clarity rather than obscure the
+domain entry, assessment result, consent, price, or failure messages.
+
+The design remains accessible and mobile-first: readable text, sufficient
+contrast, keyboard-operable form controls, meaningful non-text alternatives,
+and a complete usable journey without relying on animation or jokes. Loveable
+is an authoring/prototyping choice, not a production-hosting or application
+architecture decision.
+
+## 4. Automated failure and insufficient-evidence journey
+
+MVP 1 must remain automated. It must not depend on a person manually preparing
+a report or rescuing a customer journey.
+
+For an unreadable, unreachable, blocked, unsafe, sparse, or
+insufficient-evidence website—or for a failed AI-search test—the system must:
+
+1. state clearly what could not be assessed and why, where safe to disclose;
+2. avoid invented business, ICP, gap, or ranking findings;
+3. create a stored assessment-run status and machine-readable failure reason;
+4. offer the visitor a route to the SuccessByCS support email; and
+5. send an automated internal support notification if an address is configured.
+
+The support route is not a promise of manual report completion. The support
+email address, notification behaviour, and customer wording are decisions still
+required before implementation.
+
+## 5. Data required for MVP 1
+
+For each business and assessment run, retain only the data needed to provide,
+support, measure, and improve the requested assessment:
+
+- normalised domain and submitted URL;
+- UTC timestamps in ISO 8601 format and the Auckland-local display time used;
+- matched Auckland suburb, eligibility outcome, and suburb-reference-dataset
+  version used for the assessment;
+- customer record, assessment-run, and privacy-minimised visitor/abuse-event
+  records, including bot-check and rate-limit outcomes;
+- first-landing attribution: recognised UTM fields, landing path, and referrer
+  when provided, plus the attribution version and capture time;
+- business/site assessment and supporting page excerpts/URLs;
+- inferred buyer situations and their evidence;
+- tested ChatGPT Search question, complete response, ordered surfaced results,
+  available citations/source URLs, model/search context, and outcome;
+- email address when provided;
+- separate report-delivery and marketing-consent records;
+- pilot outreach contact source, consent basis/evidence, consent timestamp,
+  delivery, feedback, and suppression/unsubscribe records where applicable;
+- rate-limit events;
+- assessment and email-delivery status; and
+- automated failure reason/support-notification status where applicable.
+
+The report document itself must be retained with its assessment run, including
+the generated PDF, template version, generation timestamp, and integrity-safe
+storage reference. A lightweight Cloudflare-oriented candidate is D1 for
+relational customer, run, visitor, and metadata records plus R2 for the PDF
+object; this is an implementation choice to be confirmed during design, not a
+claim that those services are configured today.
+
+Retention period, deletion scope, backup handling, and privacy notice wording
+remain decisions required before public launch.
+
+## 6. Explicit MVP 1 non-goals
+
+MVP 1 does not include:
+
+- Stripe checkout or a payment gateway;
+- a fixed price or paid product promise;
+- manually produced reports or manual review required for normal delivery;
+- consulting delivery;
+- automated website, Google Business Profile, or third-party profile changes;
+- recurring monitoring;
+- client login/accounts;
+- a complex customer dashboard;
+- multiple AI platforms; or
+- a claim of an official, stable ChatGPT/OpenAI rank.
+
+## 7. Candidate acceptance scenarios
+
+| ID | Scenario | Required outcome |
+| --- | --- | --- |
+| M1-AC-01 | Owner submits a valid public Auckland small-business domain. | The system creates or reuses the one customer record for the normalised domain, stores an assessment run, and shows an automated, evidence-based preview before email capture. |
+| M1-AC-02 | Website evidence supports a business type and Auckland eligibility. | The system runs one dated Auckland-wide business-type ChatGPT Search test, records its complete provenance, and shows the actual surfaced order without claiming a universal rank. |
+| M1-AC-03 | ChatGPT Search returns fewer than three identifiable businesses. | The product states the actual result and does not manufacture a top three. |
+| M1-AC-04 | The submitted business is absent, mentioned, or described inaccurately. | The teaser states the observed outcome and cites/records the tested response. |
+| M1-AC-05 | A visitor chooses to receive the free assessment without marketing consent. | The email is delivered; no optional marketing consent is stored. |
+| M1-AC-06 | Website analysis or search cannot complete. | The visitor receives an honest automated outcome, the run is stored with a reason, and a support route is offered without promising manual fulfilment. |
+| M1-AC-07 | A domain exceeds the approved daily allowance. | The system refuses or delays the additional attempt with a clear rate-limit message and records the event. |
+| M1-AC-08 | A site provides a service-area suburb. | The system determines eligibility from the versioned Auckland suburb dataset and records the match or an honest unable-to-determine outcome. |
+| M1-AC-09 | Visitor enters an incorrectly formatted domain name. | The system rejects it before external processing or customer-record creation and explains the required format. |
+| M1-AC-10 | One source IP repeatedly submits the form. | The bot check and server-side IP/domain limits prevent excessive processing, record the decision, and return a safe rate-limit response. |
+| M1-AC-11 | A completed assessment is viewed by a customer. | Its stored machine timestamp is UTC ISO 8601; the teaser, email, and PDF show the equivalent Pacific/Auckland date and time. |
+| M1-AC-12 | An AI request would exceed its approved token, timeout, or cost limit. | The system stops safely, records a machine-readable limit outcome, and does not expose credentials or internal detail. |
+| M1-AC-13 | A free assessment report is generated. | The PDF and its versioned metadata are retained with the assessment run and meet the approved professional visual-template standard. |
+| M1-AC-14 | A visitor arrives through a UTM-tagged link and completes an assessment. | The recognised first-landing UTM values, path, and referrer are retained with the resulting assessment/customer record; unknown query parameters are not stored as attribution data. |
+| M1-AC-15 | A representative mobile and desktop visitor completes the MVP journey. | The approved Loveable design is recognisably ShortList rather than a generic template, uses purposeful small-business/search/AI visual references, and remains clear and accessible through submission, result, consent, and failure states. |
+| M1-AC-16 | The 10-business lawn-mowing pilot recruits a company by email or sends it a report. | The recipient has recorded consent before the commercial email is sent; the sender is identified, a functional unsubscribe route is included, and the feedback outcome is retained. |
+| M1-AC-17 | A business owner arrives at the live site and requests their own assessment. | They can complete the self-service domain, teaser, and opt-in email journey without pilot outreach or manual intervention. |
+
+## 8. Decisions still needed before requirements approval
+
+1. Is the proposed three-per-domain-per-Auckland-day limit correct, and what
+   additional IP/email/business protections are required?
+2. What exact ChatGPT Search capability, model/search context, location method,
+   cost ceiling, timeout, and failure threshold are acceptable?
+3. What counts as enough website evidence to generate a buyer question rather
+   than issue an insufficient-evidence result?
+4. What authoritative source and update owner define the versioned Auckland
+   suburb reference dataset, including locality aliases and boundary changes?
+5. What support email address, automated alert, privacy copy, retention period,
+   and deletion path apply?
+6. What constitutes MVP 1 success for each 10-business cohort: completed
+   checks, email capture rate,
+   qualitative value feedback, or a defined combination?
+7. When MVP 2 begins, what pricing research must be complete before the Stripe
+   Basic Assessment is offered?
+8. What IP-rate limit and visitor-event retention period balance abuse control,
+   conversion measurement, cost, and privacy?
+9. Which product domain should be purchased, and which sending/support email
+    address and mail domain should represent ShortList? These are separate
+    decisions: a product web domain identifies the public service; a sending
+    address is the authenticated origin for customer email.
+10. What approved token, timeout, and per-assessment cost limits apply to the
+    AI request?
+11. What brand assets and visual acceptance examples define “beautiful and
+    super-professional” for the PDF report?
+12. What visual references, tone boundaries, and examples should the Loveable
+    design use so that “quirky” remains credible for Auckland small-business
+    owners?
+13. Which consented recruitment channel and exact feedback question will be
+    used for the first 10 lawn-mowing businesses?
