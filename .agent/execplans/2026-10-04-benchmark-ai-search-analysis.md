@@ -15,8 +15,10 @@ requirements.
 
 - [x] (2026-10-04 13:25Z) Created this design/research ExecPlan after the
   Discovery gate (#4) was closed.
-- [ ] Collect official, current provider documentation and pricing evidence for
-  candidate web-search and structured-analysis capabilities.
+- [x] (2026-10-05) Collect official, current provider documentation and pricing
+  evidence for candidate web-search and structured-analysis capabilities;
+  record the documentation-only comparison in
+  `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
 - [ ] Define neutral, reproducible evaluation inputs and a safe local evidence
   format; obtain any required product-owner authority before making billable or
   live provider calls.
