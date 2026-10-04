@@ -20,7 +20,7 @@ requirements.
   record the documentation-only comparison in
   `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
 - [x] (2026-10-05) Expand the evidence design to a 67-configuration official-documentation
-  screen, a smaller controlled quality shortlist, and separate 1,000-API-call
+  screen, a controlled quality test set for documentary-qualified entries, and separate 1,000-API-call
   from 1,000-completed-assessment cost measures.
 - [x] (2026-10-05) Define the initial named 67-configuration market screen,
   including OpenAI Astra, Terra, and Luna, in
@@ -30,12 +30,13 @@ requirements.
 - [ ] For each of the 67 configurations, record the server-side API route,
   native-search or named paired-retrieval path, provenance support, structured
   output support, pricing, and availability/deprecation status.
-- [ ] Obtain product-owner approval for the normalized request profile, public
-  test set, search/retrieval pairing rules, and total spend cap before invoking
-  any billable API.
-- [ ] Run the approved, identical workflow test for each configuration that
+- [ ] Obtain product-owner approval for the usefulness threshold, normalized
+  request profile, public test set, search/retrieval pairing rules, and total
+  spend cap before invoking any billable API.
+- [ ] Run the approved, identical workflow test for every configuration that
   passes the documented search-path gate; record the quality-rubric result,
-  sources, usage, cost, latency, and failure outcome.
+  sources, usage, cost, latency, and failure outcome. Record configurations
+  that fail the documentary gate as excluded without a paid live test.
 - [ ] Define neutral, reproducible evaluation inputs and a safe local evidence
   format; obtain any required product-owner authority before making billable or
   live provider calls.
@@ -72,12 +73,11 @@ requirements.
   Rationale: The observed answer from one prompt/time/provider is a dated
   result, not a stable rank or a provider endorsement.
   Date/Author: 2026-10-04 / Chris's approved requirements, recorded by Codex.
-- Decision: Screen 67 documented model configurations, then test only a
-  comparable shortlist under an approved cap.
-  Rationale: Documentation can establish eligible technical options and public
-  pricing, whereas meaningful Auckland results, quality, and real workflow
-  cost need observed evidence. Testing all screened entries would conflate
-  market research with an unbounded billable experiment.
+- Decision: Screen all 67 configurations and test every configuration that
+  passes the documentary search-path gate, under an approved cap.
+  Rationale: Chris requires confirmation that every candidate which could form
+  the ShortList search-and-analysis workflow is actually useful. Documentary
+  failure excludes a configuration before it can create a billable test.
   Date/Author: 2026-10-05 / Chris's requested review scope, recorded by Codex.
 - Decision: Include OpenAI Astra, Terra, and Luna in the 67-configuration screen where
   their current API availability and pricing are documented.

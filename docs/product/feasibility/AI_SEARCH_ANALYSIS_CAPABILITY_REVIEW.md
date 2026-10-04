@@ -21,6 +21,23 @@ approved, capped live test.
 The product owner retains control of the customer-facing name for this result.
 This review records technical capability and provenance only.
 
+## Assumptions and decisions required
+
+| Topic | Current position | Status needed before live testing |
+| --- | --- | --- |
+| Runtime boundary | A production candidate must be a commercially usable, server-side API integration. Consumer chat use and browser automation are outside scope. | retained working boundary |
+| Candidate coverage | The 67 configurations are a market screen. A configuration means a base model plus a materially different reasoning effort or endpoint where applicable. | retained working boundary |
+| Qualification coverage | Every configuration must have documented API, search-path, provenance, structured-output, pricing, and availability/deprecation evidence. | required evidence |
+| Observed-test coverage | Every configuration that passes the documentary search-path gate must run the same controlled ShortList workflow test. Entries failing the documentary gate are recorded as excluded and do not incur a live test. | corrected execution rule |
+| “Useful” threshold | The rubric identifies dimensions but has no agreed score, evaluator, or maximum unsupported-claim threshold. | product-owner decision required |
+| Standard test workload | Input/output allowance, search-query cap, retries, timeouts, and whether retrieval is separate from analysis are not fixed. | product-owner decision required |
+| Test set | The number of Auckland questions, business types, public websites, repeat runs, and evaluation method are not fixed. | product-owner decision required |
+| Retrieval pairing | A non-native-search model may be paired with a named retrieval provider, but approved provider pairings are not fixed. | product-owner decision required |
+| Cost and authority | No total spend cap, accounts, credentials, or provider configurations are approved. | explicit approval required |
+| Provider terms | Commercial eligibility, data handling, regional availability, quotas, and current prices must be proven from official sources per configuration. | required evidence |
+
+No unresolved item in this table is silently converted into a product decision.
+
 ## Documentation comparison
 
 | Candidate approach | Documented search/provenance capability | Documented structured-analysis capability | Documented cost signal at retrieval | What live evidence must establish |
@@ -75,7 +92,7 @@ provider bills or behaves materially differently by reasoning effort or region,
 that combination is a separate comparison entry. It is not a quality ranking,
 provider selection, or a claim that every entry has the same search capability.
 Each entry must still pass official capability and pricing capture before it can
-enter the live-test shortlist.
+enter the live-test set.
 
 ## Mandatory per-configuration qualification
 
@@ -170,7 +187,7 @@ when it has not.
 The OpenAI 5.x entries are included for coverage, not presumed suitable for a
 new production dependency. The pricing pass must record their then-current API
 availability, deprecation state, and supported tools before they can be
-shortlisted. An older model that remains callable but has a published
+entered into live testing. An older model that remains callable but has a published
 replacement or retirement date will be compared for evidence only and not
 recommended as the default without an explicit exception.
 
@@ -182,7 +199,7 @@ itself satisfy the dated-search result. A search provider can still be paired
 with a different analysis model, which creates a provider *combination* rather
 than a single-model choice.
 
-### 2. Controlled quality test: a smaller comparable shortlist
+### 2. Controlled quality test set
 
 Documentation cannot tell us whether a result is meaningful for ShortList.
 Each configuration that passes the documentary search-path gate must undergo
@@ -243,9 +260,10 @@ retrieval and generated-answer pricing.
 
 ## Proposed controlled test, pending approval
 
-Before a live test, Chris should approve the providers to compare, a total
-spend cap, and the test set. The test should use the same small set of public,
-non-sensitive Auckland business queries for each chosen option and retain:
+Before a live test, Chris should approve a total spend cap, the test workload,
+the test set, and permitted retrieval pairings. The test should use the same
+public, non-sensitive Auckland business queries for every configuration that
+passes the documentary search-path gate and retain:
 
 - exact question and Auckland-local and UTC time;
 - configured location/context and capability or model identity;
