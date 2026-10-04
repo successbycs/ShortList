@@ -47,6 +47,11 @@ The command requires an explicit `OWNER/REPOSITORY`; it changes only the
 bounded template markers and records the selected values in an ignored local
 state file. See [the GitHub Issue workflow](docs/harness/GITHUB_ISSUE_WORKFLOW.md).
 
+After the bootstrapped baseline passes verification, follow the
+[New Project Guide](docs/template/NEW_PROJECT_GUIDE.md). It explains how to
+turn business requirements into durable product documents, milestones,
+dependency-ordered Issues, specifications, and ExecPlans before implementation.
+
 ## Optional upstream Symphony
 
 Symphony is an optional upstream preview integration, not the Python template
