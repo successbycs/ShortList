@@ -14,6 +14,7 @@ only after all documentary gates are evidenced from the cited official source.
 | Status | Meaning |
 | --- | --- |
 | pending | The exact configuration has not yet been verified from official documentation. |
+| partial | Some exact official evidence is captured, but at least one documentary gate remains open. |
 | documentary pass | Official documentation establishes the required API/search/provenance/format route; it remains untested. |
 | excluded | Official evidence establishes that the configuration cannot form the required workflow. |
 | observed pass/fail | A separately approved live test has run and its evidence is linked here. |
@@ -30,6 +31,24 @@ only after all documentary gates are evidenced from the cited official source.
 | 58–62 | xAI | [Grok 4.7 API guide](https://docs.x.ai/developers/grok-4-7) | Grok 4.7 documents server-side web and X search; capture citation/provenance behaviour and regional difference | Grok 4.7 documents structured outputs | pending exact effort/region evidence | not tested |
 | 63–64 | DeepSeek | [Models and pricing](https://api-docs.deepseek.com/quick_start/pricing/) | No native server-side web-search path evidenced in this register; evaluate a named paired retrieval provider | Exact structured-output evidence pending | pending per configuration | not tested |
 | 65–67 | Moonshot AI / Kimi | [Kimi API overview](https://www.kimi.ai/help/kimi-api/api-overview) | [Kimi Web Search APIs](https://www.kimi.ai/academy/best-practices-for-web-search); verify exact K3/K2.6 pairing | [Kimi JSON mode](https://www.kimi.ai/ja/help/kimi-api/api-model-capabilities); verify exact K3/K2.6 pairing | pending per configuration | not tested |
+
+## Individual evidence capture: OpenAI first pass
+
+All entries below are **partial** rather than viable. The cited official model
+pages establish a server-side Responses API route, structured outputs, and
+native web-search support. They do not establish Auckland usefulness,
+provenance quality in the ShortList workflow, latency, or a normalized
+per-assessment cost.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Remaining documentary work | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 11–13 | GPT-5.6 Terra, no/low/medium effort | [Model page](https://developers.openai.com/api/docs/models/gpt-5.6-terra) | Responses API; structured outputs; web search; US$2/M input and US$12/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
+| 17 | GPT-5.6 Sol | [Model page](https://developers.openai.com/api/docs/models/gpt-5.6-sol) | Responses API; structured outputs; web search; US$4/M input and US$20/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
+| 18 | GPT-5.6 Luna | [Model page](https://developers.openai.com/api/docs/models/gpt-5.6-luna) | Responses API; structured outputs; web search documented | exact price extraction, citation behaviour, location control, current availability, and normalized cost | not tested |
+| 19 | GPT-5.5 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.5) | Responses API; structured outputs; web search; US$5/M input and US$30/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
+| 21 | GPT-5.4 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.4) | Responses API; structured outputs; web search; US$2.50/M input and US$15/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
+| 22 | GPT-5.4 Mini | [Model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini) | Responses API; structured outputs; web search; US$0.75/M input and US$4.50/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
+| 24 | GPT-5.2 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.2) | Responses API and structured outputs documented | native web-search support is not established by this cited page; pricing, availability, and other gates remain open | not tested |
 
 ## Required fields for each individual configuration
 

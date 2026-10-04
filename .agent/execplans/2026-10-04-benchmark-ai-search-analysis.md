@@ -28,6 +28,9 @@ requirements.
 - [x] (2026-10-05) Create the durable provider-level evidence register at
   `docs/product/feasibility/AI_MODEL_QUALIFICATION_MATRIX.md`; preserve every
   individual configuration as pending until exact official evidence is captured.
+- [x] (2026-10-05) Capture first exact OpenAI evidence for GPT-5.6 Terra/Sol/
+  Luna, GPT-5.5, GPT-5.4, GPT-5.4 Mini, and GPT-5.2 in the qualification matrix;
+  retain every entry as partial and untested.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,
