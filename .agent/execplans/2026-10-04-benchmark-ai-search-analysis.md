@@ -62,6 +62,21 @@ promise or defer concrete provider selection to implementation design.
 - [x] (2026-10-05) Update Issue #23 with the documentary-only conclusion and
   leave it open for product-owner review. Evidence: GitHub comment
   `issuecomment-5984826269` and commit `9a444ff`.
+- [x] (2026-10-05) Add a current published-price snapshot for every model that
+  meets the narrow documented direct-route screen, and a clearly limited top
+  three documentation shortlist. No provider request was made.
+- [x] (2026-10-05) Add DeepSeek V4.1 Flash and V4 Pro to the pricing evidence
+  as server-side paired-retrieval candidates rather than excluding them for
+  lacking native web search.
+- [ ] Complete official published-price capture for every eligible backend API
+  in the 67-configuration list, then rank the three lowest model-token options
+  using one stated comparison unit and a light documented MVP suitability
+  screen. Keep optional search/retrieval charges separate; do not benchmark or
+  score actual model results.
+- [x] (2026-10-05) Derive illustrative prompts for MVP 1, MVP 2, and MVP 3;
+  define an MVP 1 normal planning profile of 9,000 input and 1,600 output
+  tokens with one search request; calculate rough model and published-tool
+  components for the currently priced candidates.
 
 ## Surprises & Discoveries
 
@@ -78,6 +93,11 @@ promise or defer concrete provider selection to implementation design.
   documentation alone cannot calculate that cost honestly.
   Evidence: `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`,
   “Cost comparison: two units, not one”.
+- Observation: Five named configurations currently have both an official
+  direct-route record and published model-plus-search pricing: GPT-6 Astra,
+  GPT-6.1 Sol, GPT-6 Luna, Gemini 3.8 Flash, and Grok 4.7.
+  Evidence: the pricing snapshot in
+  `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
 
 ## Decision Log
 
@@ -118,6 +138,34 @@ promise or defer concrete provider selection to implementation design.
   Rationale: Chris does not require a live test. The Issue is a
   documentation-only feasibility screen and must not create provider accounts,
   use credentials, make API calls, incur spend, or imply observed quality.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
+- Decision: Add published pricing only for configurations that meet the narrow
+  documented direct-route screen, and label the resulting top three as a
+  documentation shortlist rather than a quality ranking.
+  Rationale: Chris requested usable pricing and a top-three summary without
+  reintroducing provider calls or claiming unobserved quality.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
+- Decision: Include DeepSeek's backend API models in the price record as
+  paired-retrieval candidates.
+  Rationale: A native current-web-search tool is not required for a model to be
+  a viable backend analysis component, provided the eventual retrieval provider
+  is explicit and separately costed.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
+- Decision: Make server-side API availability and official published pricing,
+  rather than native web search, the eligibility rule for #23's price screen.
+  Rationale: Chris clarified that #23 compares model price, not a model's
+  ability to perform web search or its answer quality.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
+- Decision: Add a light documented general-suitability assessment to the price
+  screen.
+  Rationale: The MVP needs a credible model that can return a relevant
+  structured assessment, but #23 does not need an answer-quality benchmark.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
+- Decision: Use 9,000 input tokens, 1,600 output tokens, and one search
+  request as the normal MVP 1 rough-price comparison unit.
+  Rationale: The short query itself is not the material cost driver; bounded
+  public-page evidence and the structured assessment are. A hard 12,000 input
+  and 2,000 output planning cap remains visible for implementation design.
   Date/Author: 2026-10-05 / Chris, recorded by Codex.
 
 ## Outcomes & Retrospective

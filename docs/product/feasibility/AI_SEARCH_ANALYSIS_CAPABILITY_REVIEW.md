@@ -49,6 +49,110 @@ Pricing is a documented signal, not a ShortList budget or a promise. It can
 change and must be rechecked before any future provider selection or
 implementation.
 
+## Pricing snapshot
+
+This Issue is a **price-led MVP screen** with a light general-suitability check.
+It does not benchmark or score actual answers. A configuration is eligible when
+it has a usable server-side API, official published model pricing, and
+documentation that it can produce a structured, relevant text assessment from
+supplied evidence. Native search and retrieval design are separate product
+questions and do not exclude a backend model such as DeepSeek.
+
+All amounts are USD, retrieved 2026-10-05. Token rates are per one million
+tokens. Search rates are additional to model tokens. A single customer request
+may cause more than one search, so these figures are components, not a customer
+price or a cost estimate.
+
+| Candidate configuration(s) | Model tokens: input / output | General MVP suitability from documentation | Optional provider web-search charge |
+| --- | --- | --- | --- |
+| OpenAI GPT-6 Astra (IDs 1–4) | $10.00 / $50.00 | Strong general reasoning, structured output, and server-side tools are documented; expensive benchmark option. | $10 per 1,000 calls |
+| OpenAI GPT-6.1 Sol (IDs 5–7) | $2.00 / $10.00 | Documented as a balanced general-purpose model with structured output and server-side tools. | $10 per 1,000 calls |
+| OpenAI GPT-6 Luna (IDs 14–16) | $0.10 / $0.50 | Documented for focused, high-volume tasks with structured output and server-side tools; a credible low-cost MVP candidate. | $10 per 1,000 calls |
+| Google Gemini 3.8 Flash (ID 29) | $0.75 / $3.75 introductory rate through 2026-12-31 | Documented general API model with structured output and grounding support; credible MVP candidate. | First 5,000 shared Gemini 3.x search requests/month free, then $14 per 1,000 search requests |
+| xAI Grok 4.7 (IDs 58–62) | $2.00 / $6.00 | Documented frontier general model with structured output and server-side tools; credible but not low-cost. | $5 per 1,000 web-search calls |
+| DeepSeek-V4.1-Flash (ID 63) | Peak: $0.30 / $1.20; off-peak: $0.15 / $0.60 | Documented server-side model with JSON output and tool calls; credible low-cost MVP analysis candidate. | No provider search price recorded |
+| DeepSeek-V4-Pro-0813 (ID 64) | Peak: $1.32 / $3.96; off-peak: $0.66 / $1.98 | Documented server-side model with JSON output and tool calls; credible higher-capability comparison candidate. | No provider search price recorded |
+
+Official sources: [OpenAI pricing](https://platform.openai.com/pricing) and
+[GPT-6 Luna model page](https://developers.openai.com/api/docs/models/gpt-6-luna),
+[Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing) and
+[Gemini 3.8 Flash guidance](https://ai.google.dev/gemini-api/docs/latest-model),
+and [Grok 4.7](https://docs.x.ai/developers/grok-4-7) with [xAI tool
+pricing](https://docs.x.ai/developers/pricing).
+
+Official source for DeepSeek: [DeepSeek models and pricing](https://api-docs.deepseek.com/quick_start/pricing/). Peak and off-peak periods are provider-defined and may change.
+
+### Top three price options
+
+Not determined yet. A valid cheapest-three ranking needs the official price
+capture completed for all eligible backend APIs in the 67-configuration list,
+using the same comparison unit and the same light MVP suitability screen. The
+next section of this review will complete that vendor-by-vendor register. It
+will rank published **model-token cost** with a general capability flag, and
+will show optional search/retrieval charges separately rather than pretending
+they are part of a model's price.
+
+## Illustrative prompts and MVP 1 token budget
+
+These are planning examples, not customer-facing wording or approved product
+prompts. They show the difference in scope between the MVP stages. MVP 2 and
+MVP 3 remain future product decisions.
+
+| Stage | Illustrative prompt or search string | Purpose |
+| --- | --- | --- |
+| MVP 1 — free Minimum Assessment | `On 2026-10-05, identify three lawn-mowing businesses serving Auckland. Return only the business name, website URL where available, and source URLs. State uncertainty rather than inventing a rank.` | One dated, Auckland-wide comparison teaser based on the business type evidenced on the submitted website. |
+| MVP 1 — website assessment | `Using only the supplied public-page extracts for [domain], return a structured assessment: business name, apparent services, Auckland evidence, buyer situations marked as inference, trust evidence, strengths, opportunities, and insufficient-evidence flags.` | Creates the evidence-based assessment behind the teaser and free PDF. |
+| MVP 2 — future paid Basic Assessment | `For [domain], compare the available public evidence with businesses offering [business type] in [Auckland suburb]. Identify evidence-backed differentiation opportunities and cite the supplied sources. Do not state unsupported market facts.` | Illustrates the later, more segmented comparison; it is not approved MVP 1 scope. |
+| MVP 3 — future consulting | `Create a consulting discussion brief for [domain] from the stored assessment evidence, stated goals, and approved business context. Separate observations, hypotheses, options, and decisions required.` | Illustrates a human-led consulting input, not an automated MVP 1 promise. |
+
+### MVP 1 calculation basis
+
+The literal search string is only roughly 50–90 tokens, depending on the
+provider tokenizer. It is not the material cost driver. The website evidence,
+the response schema, and the generated assessment are. For a normal successful
+MVP 1 assessment, use this common comparison profile:
+
+| Component | Input tokens | Output tokens | Reason for allowance |
+| --- | ---: | ---: | --- |
+| Instructions, safe-output schema, and run metadata | 450 | — | Fixed backend instruction and structured fields. |
+| Dated Auckland search request and returned source context | 650 | 350 | One business-type query and a concise teaser/source response. |
+| Sanitised public-page extracts | 7,000 | — | A bounded selection of useful website text, rather than an entire site. |
+| Website-assessment instruction and evidence mapping | 900 | 900 | Structured findings, evidence/inference labels, strengths, and opportunities. |
+| PDF-ready summary | — | 350 | Concise final summary; deterministic PDF rendering itself uses no model tokens. |
+| **Normal planning total** | **9,000** | **1,600** | **One search request plus assessment.** |
+| **Hard planning cap** | **12,000** | **2,000** | Limit for unusually content-heavy but accepted sites. |
+
+The normal total is the comparison unit below. It is a planning estimate, not
+an observed usage figure. A later implementation must enforce a token cap and
+record actual provider usage, as already required by MVP1-ABUSE-001.
+
+### Rough MVP 1 model-cost comparison
+
+For each model: `9,000 / 1,000,000 × input price + 1,600 / 1,000,000 × output
+price`. The **model-only** column excludes any search/retrieval tool charge.
+The last column adds one provider-native search request only where that price
+is published. This is deliberately not a customer price, because a provider
+may execute more than one search and a paired retrieval service is not yet
+selected.
+
+| Model configuration | Model-only per MVP 1 assessment | Model-only per 1,000 assessments | With one published native-search request per assessment | Interpretation |
+| --- | ---: | ---: | ---: | --- |
+| OpenAI GPT-6 Astra | $0.1700 | $170.00 | $0.1800 / $180.00 | High-cost capability benchmark. |
+| OpenAI GPT-6.1 Sol | $0.0340 | $34.00 | $0.0440 / $44.00 | Mid-cost OpenAI option. |
+| OpenAI GPT-6 Luna | $0.0017 | $1.70 | $0.0117 / $11.70 | Lowest listed OpenAI model-token cost; search dominates the total. |
+| Google Gemini 3.8 Flash | $0.0128 | $12.75 | $0.0268 / $26.75 after the shared free-search allowance | Introductory token rate ends 2026-12-31; provider may run multiple billable searches. |
+| xAI Grok 4.7 | $0.0276 | $27.60 | $0.0326 / $32.60 | One web-search tool call included; US endpoint token use is higher. |
+| DeepSeek-V4.1-Flash — peak | $0.0046 | $4.62 | Not calculated: retrieval partner not selected | Low model-token cost; add the chosen retrieval provider later. |
+| DeepSeek-V4.1-Flash — off-peak | $0.0023 | $2.31 | Not calculated: retrieval partner not selected | Provider-defined off-peak rate; same retrieval caveat. |
+| DeepSeek-V4-Pro-0813 — peak | $0.0182 | $18.22 | Not calculated: retrieval partner not selected | Higher-cost DeepSeek comparison. |
+| DeepSeek-V4-Pro-0813 — off-peak | $0.0091 | $9.11 | Not calculated: retrieval partner not selected | Provider-defined off-peak rate; same retrieval caveat. |
+
+At this planning profile, the initial price-focused shortlist is **GPT-6 Luna,
+DeepSeek-V4.1-Flash, and Gemini 3.8 Flash**. This is a rough cost shortlist
+with a documented MVP-suitability check—not a measured quality ranking or a
+provider-selection decision. DeepSeek's final combined cost cannot be ranked
+fairly until its retrieval source is chosen.
+
 ## Expanded 67-configuration evaluation
 
 **Working assumption:** “AI CI implementation” means a server-side,

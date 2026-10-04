@@ -58,6 +58,23 @@ Follow [Authority and Guardrails](AUTHORITY_AND_GUARDRAILS.md) and
 not require a GitHub label: follow this workflow, the active task, actual
 dependencies, and acceptance evidence.
 
+### Project Status for user-directed work
+
+The GitHub Project Status field is the visible work-state record for a
+user-directed Codex session. It is separate from both Issue open/closed state
+and Symphony labels.
+
+- **Todo:** no active Codex work has started.
+- **In Progress:** Codex moves the Project item here as soon as the product
+  owner asks it to start active work on that Issue.
+- **Done:** only the product owner moves the Project item here, normally when
+  they are satisfied with the review and close the Issue.
+
+Codex does not move an item to Done, add an extra review status, or use Project
+Status as Symphony eligibility. If an Issue has no Project item, Codex records
+the work in its Issue comment and asks the product owner whether it should be
+added; it does not create a Project item without authority.
+
 **Deliberately started upstream Symphony dispatch** is separate. Its upstream
 configuration in `WORKFLOW.md` requires the `symphony:ready` label, and its
 additional eligibility criteria are canonical in
@@ -83,7 +100,9 @@ Follow [Definition of Done](DEFINITION_OF_DONE.md) for planning and verification
 Record observable results and remaining limits, create a local commit when
 appropriate, and leave completed work open for human review. Describe real
 blockers and the required action in comments. Do not create, require, change,
-or delete labels as part of this session workflow.
+or delete labels as part of this session workflow. For an existing Project item,
+move its Status to In Progress at the start of active user-directed work; do
+not move it to Done.
 
 For approved disruptive restarts, record the baseline and exact human recovery
 action before the session ends. A new user-directed session must perform the
