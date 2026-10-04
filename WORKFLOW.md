@@ -1,6 +1,6 @@
 ---
 # This is the official OpenAI Symphony v0.0.3 workflow format. It is consumed
-# by the upstream executable, not by the template's transitional Python code.
+# by the upstream executable, not by a repository-owned Python runtime.
 tracker:
   kind: github
   provider:

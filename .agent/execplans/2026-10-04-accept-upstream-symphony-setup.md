@@ -51,8 +51,8 @@ for human review.
 Pending the parent Issue handoff. The five required children have current
 evidence: #39 upstream installation/dashboard, #40 real task/restart, #41
 duplicate-runtime retirement, #13 copied-project operator operation, and #16
-lightweight planning policy. The next execution task after this handoff is #17,
-the final retrospective; #18 is the final human review.
+lightweight planning policy. The next execution task after this handoff is #44,
+the replacement final retrospective; #45 is the final human review.
 
 ## Context and Orientation
 
@@ -87,7 +87,7 @@ its predecessors are on `origin/main`; later child commits are local and must
 not be pushed without new authorization.
 
 Post a concise #5 matrix listing each requirement, evidence, status, and limit.
-The remaining work is the separately ordered #17 retrospective followed by #18
+The remaining work is the separately ordered #44 retrospective followed by #45
 human final review. No runtime process starts, label changes, dispatch,
 integration of #42's proposal, push, merge, deployment, or Issue closure occurs
 as part of parent acceptance.
@@ -138,5 +138,5 @@ runtime sequence and is historical, not the current parent contract.
 ## Interfaces and Dependencies
 
 No interface changes. #5 has five completed evidence children and now gates
-only #17 retrospective sequencing. #18 remains the final human review beneath
-#17. #43 is explicitly deferred host-service hardening outside this milestone.
+only #44 retrospective sequencing. #45 remains the final human review beneath
+#44. #43 is explicitly deferred host-service hardening outside this milestone.
