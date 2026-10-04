@@ -42,14 +42,3 @@ def test_workflow_requires_ready_and_symphony_eligibility_labels(tmp_path: Path)
     )
     with pytest.raises(WorkflowError, match="workflow_validation_error"):
         load_workflow(path)
-
-
-def test_workflow_rejects_parallel_worker_configuration(tmp_path: Path) -> None:
-    path = tmp_path / "WORKFLOW.md"
-    path.write_text(
-        "---\ntracker:\n  repository: owner/repo\nagent:\n  max_concurrent_agents: 2\n---\nwork\n",
-        encoding="utf-8",
-    )
-
-    with pytest.raises(WorkflowError, match="workflow_validation_error"):
-        load_workflow(path)

@@ -5,14 +5,14 @@ This ExecPlan is a living document and must be maintained under `.agent/PLANS.md
 ## Purpose / Big Picture
 
 Define the product contract required before Symphony can safely allocate real
-coding work to one worker and expose that lifecycle in a dashboard.
+coding work within configured capacity and expose that lifecycle in a dashboard.
 
 ## Progress
 
 - [x] (2026-10-04 04:42Z) Astra reviewed the current scheduler, runner, tracker, worktree, event-store, and #38 evidence path without making changes.
-- [x] (2026-10-04 04:43Z) Added the coordinator/dashboard specification with admission, verification, ownership, recovery, single-worker capacity, and dashboard requirements.
-- [x] (2026-10-04 04:44Z) Removed multi-worker allocation from the product contract at Chris's direction; effective capacity is permanently one.
-- [x] (2026-10-04 04:46Z) Enforced the single-worker upper bound in typed workflow validation and added a regression test rejecting `max_concurrent_agents: 2`; focused workflow/scheduler tests passed 13 tests and Markdown links passed.
+- [x] (2026-10-04 04:43Z) Added the coordinator/dashboard specification with admission, verification, ownership, recovery, capacity, and dashboard requirements.
+- [x] (2026-10-04 04:44Z) Retained the checked-in one-worker configuration as the safe baseline while preserving the base configurable-capacity model; no higher capacity is required or enabled.
+- [x] (2026-10-04 04:46Z) Reverted the temporary typed upper-bound enforcement at Chris's direction. The workflow's checked-in configuration remains one; focused workflow/scheduler tests passed 12 tests and Markdown links passed afterward.
 - [ ] Create a governed delivery Issue before implementation; this plan grants no runtime authority.
 
 ## Surprises & Discoveries
@@ -44,7 +44,8 @@ runner, tracker, worktree, and event-store components are in
 ## Plan of Work
 
 Create a governed delivery Issue. Implement a verified one-worker coordinator,
-then durable ownership/recovery, then the dashboard. Do not restore UI first.
+then durable ownership/recovery, then the dashboard. Only qualify a configured
+capacity increase if the owner later decides it is needed. Do not restore UI first.
 
 ## Concrete Steps
 
@@ -56,7 +57,7 @@ Expected: `Markdown links: passed`.
 
 ## Validation and Acceptance
 
-This documentation milestone passes when it defines safe single-worker
+This documentation milestone passes when it defines safe configured-capacity
 allocation, dashboard limits, and the required operational proofs. It
 does not claim any runnable capability.
 

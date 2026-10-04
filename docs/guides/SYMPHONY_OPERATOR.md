@@ -14,8 +14,8 @@ has all of these properties:
 
 - `runtime.live_dispatch: false` — calling `symphony serve` cannot admit work
   while this value is false.
-- `agent.max_concurrent_agents: 1` — Symphony is deliberately single-worker.
-  Parallel worker allocation is out of scope.
+- `agent.max_concurrent_agents: 1` — the checked-in safe baseline is one
+  worker. Any future increase requires the separate #24 safety qualification.
 - GitHub queue admission requires both `status:ready` and `symphony:ready`.
   Do not add, remove, or use labels as a shortcut around user-started coding
   work or a human approval gate.
@@ -74,7 +74,7 @@ afterward, and no label changes. Its evidence is recorded in #38 and #12.
 
 That demonstration is not a general scheduler activation and must not be
 re-run as a substitute for a real task. It establishes the one-worker safety
-baseline for safe single-worker operation.
+baseline before any separately qualified capacity increase.
 
 ## Recovery
 
