@@ -49,6 +49,13 @@ Implemented the read-only page and safe persisted-evidence API, removed mutation
 
 On 2026-10-04, fresh Docker verification reconfirmed the focused suite, complete verifier, and a real loopback health/start-stop proof with dispatch false. It does not satisfy the separate human-review prerequisite of #12.
 
+Scope superseded on 2026-10-04 by the repository owner: the dashboard UI is not
+a product-level requirement and has been retired under
+`2026-10-04-retire-symphony-dashboard-ui.md`. Durable scheduler event,
+reservation-recovery, and notification persistence remain because they support
+safe worker execution. This historical plan preserves its prior evidence; it
+does not authorize restoring the removed UI.
+
 ## Context and Orientation
 
 `src/app_template/symphony/service.py` owns SQLite EventStore and dashboard construction; the dashboard factory uses ReadOnlyTracker/Runner. `tests/unit/symphony/test_dashboard.py` covers persistence and service boundaries. `compose.yaml` publishes 127.0.0.1:8765 and uses an internal 0.0.0.0 bind. `WORKFLOW.md` disables live dispatch. Historical full-suite attempts inside the sandbox stalled and require a bounded rerun with appropriate permissions if needed.

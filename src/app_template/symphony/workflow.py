@@ -58,8 +58,6 @@ class AgentSettings(BaseModel):
 class RuntimeSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
     live_dispatch: bool = False
-    dashboard_host: str = "127.0.0.1"
-    dashboard_port: int = Field(default=8765, ge=1024, le=65535)
 
 
 class EmailNotificationSettings(BaseModel):

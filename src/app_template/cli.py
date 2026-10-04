@@ -27,9 +27,6 @@ def _parser() -> argparse.ArgumentParser:
     symphony_subcommands = symphony.add_subparsers(dest="symphony_command", required=True)
     validate = symphony_subcommands.add_parser("validate-workflow", help="Validate WORKFLOW.md")
     validate.add_argument("--workflow", type=Path, default=Path("WORKFLOW.md"))
-    dashboard = symphony_subcommands.add_parser("dashboard", help="Start the operator dashboard")
-    dashboard.add_argument("--workflow", type=Path, default=Path("WORKFLOW.md"))
-    dashboard.add_argument("--dry-run", action="store_true")
     serve = symphony_subcommands.add_parser("serve", help="Start the long-running scheduler")
     serve.add_argument("--workflow", type=Path, default=Path("WORKFLOW.md"))
     preflight = symphony_subcommands.add_parser(
@@ -77,22 +74,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             if args.symphony_command == "validate-workflow":
                 print(json.dumps({"status": "ok", "workflow": str(workflow.path)}, sort_keys=True))
                 return 0
-            service = (
-                SymphonyService.from_host_workflow(args.workflow)
-                if args.symphony_command in {"serve", "preflight"}
-                else SymphonyService.from_workflow(args.workflow)
-            )
-            if args.symphony_command == "dashboard":
-                if args.dry_run:
-                    print(
-                        json.dumps(
-                            {"status": "ok", "dashboard": service.scheduler.snapshot()},
-                            sort_keys=True,
-                        )
-                    )
-                    return 0
-                service.run_dashboard()
-                return 0
+            service = SymphonyService.from_host_workflow(args.workflow)
             if args.symphony_command == "preflight":
                 result = service.preflight()
                 print(json.dumps(result, sort_keys=True))

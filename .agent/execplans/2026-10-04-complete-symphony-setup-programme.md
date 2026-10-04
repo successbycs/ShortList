@@ -13,7 +13,7 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 - [x] (2026-10-04 02:34Z) Updated #10's existing ExecPlan with fresh container test, verifier, and loopback boundary evidence; Issue handoff remains to be posted.
 - [x] (2026-10-04 02:31Z) Revalidated #10 in locked Docker: 13 focused dashboard tests and the 77-test canonical verifier passed; the loopback HTTP proof passed while dispatch stayed false.
 - [x] (2026-10-04 02:36Z) Repaired the proof harness's ambient Compose audit-path interference, added a focused regression test, and re-ran its full local proof with zero failed supported rows.
-- [ ] Obtain explicit human review of #10 and all its stated prerequisite safety work before attempting #12.
+- [x] (2026-10-04 03:44Z) Retired #10’s non-required dashboard UI while preserving event/reservation recovery; dependent Issue contracts require update before #12.
 - [ ] Execute the dedicated safe #12 demonstration only after its human-review and dedicated-Issue prerequisites are satisfied; record its external GitHub boundary result.
 - [ ] Complete #13, #16, and #24 in that order, with their required reviews and evidence.
 - [x] (2026-10-04 02:45Z) Diagnosed the available #21 evidence without sending mail: the only local durable delivery is Issue #19, `sent`, one attempt, at 2026-10-02T09:02:49Z; #19 records recipient-confirmed receipt. The checked-in notifier is deliberately disabled, so no evidence links #21's report to a Symphony transition.
@@ -53,7 +53,13 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 
 ## Outcomes & Retrospective
 
-As of 2026-10-04, #10 has fresh locked-container, canonical, and real loopback dashboard evidence; #21 has an evidence gap recorded rather than a speculative SMTP diagnosis; and commit `7d8f723` repairs the proof harness so it remains valid under Compose. The programme is not ready for a completion claim: #12 needs human review of #10 and its other stated prerequisites; #13, #16, and #24 follow #12; #21 requires event correlation or separately authorized controlled receipt proof. #17 and #18 intentionally remain last.
+As of 2026-10-04, #10’s non-required UI has been retired while scheduler safety
+persistence remains; #21 has an evidence gap recorded rather than a speculative
+SMTP diagnosis; and commit `7d8f723` repairs the proof harness so it remains
+valid under Compose. The programme is not ready for a completion claim: #12
+needs its revised contract and a safe single-worker baseline; #13, #16, and #24
+follow #12; #21 requires event correlation or separately authorized controlled
+receipt proof. #17 and #18 intentionally remain last.
 
 ## Context and Orientation
 

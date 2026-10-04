@@ -1,22 +1,16 @@
-"""Service composition, local durable event evidence, and dashboard API."""
+"""Service composition and durable Symphony execution evidence."""
 
 from __future__ import annotations
 
 import asyncio
 import json
-import os
 import shutil
 import sqlite3
 import subprocess
 from datetime import UTC, datetime
-from html import escape
-from ipaddress import ip_address
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-
-from app_template.symphony.domain import Issue, RunRecord, RunResult
+from app_template.symphony.domain import RunRecord, RunResult
 from app_template.symphony.notifications import (
     HumanReviewNotifier,
     NotificationResult,
@@ -159,56 +153,6 @@ class EventStore:
             for row in rows
         ]
 
-    def dashboard_snapshot(self) -> dict[str, object]:
-        """Read an existing database without migration, creation or free-text run data."""
-        snapshot: dict[str, object] = {
-            "operations": [],
-            "active_reservations": [],
-            "notifications": [],
-        }
-        if not self.database.exists():
-            return snapshot
-        with sqlite3.connect(self.database.resolve().as_uri() + "?mode=ro", uri=True) as db:
-            tables = {row[0] for row in db.execute("SELECT name FROM sqlite_master")}
-            if "symphony_operational_events" in tables:
-                operations = []
-                for created, issue_id, kind, raw in db.execute(
-                    "SELECT created_at, issue_id, kind, details_json "
-                    "FROM symphony_operational_events ORDER BY id DESC LIMIT 100"
-                ):
-                    try:
-                        details = self._safe_details(kind, json.loads(raw))
-                    except (ValueError, TypeError):
-                        continue
-                    operations.append(
-                        {"created_at": created, "issue_id": issue_id, "kind": kind, **details}
-                    )
-                snapshot["operations"] = operations
-            if "symphony_reservations" in tables:
-                snapshot["active_reservations"] = [
-                    row[0]
-                    for row in db.execute(
-                        "SELECT issue_id FROM symphony_reservations "
-                        "WHERE status = 'active' ORDER BY issue_id"
-                    )
-                ]
-            if "symphony_notification_deliveries" in tables:
-                snapshot["notifications"] = [
-                    {
-                        "created_at": created,
-                        "issue_id": issue_id,
-                        "status": status,
-                        "attempts": attempts,
-                    }
-                    for created, issue_id, status, attempts in db.execute(
-                        "SELECT created_at, issue_id, status, attempts "
-                        "FROM symphony_notification_deliveries "
-                        "WHERE status IN ('pending', 'sent', 'disabled', 'failed') "
-                        "ORDER BY id DESC LIMIT 100"
-                    )
-                ]
-        return snapshot
-
     def append(self, record: RunRecord, result: RunResult | None) -> None:
         with self._connect() as connection:
             connection.execute(
@@ -311,35 +255,6 @@ class EventStore:
         ]
 
 
-class ReadOnlyTracker:
-    """Dashboard-safe tracker: never performs GitHub reads or writes."""
-
-    def candidates(self, required_labels: set[str]) -> list[Issue]:
-        return []
-
-    def get(self, issue_id: str) -> None:
-        return None
-
-    def comment(self, issue: object, body: str) -> None:
-        raise RuntimeError("dashboard-only service cannot write GitHub")
-
-    def claim(self, issue: object, *, status_label: str, terra_label: str) -> bool:
-        return False
-
-    def finish(self, issue: object, *, status_label: str) -> None:
-        raise RuntimeError("dashboard-only service cannot write GitHub")
-
-    def transition(self, issue: object, remove: str, add: str) -> None:
-        raise RuntimeError("dashboard-only service cannot write GitHub")
-
-
-class ReadOnlyRunner:
-    """Dashboard-safe runner: execution is available only in the host broker."""
-
-    async def run(self, *args: object, **kwargs: object) -> RunResult:
-        return RunResult(False, "dashboard-only service cannot run Codex")
-
-
 class SymphonyService:
     def __init__(
         self,
@@ -374,17 +289,6 @@ class SymphonyService:
         self.store.complete_notification(record.issue.id, transition_id, result)
 
     @classmethod
-    def from_workflow(cls, path: Path = Path("WORKFLOW.md")) -> SymphonyService:
-        """Construct the container-safe dashboard service without host adapters."""
-        workflow = load_workflow(path)
-        return cls(
-            workflow,
-            ReadOnlyTracker(),
-            ReadOnlyRunner(),
-            EventStore(workflow.path.parent / "var" / "symphony" / "events.sqlite3"),
-        )
-
-    @classmethod
     def from_host_workflow(cls, path: Path = Path("WORKFLOW.md")) -> SymphonyService:
         """Construct the only service variant permitted to execute Codex or GitHub writes."""
         workflow = load_workflow(path)
@@ -399,24 +303,8 @@ class SymphonyService:
         await self.scheduler.tick()
 
     async def serve(self) -> None:
-        import uvicorn
-
-        host = os.environ.get(
-            "SYMPHONY_DASHBOARD_HOST", self.workflow.config.runtime.dashboard_host
-        )
-        server = uvicorn.Server(
-            uvicorn.Config(
-                self.dashboard(),
-                host=host,
-                port=self.workflow.config.runtime.dashboard_port,
-            )
-        )
-        scheduler_task = asyncio.create_task(self.scheduler.serve())
-        try:
-            await server.serve()
-        finally:
-            scheduler_task.cancel()
-            await asyncio.gather(scheduler_task, return_exceptions=True)
+        """Run the scheduler; dispatch still remains disabled by workflow default."""
+        await self.scheduler.serve()
 
     def preflight(self) -> dict[str, object]:
         """Report executable/authentication prerequisites without credential output."""
@@ -440,79 +328,6 @@ class SymphonyService:
             "github_authenticated": github_authenticated,
             "dispatch_ready": dispatch_ready,
         }
-
-    def dashboard(self) -> FastAPI:
-        app = FastAPI(title="Symphony Operator Console")
-
-        @app.get("/health")
-        def health() -> dict[str, object]:
-            return {"status": "ok", "live_dispatch": self.workflow.config.runtime.live_dispatch}
-
-        @app.get("/api/status")
-        def status() -> dict[str, object]:
-            return self.store.dashboard_snapshot()
-
-        @app.get("/", response_class=HTMLResponse)
-        def index() -> str:
-            snapshot = self.store.dashboard_snapshot()
-            rows = []
-            for operation in snapshot["operations"]:
-                details = {
-                    key: value
-                    for key, value in operation.items()
-                    if key not in {"created_at", "issue_id", "kind"}
-                }
-                cells = [
-                    operation["created_at"],
-                    operation["issue_id"],
-                    operation["kind"],
-                    json.dumps(details, sort_keys=True),
-                ]
-                rows.append(
-                    "<tr>" + "".join(f"<td>{escape(str(cell))}</td>" for cell in cells) + "</tr>"
-                )
-            reservations = escape(
-                ", ".join(str(item) for item in snapshot["active_reservations"]) or "None"
-            )
-            body = "".join(rows) or '<tr><td colspan="4">No operational evidence yet.</td></tr>'
-            return (
-                '<!doctype html><html lang="en"><head><meta charset="utf-8">'
-                '<meta name="viewport" content="width=device-width, initial-scale=1">'
-                "<title>Symphony evidence</title><style>"
-                "body{font:16px system-ui;margin:2rem;color:#172b4d;background:#f5f7fa}"
-                "table{border-collapse:collapse;width:100%;background:white}"
-                "td,th{text-align:left;padding:.7rem;border:1px solid #cbd2dc;"
-                "overflow-wrap:anywhere}a{color:#0645ad}"
-                "</style></head><body><h1>Symphony operational evidence</h1>"
-                "<p>Read-only • Last 100 recorded events, newest first. "
-                "Refresh to read current evidence. This is not a live worker heartbeat.</p>"
-                '<p><a href="/">Refresh</a> · <a href="/api/status">JSON evidence</a></p>'
-                f"<p>Active reservations: {reservations}</p>"
-                "<table><caption>Persisted operations</caption><thead><tr>"
-                "<th>Recorded (UTC)</th><th>Issue</th><th>Event</th><th>Details</th>"
-                f"</tr></thead><tbody>{body}</tbody></table></body></html>"
-            )
-
-        return app
-
-    def run_dashboard(self) -> None:
-        import uvicorn
-
-        host = os.environ.get(
-            "SYMPHONY_DASHBOARD_HOST", self.workflow.config.runtime.dashboard_host
-        )
-        container_bind = host == "0.0.0.0" and Path("/.dockerenv").exists()
-        try:
-            loopback = host == "localhost" or ip_address(host).is_loopback
-        except ValueError:
-            loopback = False
-        if not (loopback or container_bind):
-            raise ValueError("Dashboard requires loopback or the container-only 0.0.0.0 bind")
-        uvicorn.run(
-            self.dashboard(),
-            host=host,
-            port=self.workflow.config.runtime.dashboard_port,
-        )
 
 
 def run_service(path: Path = Path("WORKFLOW.md")) -> None:

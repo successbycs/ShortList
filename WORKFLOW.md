@@ -17,10 +17,8 @@ agent:
   turn_timeout_seconds: 3600
   retry_backoff_seconds: 5
 runtime:
-  # Must be explicitly enabled after the dashboard and a dedicated Issue test are verified.
+  # Must be explicitly enabled only after the dedicated Issue test is reviewed.
   live_dispatch: false
-  dashboard_host: 127.0.0.1
-  dashboard_port: 8765
 notifications:
   email:
     # Delivery is opt-in. Configure host and the named runtime environment

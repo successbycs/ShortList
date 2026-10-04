@@ -12,19 +12,19 @@ prerequisites without printing credentials with `uv run app-template symphony
 preflight --require-dispatch`. The latter requires host `codex` and authenticated
 `gh`; it does not perform a task or enable dispatch.
 
-To expose the loopback-only operator API while dispatch remains disabled, run
-`docker compose --profile symphony up`. It binds the dashboard to
-`127.0.0.1:8765` and persists local state under ignored `var/symphony/`. Issue worktrees are created separately under `../var/symphony/workspaces`, outside the shared checkout; inspect them with `git worktree list` and remove only a clean task worktree through Symphony or `git worktree remove`.
-Stop it with `docker compose --profile symphony stop symphony`. Enable live
-dispatch only after the dedicated end-to-end demonstration is approved.
+The scheduler has no web interface. Its durable local state remains under ignored
+`var/symphony/`. Issue worktrees are created separately under
+`../var/symphony/workspaces`, outside the shared checkout; inspect them with
+`git worktree list` and remove only a clean task worktree through Symphony or
+`git worktree remove`. Enable live dispatch only after the dedicated end-to-end
+demonstration is approved.
 
 ### Restart-safe operational evidence
 
-The local `var/symphony/events.sqlite3` database records sanitized scheduling facts
-under the dashboard's `/api/status` `operations` data. These include fresh
-observations, admission decisions and queue age, claims, reservations, reviewed
-revision markers, and worker stops. It contains no runner prompts, transcripts,
-credentials, or email bodies.
+The local `var/symphony/events.sqlite3` database records sanitized scheduling
+facts: fresh observations, admission decisions and queue age, claims,
+reservations, reviewed revision markers, and worker stops. It contains no runner
+prompts, transcripts, credentials, or email bodies.
 
 If a host process ends after acquiring a reservation but before recording its worker
 stop, the next service instance retains that Issue's active reservation and refuses
@@ -57,11 +57,10 @@ or load a `.env` file automatically. Host-local credential loaders must remain
 outside Git and must not execute the source file as shell code.
 
 The notifier tries at most `max_attempts` (default two) for one human-review
-transition. Its result is stored in the local dashboard’s `/api/status`
-`notifications` data. A missing or failed mail configuration records a
-sanitized `failed` outcome, leaves the Issue in human review, and never reruns
-the completed implementation. Disable the capability again by setting
-`notifications.email.enabled: false`.
+transition. Its result is stored as a local durable notification record. A
+missing or failed mail configuration records a sanitized `failed` outcome,
+leaves the Issue in human review, and never reruns the completed implementation.
+Disable the capability again by setting `notifications.email.enabled: false`.
 
 ## Real local capability proof
 
@@ -74,9 +73,8 @@ sanitized ignored result, run:
 
 The proof invokes the installed CLI with valid and invalid configuration, writes
 and reopens a disposable SQLite audit database, runs the deterministic no-op
-demo, starts the disabled-dispatch Symphony dashboard on loopback and checks
-its clean shutdown, and tests the repository Markdown checker against good and
-temporary bad input. It does not call an external provider.
+demo, and tests the repository Markdown checker against good and temporary bad
+input. It does not call an external provider.
 
 Prefect, PyYAML runtime, and OpenAI Agents SDK provider capabilities are not
 default deployed services. The report labels them inactive or blocked; a real
@@ -84,15 +82,3 @@ provider request needs explicit account, credential, cost, data, and authority
 approval. Docker Compose proof is a separate operator action because Docker is
 host-owned: build an isolated project, request its loopback health endpoint,
 then stop that exact project.
-
-For the Docker boundary, use the exact isolated project name and clean it up:
-
-```bash
-docker compose --project-name issue30proof --profile symphony up --build --detach
-curl --fail http://127.0.0.1:8765/health
-docker compose --project-name issue30proof --profile symphony down
-```
-
-Expected health output is `{"status":"ok","live_dispatch":false}`. If the
-request fails, still run the exact `down` command before diagnosing the
-container logs.

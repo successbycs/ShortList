@@ -5,13 +5,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import socket
 import subprocess
 import sys
 import tempfile
-import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -57,80 +53,6 @@ def row(
         "observed": observed,
         "limitation": limitation,
     }
-
-
-def free_port() -> int:
-    with socket.socket() as listener:
-        listener.bind(("127.0.0.1", 0))
-        return int(listener.getsockname()[1])
-
-
-def dashboard_proof(workflow: Path, temporary: Path) -> dict[str, str]:
-    port = free_port()
-    proof_workflow = temporary / "WORKFLOW.md"
-    proof_workflow.write_text(
-        workflow.read_text(encoding="utf-8").replace(
-            "dashboard_port: 8765", f"dashboard_port: {port}"
-        ),
-        encoding="utf-8",
-    )
-    process = subprocess.Popen(
-        [
-            sys.executable,
-            "-m",
-            "app_template.cli",
-            "symphony",
-            "dashboard",
-            "--workflow",
-            str(proof_workflow),
-        ],
-        cwd=ROOT,
-        env={**os.environ, "SYMPHONY_DASHBOARD_HOST": "127.0.0.1"},
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    url = f"http://127.0.0.1:{port}/health"
-    ready = False
-    try:
-        for _ in range(50):
-            if process.poll() is not None:
-                break
-            try:
-                with urllib.request.urlopen(url, timeout=0.2) as response:
-                    ready = response.status == 200 and json.loads(response.read()) == {
-                        "status": "ok",
-                        "live_dispatch": False,
-                    }
-                if ready:
-                    break
-            except urllib.error.URLError:
-                time.sleep(0.1)
-    finally:
-        process.terminate()
-        try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
-    if not ready:
-        return row(
-            "FastAPI/Uvicorn dashboard",
-            "loopback HTTP /health",
-            "failed",
-            "health did not return expected payload",
-        )
-    try:
-        urllib.request.urlopen(url, timeout=0.2)
-    except urllib.error.URLError:
-        return row(
-            "FastAPI/Uvicorn dashboard",
-            "loopback HTTP /health and clean shutdown",
-            "passed",
-            "HTTP 200 while live; connection refused after exact child termination",
-        )
-    return row(
-        "FastAPI/Uvicorn dashboard", "clean shutdown", "failed", "endpoint remained reachable"
-    )
 
 
 def prove() -> list[dict[str, str]]:
@@ -198,8 +120,6 @@ def prove() -> list[dict[str, str]]:
                 f"exit={code}; outcome={payload.get('outcome')}",
             )
         )
-        rows.append(dashboard_proof(ROOT / "WORKFLOW.md", temporary))
-
     code, _ = command([sys.executable, "scripts/check_markdown_links.py"])
     rows.append(
         row(

@@ -21,6 +21,8 @@ main = MODULE.main
 @pytest.fixture
 def copied_template(tmp_path: Path) -> Path:
     root = Path(__file__).resolve().parents[2]
+    if (root / MODULE.STATE_FILE).exists():
+        pytest.skip("bootstrap self-tests require the unbootstrapped source template")
     destination = tmp_path / "template-copy"
     ignored = shutil.ignore_patterns(".git", ".venv", "var", "__pycache__")
     shutil.copytree(root, destination, ignore=ignored)
@@ -68,6 +70,12 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert 'repository = "example-owner/demo-app"' in (
         copied_template / "pyproject.toml"
     ).read_text(encoding="utf-8")
+    service = copied_template / "src" / "demo_app" / "symphony" / "service.py"
+    assert "from demo_app.symphony.domain import RunRecord, RunResult" in service.read_text(
+        encoding="utf-8"
+    )
+    proof = copied_template / "scripts" / "prove_deployed_software.py"
+    assert "from demo_app.audit import AuditStore" in proof.read_text(encoding="utf-8")
     result = subprocess.run(
         [sys.executable, "-c", "import demo_app; print(demo_app.__version__)"],
         cwd=copied_template,

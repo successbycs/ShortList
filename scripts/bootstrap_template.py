@@ -59,9 +59,11 @@ def _build_plan(
     files = (
         root / "pyproject.toml",
         root / "README.md",
+        root / "compose.yaml",
+        root / "scripts" / "prove_deployed_software.py",
         root / "src" / "app_template" / "config.py",
     )
-    files += tuple((root / "src" / "app_template").glob("*.py"))
+    files += tuple((root / "src" / "app_template").rglob("*.py"))
     files += tuple((root / "tests").rglob("*.py"))
     return BootstrapPlan(
         root,
