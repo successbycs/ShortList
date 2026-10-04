@@ -16,7 +16,7 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 - [ ] Obtain explicit human review of #10 and all its stated prerequisite safety work before attempting #12.
 - [ ] Execute the dedicated safe #12 demonstration only after its human-review and dedicated-Issue prerequisites are satisfied; record its external GitHub boundary result.
 - [ ] Complete #13, #16, and #24 in that order, with their required reviews and evidence.
-- [ ] Diagnose #21 without sending external email; record the exact missing authority or evidence.
+- [x] (2026-10-04 02:45Z) Diagnosed the available #21 evidence without sending mail: the only local durable delivery is Issue #19, `sent`, one attempt, at 2026-10-02T09:02:49Z; #19 records recipient-confirmed receipt. The checked-in notifier is deliberately disabled, so no evidence links #21's report to a Symphony transition.
 - [ ] Refresh #14's duplicate-scope verification if dependencies changed, then leave it for human review.
 - [ ] Refresh the final #17 retrospective only after every earlier Set-up task is evidenced or explicitly blocked; #18 is the last human review and may scope, but not execute, next-milestone work.
 - [ ] Post a #5 parent handoff listing evidence, commits, exact verification, reviews, and unresolved blockers. Leave all completed Issues open for human review.
@@ -33,6 +33,8 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
   Evidence: `var/proofs/issue-5-dashboard-20261004.json` showed `exit=0; event_reopened=False`, while `compose.yaml` supplies that environment variable and `src/app_template/config.py` gives environment higher precedence than TOML.
 - Observation: After removing only that ambient variable from the proof child environment, all supported proof rows passed, including SQLite reopen and actual loopback dashboard start/stop.
   Evidence: `docker compose run --rm app uv run python scripts/prove_deployed_software.py --output var/proofs/issue-5-dashboard-20261004.json` returned `{"failed": 0, ...}` on 2026-10-04.
+- Observation: The reported #21 non-receipt cannot be reproduced as a failed Symfony email delivery from the available durable state. The only persisted delivery is the successful controlled #19 receipt test, while checked-in `WORKFLOW.md` keeps email disabled.
+  Evidence: Read-only SQLite query on `var/symphony/events.sqlite3` returned `[('19', 'sent', 1, '2026-10-02T09:02:49.046845+00:00)]`; Issue #19's latest controlled-test handoff records recipient confirmation.
 
 ## Decision Log
 
@@ -45,10 +47,13 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 - Decision: Do not send a test email while investigating #21 without a recipient and explicit authority for an external message.
   Rationale: A real provider request is externally visible and the Issue supplies neither a test address nor current send authorization.
   Date/Author: 2026-10-04 / Codex
+- Decision: Classify #21 as insufficiently correlated rather than as proof that SMTP is broken.
+  Rationale: A successful recipient-confirmed provider test exists for #19, but there is no #21 issue ID, transition, timestamp, or persisted failed/disabled delivery to diagnose.
+  Date/Author: 2026-10-04 / Codex
 
 ## Outcomes & Retrospective
 
-Pending. The programme is not ready for a completion claim until the child evidence and required human reviews are present. This section will name any remaining blocked boundary explicitly.
+As of 2026-10-04, #10 has fresh locked-container, canonical, and real loopback dashboard evidence; #21 has an evidence gap recorded rather than a speculative SMTP diagnosis; and commit `7d8f723` repairs the proof harness so it remains valid under Compose. The programme is not ready for a completion claim: #12 needs human review of #10 and its other stated prerequisites; #13, #16, and #24 follow #12; #21 requires event correlation or separately authorized controlled receipt proof. #17 and #18 intentionally remain last.
 
 ## Context and Orientation
 
