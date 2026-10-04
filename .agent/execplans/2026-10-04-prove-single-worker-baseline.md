@@ -10,7 +10,7 @@ Before enabling the requested multi-worker Symphony runtime, establish one trust
 
 - [x] (2026-10-04 03:55Z) Changed checked-in and typed default concurrency from two to one and added a regression test for two independent eligible Issues.
 - [x] (2026-10-04 03:57Z) Focused scheduler/workflow suite passed 12 tests and workflow validation passed. Full canonical verification remains to run after the dedicated test Issue preparation is recorded.
-- [ ] Create one dedicated no-dispatch GitHub test Issue and record its exact identifier.
+- [x] (2026-10-04 04:00Z) Created dedicated child Issue [#38](https://github.com/successbycs/template/issues/38) under #12 with no labels and an explicit no-general-dispatch safety contract.
 - [ ] Run the revised #12 clean scheduler/restart/dedicated-Issue proof only after its external test target and authority are confirmed.
 - [ ] Record the result in #12, the verification matrix, and this plan; leave dispatch false.
 
@@ -65,7 +65,7 @@ Local tests are repeatable. The dedicated test Issue will be explicitly named an
 
 ## Artifacts and Notes
 
-Store exact test counts, dedicated Issue URL, local commit, and external observations in this plan and #12. Do not include credentials, prompts, transcripts, or email content.
+Store exact test counts, dedicated Issue URL, local commit `dede0fb`, and external observations in this plan and #12. Do not include credentials, prompts, transcripts, or email content.
 
 ## Interfaces and Dependencies
 

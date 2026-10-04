@@ -11,7 +11,7 @@ The repository owner has removed the value case for the #10 browser dashboard. T
 - [x] (2026-10-04 03:22Z) Revalidated that the dashboard is not a product-template requirement and identified every current UI-specific source, test, configuration, Compose, guide, specification, and proof reference.
 - [x] (2026-10-04 03:44Z) Removed dashboard-only runtime/UI code while retaining `EventStore`, scheduler callbacks, reservation recovery, and notification persistence.
 - [x] (2026-10-04 03:44Z) Removed dashboard-specific configuration, Compose service, CLI command, active documentation/specification, tests, bootstrap rewrite assertion, and proof-harness row.
-- [ ] Update #10 and the dependent #12, #13, and #16 Issue contracts to remove dashboard requirements; cancel #10 as not planned.
+- [x] (2026-10-04 03:49Z) Updated #12, #13, and #16 contracts to remove dashboard criteria and closed #10 as `not planned` with the scoped-removal evidence.
 - [ ] Run focused scheduler/event-store/CLI/bootstrap tests plus the canonical verifier, then record evidence in the plan and Issues.
 
 ## Surprises & Discoveries
@@ -36,11 +36,11 @@ The repository owner has removed the value case for the #10 browser dashboard. T
 
 ## Outcomes & Retrospective
 
-The dormant dashboard is removed. The retained scheduler remains disabled for
-dispatch by default and preserves its durable safety records. Focused tests
-passed 43 tests; the canonical verifier passed Ruff, format, 70 tests, and
-Markdown links. The remaining work is the external Issue-contract update and
-human review of this scope change.
+The dormant dashboard is removed and #10 is cancelled. The retained scheduler
+remains disabled for dispatch by default and preserves its durable safety
+records. Focused tests passed 43 tests; the canonical verifier passed Ruff,
+format, 70 tests, and Markdown links. #12, #13, and #16 now exclude UI
+requirements. Human review remains required for later worker activation work.
 
 ## Context and Orientation
 
