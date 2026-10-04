@@ -37,9 +37,13 @@ OpenAI, process payments, send email, or create public pages.
   replaced the stale paid-MVP draft in `docs/product/REQUIREMENTS.md` with a
   canonical review draft that maps the agreed MVP 1 baseline to stable IDs,
   owners, priorities, and observable evidence; deferred choices remain visible.
+- [x] (2026-10-04 13:15Z) After formal requirements approval, replaced the
+  product-document templates with an MVP 1 brief, assumptions register, user
+  stories, glossary, and decision-gated roadmap for Issue #3. No architecture
+  or provider decisions were added.
 - [ ] (requires product-owner review) Approve or amend the canonical MVP 1
-  requirements draft in Issue #1, then progress to Issue #2 for formal scope
-  approval.
+  product-definition documents in Issue #3, then progress to the Discovery
+  gate in Issue #4.
 - [ ] (after requirements approval) Create the MVP scope, architecture, assumptions, user stories, data/prompt contracts, and delivery plan as separate reviewed documents.
 - [ ] (after product-definition approval) Propose dependency-ordered GitHub milestones and Issues; do not create them without explicit approval.
 
