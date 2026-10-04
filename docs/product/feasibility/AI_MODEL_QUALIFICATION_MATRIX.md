@@ -50,6 +50,24 @@ per-assessment cost.
 | 22 | GPT-5.4 Mini | [Model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini) | Responses API; structured outputs; web search; US$0.75/M input and US$4.50/M output listed | tool-call price, citation behaviour, location control, current availability, and normalized cost | not tested |
 | 24 | GPT-5.2 | [Model page](https://developers.openai.com/api/docs/models/gpt-5.2) | Responses API and structured outputs documented | native web-search support is not established by this cited page; pricing, availability, and other gates remain open | not tested |
 
+## Individual evidence capture: Google Gemini first pass
+
+All entries below remain **partial** and untested. Google's model catalogue
+provides the current API identifiers and lifecycle state; its Grounding with
+Google Search guide explicitly names the configurations with native search
+support. Its structured-output guide demonstrates JSON-schema response formats
+with Gemini 3.8 Flash, but this documentation pass does **not** establish that
+every listed configuration supports the exact combined grounded-search plus
+structured-analysis workflow. A live test is still required after approval.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Remaining documentary work | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 29 | Gemini 3.8 Flash (`gemini-3.8-flash`) | [Model catalogue](https://ai.google.dev/gemini-api/docs/models), [Search grounding](https://ai.google.dev/gemini-api/docs/google-search), [structured output](https://ai.google.dev/gemini-api/docs/structured-output), [pricing](https://ai.google.dev/gemini-api/docs/pricing) | Current stable API model; native Google Search grounding with citations is documented; JSON-schema response format is documented; listed at US$0.75/M input and US$4.50/M output. Paid search is 5,000 shared Gemini 3.x requests/month then US$14/1,000 requests. | citation payload retention, Auckland/location control, combined tool-and-schema compatibility, current availability for the selected account, and normalized cost | not tested |
+| 30–33 | Gemini 3.7 Flash, 3.6 Flash, 3.5 Flash, 3.5 Flash-Lite | [Model catalogue](https://ai.google.dev/gemini-api/docs/models), [Search grounding supported-model table](https://ai.google.dev/gemini-api/docs/google-search), [pricing](https://ai.google.dev/gemini-api/docs/pricing) | Current stable API identifiers and native Google Search grounding are documented. | exact structured-output support, per-model token price extraction, citation payload retention, Auckland/location control, and normalized cost | not tested |
+| 34 | Gemini 3.1 Flash-Lite | [Model catalogue](https://ai.google.dev/gemini-api/docs/models), [Search grounding supported-model table](https://ai.google.dev/gemini-api/docs/google-search), [pricing](https://ai.google.dev/gemini-api/docs/pricing) | Current stable API model and token prices are documented; it is absent from Google's native Search-grounding supported-model table. | an approved named paired-retrieval path, exact structured-output support, provenance, availability, and normalized combined cost | not tested |
+| 35–36 | Gemini 3.1 Pro Preview, Gemini 3 Flash Preview | [Model catalogue](https://ai.google.dev/gemini-api/docs/models), [Search grounding supported-model table](https://ai.google.dev/gemini-api/docs/google-search) | Native Google Search grounding is documented. Both are preview endpoints; Google says preview models can have tighter rate limits and shorter deprecation notice. | exact structured-output support, pricing, citation payload retention, Auckland/location control, and acceptance of preview lifecycle risk | not tested |
+| 37–39 | Gemini 2.5 Pro, 2.5 Flash, 2.5 Flash-Lite | [Model catalogue access note](https://ai.google.dev/gemini-api/docs/models), [Search grounding supported-model table](https://ai.google.dev/gemini-api/docs/google-search), [pricing](https://ai.google.dev/gemini-api/docs/pricing) | Native Google Search grounding is documented, but Google limits 2.5 API access to users who actively used those models in the past and recommends 3.5 Flash-Lite or 3.8 Flash for new projects. | evidence that the intended ShortList account qualifies for access; exact structured-output support, pricing, provenance, location control, and normalized cost. Do not treat these as available to a new project without that evidence. | not tested |
+
 ## Required fields for each individual configuration
 
 The next collection pass expands each candidate ID into these fields. It must
