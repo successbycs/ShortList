@@ -41,6 +41,9 @@ requirements.
 - [x] (2026-10-05) Capture first Anthropic and Cohere evidence: record
   Anthropic's cited server-side web-search/cost path without assuming exact
   model compatibility, and retain Cohere only as a paired-retrieval option.
+- [x] (2026-10-05) Capture first xAI, DeepSeek, and Kimi evidence: document
+  Grok 4.7's native tool path, retain DeepSeek as paired retrieval only, and
+  distinguish Kimi's model API from its separate source-returning search API.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,

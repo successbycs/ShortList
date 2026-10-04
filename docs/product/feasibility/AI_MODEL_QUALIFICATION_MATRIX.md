@@ -110,6 +110,47 @@ retrieval provider.
 | 54 | Command A+ | [Model page](https://docs.cohere.com/docs/command-a-plus), [pricing overview](https://docs.cohere.com/docs/how-does-cohere-pricing-work) | Cohere documents citations, tool use, and structured outputs for Command A+; its model page says it can be used in production through Model Vault and is free until the relevant rate limit. | partial — approved paired retrieval, current commercial/API path and price after rate limits, source/provenance retention, location control, and normalized combined cost | not tested |
 | 55–57 | Command A; Command R7B; Command R | [Model/pricing overview](https://docs.cohere.com/docs/how-does-cohere-pricing-work) | Cohere lists these as generative API models priced on input/output tokens. | partial — exact structured-output/citation support, approved paired retrieval, API availability and price, provenance/location control, and normalized combined cost | not tested |
 
+## Individual evidence capture: xAI first pass
+
+The exact Grok 4.7 API model page documents the named reasoning efforts,
+Responses API, native web-search tool, token prices, and a separate US endpoint.
+The web-search guide shows a server-side API request and citations. This is
+still **partial**: documentation does not prove the ShortList result quality,
+Auckland relevance, total tool charge, or that the exact combined search and
+structured-analysis request is reliable.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 58–61 | Grok 4.7 standard endpoint — low, medium, high, xhigh effort | [Grok 4.7 model page](https://docs.x.ai/developers/grok-4-7), [web search](https://docs.x.ai/developers/tools/web-search) | `grok-4.7` supports the Responses API, low/medium/high/xhigh effort, native web search and a cited response. Published price is US$2/M input and US$6/M output. | partial — structured-output request details, web-tool pricing, citation retention, Auckland/location control, account availability, and normalized workflow cost | not tested |
+| 62 | Grok 4.7 US regional endpoint — high effort | [Grok 4.7 model page](https://docs.x.ai/developers/grok-4-7), [web search](https://docs.x.ai/developers/tools/web-search) | xAI documents `https://us.api.x.ai/v1` as keeping inference in the United States with a 10% token-price premium; model/tool evidence is otherwise as above. | partial — same requirements as IDs 58–61, plus whether the US-only data route meets the selected product/data policy | not tested |
+
+## Individual evidence capture: DeepSeek first pass
+
+DeepSeek's current API documentation confirms both named models have
+server-side OpenAI- and Anthropic-compatible API routes, JSON output, tool
+calls, and published peak/off-peak token prices. No native current-web search
+or source-provenance service is established in this register. The models can
+only enter a ShortList workflow with an approved, named, separately costed
+retrieval provider.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 63 | DeepSeek-V4.1-Flash (`deepseek-flash`) | [Model/pricing reference](https://api-docs.deepseek.com/quick_start/pricing/), [JSON output](https://api-docs.deepseek.com/guides/json_mode/) | Server-side API, JSON output, tool calls, 1M context; peak US$0.30/M cache-miss input and US$1.20/M output, half that off peak. | partial — approved paired retrieval, source/citation retention, location control, availability, JSON schema reliability, and normalized combined cost | not tested |
+| 64 | DeepSeek-V4-Pro-0813 (`deepseek-v4-pro`) | [Model/pricing reference](https://api-docs.deepseek.com/quick_start/pricing/), [JSON output](https://api-docs.deepseek.com/guides/json_mode/) | Server-side API, JSON output, tool calls, 1M context; peak US$1.32/M cache-miss input and US$3.96/M output, half that off peak. | partial — approved paired retrieval, source/citation retention, location control, availability, JSON schema reliability, and normalized combined cost | not tested |
+
+## Individual evidence capture: Moonshot AI / Kimi first pass
+
+Kimi documents a model API and a distinct Web Search API. The model API does
+not access the internet by default. The separate search API returns a title,
+URL, site, date, snippet and relevance-scored chunks. That creates a named
+retrieval-plus-analysis candidate, but not evidence that the model itself
+performs web search.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 65 | Kimi K3 (`kimi-k3`) | [API overview](https://www.kimi.ai/help/kimi-api/api-overview), [Web Search API](https://www.kimi.ai/academy/best-practices-for-web-search), [JSON mode](https://www.kimi.ai/help/kimi-api/api-model-capabilities) | Chat Completions API is documented; K3 has a stated 1M-token context. Kimi documents valid-JSON mode. Its separate Web Search API returns source URLs and dates. | partial — confirm K3-to-Search API pairing and commercial pricing, source/citation presentation, location controls, search timeout/cost, and normalized combined cost | not tested |
+| 66–67 | Kimi K2.6 — thinking and non-thinking modes | [API overview](https://www.kimi.ai/help/kimi-api/api-overview), [Web Search API](https://www.kimi.ai/academy/best-practices-for-web-search), [JSON mode](https://www.kimi.ai/help/kimi-api/api-model-capabilities) | K2.6 is documented with thinking and non-thinking modes; the same separate Kimi Web Search API and JSON mode are documented. | partial — exact endpoint/model-mode pairing, commercial pricing, source/citation presentation, location controls, search timeout/cost, and normalized combined cost | not tested |
+
 ## Required fields for each individual configuration
 
 The next collection pass expands each candidate ID into these fields. It must
