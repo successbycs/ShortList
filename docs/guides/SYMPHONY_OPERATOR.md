@@ -27,6 +27,10 @@ safe baseline is deliberately narrow:
   normal repository setup, but approvals and MCP elicitation are rejected.
 - The worker workspace and runtime logs live below ignored `var/`; they are not
   the repository checkout.
+- The workspace hook clones the current committed local checkout by default.
+  This permits review of unpushed local integration commits without exposing
+  the operator's uncommitted files. Set `SYMPHONY_SOURCE_REPO` to an explicit
+  committed source repository only when an operator intends a different base.
 
 An empty eligible queue is the normal safe state. Starting the service in that
 state proves connectivity and the dashboard only; it does not prove task

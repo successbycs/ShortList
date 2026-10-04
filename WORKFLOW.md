@@ -16,7 +16,7 @@ workspace:
   root: $SYMPHONY_WORKSPACE_ROOT
 hooks:
   after_create: |
-    git clone --depth 1 https://github.com/successbycs/template.git .
+    git clone --no-hardlinks "$SYMPHONY_SOURCE_REPO" .
 agent:
   max_concurrent_agents: 1
   max_turns: 20

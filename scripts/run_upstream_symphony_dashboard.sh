@@ -28,6 +28,7 @@ binary="$("${installer}" --print-path)"
 mkdir -p "${workspace_root}" "${logs_root}"
 
 export SYMPHONY_WORKSPACE_ROOT="${workspace_root}"
+export SYMPHONY_SOURCE_REPO="${SYMPHONY_SOURCE_REPO:-${root}}"
 printf 'Starting upstream Symphony dashboard at http://127.0.0.1:%s/\n' "${port}"
 printf 'State API: http://127.0.0.1:%s/api/v1/state\n' "${port}"
 exec "${binary}" \
