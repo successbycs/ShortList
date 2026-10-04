@@ -19,9 +19,12 @@ requirements.
   evidence for candidate web-search and structured-analysis capabilities;
   record the documentation-only comparison in
   `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
-- [x] (2026-10-05) Expand the evidence design to a 20-model official-documentation
+- [x] (2026-10-05) Expand the evidence design to a 50-configuration official-documentation
   screen, a smaller controlled quality shortlist, and separate 1,000-API-call
   from 1,000-completed-assessment cost measures.
+- [x] (2026-10-05) Define the initial named 50-configuration market screen,
+  including OpenAI Astra, Terra, and Luna, in
+  `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`.
 - [ ] Collect and normalize official API capability and pricing evidence for 20
   named model configurations.
 - [ ] Obtain product-owner approval for the normalized request profile, live-test
@@ -62,14 +65,14 @@ requirements.
   Rationale: The observed answer from one prompt/time/provider is a dated
   result, not a stable rank or a provider endorsement.
   Date/Author: 2026-10-04 / Chris's approved requirements, recorded by Codex.
-- Decision: Screen 20 documented model configurations, then test only a
+- Decision: Screen 50 documented model configurations, then test only a
   comparable shortlist under an approved cap.
   Rationale: Documentation can establish eligible technical options and public
   pricing, whereas meaningful Auckland results, quality, and real workflow
   cost need observed evidence. Testing all screened entries would conflate
   market research with an unbounded billable experiment.
   Date/Author: 2026-10-05 / Chris's requested review scope, recorded by Codex.
-- Decision: Include OpenAI Astra, Terra, and Luna in the 20-model screen where
+- Decision: Include OpenAI Astra, Terra, and Luna in the 50-configuration screen where
   their current API availability and pricing are documented.
   Rationale: They are server-side model candidates as well as models familiar
   from Codex development sessions, and create a useful capability/cost range

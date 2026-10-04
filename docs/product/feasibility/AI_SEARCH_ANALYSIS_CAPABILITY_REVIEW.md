@@ -35,7 +35,7 @@ Pricing is a documented signal, not a ShortList budget or a promise. It can
 change and must be rechecked immediately before any live test or provider
 selection.
 
-## Expanded 20-model evaluation
+## Expanded 50-configuration evaluation
 
 **Working assumption:** “AI CI implementation” means a server-side,
 commercially usable API integration for this product. It does not mean a
@@ -45,9 +45,9 @@ interpretation if “CI” means something else.
 
 The comparison will have two deliberately separate stages.
 
-### 1. Documentation screen: 20 named model configurations
+### 1. Documentation screen: 50 named model configurations
 
-The next evidence update will catalogue 20 currently offered, server-side
+The next evidence update will catalogue 50 currently offered, server-side
 model configurations across multiple providers. Each entry must have a direct
 official source and record:
 
@@ -68,7 +68,71 @@ Responses API and SDKs, and documents Astra with web-search and structured-
 output support; the exact model IDs, availability, and current pricing will be
 captured against the official model catalogue at the time of the screen.
 
-Twenty models are a market screen, not a promise that all twenty are
+### Initial 50-configuration candidate list
+
+This is the named market-screen list. “Configuration” is intentional: where a
+provider bills or behaves materially differently by reasoning effort or region,
+that combination is a separate comparison entry. It is not a quality ranking,
+provider selection, or a claim that every entry has the same search capability.
+Each entry must still pass official capability and pricing capture before it can
+enter the live-test shortlist.
+
+| # | Provider | Candidate model configuration |
+| ---: | --- | --- |
+| 1 | OpenAI | GPT-6 Astra — low effort |
+| 2 | OpenAI | GPT-6 Astra — medium effort |
+| 3 | OpenAI | GPT-6 Astra — high effort |
+| 4 | OpenAI | GPT-6 Astra — max effort |
+| 5 | OpenAI | GPT-6.1 Sol — low effort |
+| 6 | OpenAI | GPT-6.1 Sol — medium effort |
+| 7 | OpenAI | GPT-6.1 Sol — high effort |
+| 8 | OpenAI | GPT-6 Sol — low effort |
+| 9 | OpenAI | GPT-6 Sol — medium effort |
+| 10 | OpenAI | GPT-6 Sol — high effort |
+| 11 | OpenAI | GPT-5.6 Terra — no reasoning |
+| 12 | OpenAI | GPT-5.6 Terra — low effort |
+| 13 | OpenAI | GPT-5.6 Terra — medium effort |
+| 14 | OpenAI | GPT-6 Luna — no reasoning |
+| 15 | OpenAI | GPT-6 Luna — low effort |
+| 16 | OpenAI | GPT-6 Luna — medium effort |
+| 17 | Google | Gemini 3.8 Flash |
+| 18 | Google | Gemini 3.7 Flash |
+| 19 | Google | Gemini 3.6 Flash |
+| 20 | Google | Gemini 3.5 Flash |
+| 21 | Google | Gemini 3.5 Flash-Lite |
+| 22 | Google | Gemini 3.1 Flash-Lite |
+| 23 | Google | Gemini 3.1 Pro Preview |
+| 24 | Google | Gemini 3 Flash Preview |
+| 25 | Google | Gemini 2.5 Pro |
+| 26 | Google | Gemini 2.5 Flash |
+| 27 | Google | Gemini 2.5 Flash-Lite |
+| 28 | Mistral | Mistral Large 3 |
+| 29 | Mistral | Mistral Medium 3.5 |
+| 30 | Mistral | Mistral Small 4 |
+| 31 | Mistral | Ministral 3 14B |
+| 32 | Mistral | Ministral 3 8B |
+| 33 | Mistral | Ministral 3 3B |
+| 34 | Mistral | Magistral Medium 1.2 |
+| 35 | Mistral | Magistral Small 1.2 |
+| 36 | Mistral | Mistral Medium 3.1 |
+| 37 | Mistral | Mistral Small 3.2 |
+| 38 | Mistral | Devstral 2 |
+| 39 | Anthropic | Claude Opus 4.7 |
+| 40 | Anthropic | Claude Sonnet 4.6 |
+| 41 | Anthropic | Claude Haiku 4.5 |
+| 42 | Cohere | Command A+ |
+| 43 | Cohere | Command A |
+| 44 | Cohere | Command R7B |
+| 45 | Cohere | Command R |
+| 46 | xAI | Grok 4.7 — standard endpoint, low effort |
+| 47 | xAI | Grok 4.7 — standard endpoint, medium effort |
+| 48 | xAI | Grok 4.7 — standard endpoint, high effort |
+| 49 | xAI | Grok 4.7 — standard endpoint, xhigh effort |
+| 50 | xAI | Grok 4.7 — US regional endpoint, high effort |
+
+Provider sources for this initial list: [OpenAI model catalogue](https://developers.openai.com/api/docs/models), [Google Gemini models](https://ai.google.dev/gemini-api/docs/models), [Mistral model catalogue](https://docs.mistral.ai/models/), [Anthropic model pricing](https://docs.anthropic.com/en/docs/about-claude/pricing), [Cohere model documentation](https://docs.cohere.com/docs/how-does-cohere-pricing-work), and [xAI models](https://docs.x.ai/developers/models). The formal pricing pass will replace provider-level references with a direct price source and retrieval date for every entry.
+
+Fifty configurations are a market screen, not a promise that all fifty are
 interchangeable candidates. A model without source-backed retrieval cannot by
 itself satisfy the dated-search result. A search provider can still be paired
 with a different analysis model, which creates a provider *combination* rather
@@ -77,7 +141,7 @@ than a single-model choice.
 ### 2. Controlled quality test: a smaller comparable shortlist
 
 Documentation cannot tell us whether a result is meaningful for ShortList.
-After the 20-model screen, the evidence should nominate a small shortlist for
+After the 50-configuration screen, the evidence should nominate a small shortlist for
 the same, approved live test. Each result will be scored against a published
 rubric:
 
