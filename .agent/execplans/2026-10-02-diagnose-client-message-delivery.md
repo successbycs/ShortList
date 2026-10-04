@@ -30,7 +30,9 @@ exact verification gap in the Issue.
 
 - [x] (2026-10-04, client date) User authorized installation and testing. Registration and digests reverified; installed atomically with a persistent verified backup. Installed-byte regression, syntax and six builder tests passed.
 - [x] (2026-10-04, client date) Saved exact reload and rollback instructions in the Issue 36 evidence artifact.
-- [ ] (2026-10-04, client date) Human reload and new-session live queue/steer test remain necessary; delivery recovery is unobserved.
+- [x] (2026-10-04, client date) User reported reload; registered version and patched digest confirmed. Fresh exthost10 log shows activation and zero release failures through 13:46:59.786 as logged; installed-code proof passes again.
+- [ ] (2026-10-04, client date) Requested numbered live Queue/Steer submissions. Delivery recovery remains unobserved pending receipt and user UI observations.
+- [x] (2026-10-04, client date) User reported post-reload normal-composer loss/delay and unavailable Steer; posted sanitized escalation to official openai/codex#26683 comment 5975145074.
 
 - [x] (2026-10-02 09:18Z) Traced repeated local lock-release failures to an undefined response and the installed webview JSON parser.
 - [x] (2026-10-02 09:23Z) Built the guarded bundle at `/tmp/issue-36-queue-patch/extension.js`; reproduced baseline SyntaxError and verified patched acknowledgement using installed code.
@@ -111,6 +113,12 @@ builder tests passed. Live activation awaits the human's `Developer: Reload
 Window` and new-session follow-up. Exact after-test and rollback instructions
 are in the evidence artifact. Earlier build-stage “not installed” statements
 below are historical and superseded by this installation result.
+
+Post-reload outcome: the user still observes disappearing or delayed normal
+composer messages and no Steer option. The installed patch corrects the specific
+lock-release JSON error but is not the complete fix. The official upstream issue
+now has a current sanitized escalation. Keep Issue #36 open; await maintainer
+diagnosis or an official release before treating this as resolved.
 
 Patch milestone: built a minimal, digest-pinned candidate correcting an observed
 JSON acknowledgement defect. The proof executes installed JavaScript in an

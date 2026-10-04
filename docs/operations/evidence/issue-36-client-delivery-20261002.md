@@ -2,6 +2,36 @@
 
 ## Installation on 2026-10-04 (Pacific/Auckland client date)
 
+Post-reload checkpoint: the user reported reloading. Registration still selects
+26.928.40906 and the installed digest still matches the candidate. The new
+`20261002T131302/exthost10/openai.chatgpt/Codex.log` begins at
+2026-10-04 13:46:20.443 (timestamp as logged). Through 13:46:59.786 it contains
+one activation, zero exact lock-release failures, and zero unexpected app-server
+exit signatures. The preceding exthost9 log contains one lock-release failure.
+The isolated proof against installed bytes passes again. This establishes
+successful post-reload startup with the patched file present, but not yet
+successful queued/steered message delivery. Requested a numbered live follow-up
+test from the user; receipt and UI behavior remain pending.
+
+The question-form response arrived but repeated the test instructions verbatim.
+It is evidence of form-response delivery only; it is not counted as a normal
+composer Queue or Steer submission. Next test starts with a plain numbered
+message in the normal chat input to avoid confusing the form with the composer.
+
+User report after reload: normal-composer messages can still disappear without
+being acted on, or appear only after a delay in the Codex pending/message list.
+The Steer option was not displayed when attempting follow-up guidance. The user
+reported that this makes the tool unusable. This is direct post-reload evidence
+that the installed acknowledgement patch does not establish a complete repair.
+
+On 2026-10-04, the sanitized reproduction was added to the matching official
+OpenAI tracker, [openai/codex#26683](https://github.com/openai/codex/issues/26683#issuecomment-5975145074).
+It identifies extension 26.928.40906 on Linux/WSL, describes disappearing and
+delayed normal-composer messages plus unavailable Steer, and asks maintainers to
+prioritize the composer submission, queued-follow-up state and UI
+acknowledgement path. No raw logs, prompts, account information, or session
+identifiers were published.
+
 The user explicitly requested installation and testing. The VS Code Server
 registration still selected `openai.chatgpt-26.928.40906-linux-x64`. The
 installed bundle and candidate matched the original and candidate digests
