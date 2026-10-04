@@ -17,6 +17,7 @@ Finish [Issue #10](https://github.com/successbycs/template/issues/10): operators
 - [x] (2026-10-02 04:14Z) Real Chromium browser loaded disposable loopback servers on ports 8876 and 8877. Populated snapshot showed all seven event kinds plus active reservation 11; empty snapshot showed no evidence. Screenshots saved and populated image visually inspected. Only browser console error was the harmless missing favicon (HTTP 404); no application JavaScript is used.
 - [x] (2026-10-02) Committed implementation and both screenshots in c3240c6. Visually inspected both screenshots; owned browser and server processes stopped successfully. Rechecked Markdown links after adding the specification.
 - [x] (2026-10-02) Posted verification and screenshot locations in the Issue handoff; left open for human review, without label changes or a push.
+- [x] (2026-10-04 02:31Z) Fresh locked-container revalidation passed all 13 dashboard tests and the canonical verifier (Ruff, formatting, 77 tests, Markdown links). The repository proof harness also reached actual loopback `/health` and observed `{"status":"ok","live_dispatch":false}` followed by connection refusal after stopping its exact child.
 
 ## Surprises & Discoveries
 
@@ -25,6 +26,8 @@ Follow-up audit found `docs/operations/LOCAL_RUNBOOK.md` and #19 require `/api/s
 The existing dashboard includes POST pause/resume/tick controls contrary to the current Issue scope. EventStore already provides allow-listed operational fields; legacy run summaries contain free text and must not be rendered as trusted markup.
 
 The Playwright wrapper is not executable directly; invoking through bash reaches Windows npx, which fails to locate its Node installation in this environment. Browser proof needs a Linux CLI path. No packages were changed by these failed attempts.
+
+The current host virtual environment again stalled on the first FastAPI `TestClient` request for 25 seconds without test output. The same suite completed in 1.18 seconds in the locked Docker environment, so the fresh result supports the earlier conclusion that this is a host harness problem rather than dashboard behavior. This is not a browser proof replacement.
 
 ## Decision Log
 
@@ -43,6 +46,8 @@ The Playwright wrapper is not executable directly; invoking through bash reaches
 Follow-up regression audit restored the `notifications` JSON field required by #19. This is delivery-record visibility only, not evidence of actual inbox receipt. All four known statuses are covered by the reopened-database test; real HTTP was checked using a synthetic sent record. The HTML screenshots remain accurate because the page is unchanged.
 
 Implemented the read-only page and safe persisted-evidence API, removed mutation routes, and passed focused and canonical tests. Browser proof used synthetic records through actual SQLite, Uvicorn HTTP and Chromium boundaries. No live worker or provider capability is inferred. Implementation and screenshot artifacts are committed locally in c3240c6. [GitHub review handoff](https://github.com/successbycs/template/issues/10#issuecomment-5945519708) records the evidence and local-only artifact limitation. Human review remains outstanding before the dependent #12 demonstration; no push was performed.
+
+On 2026-10-04, fresh Docker verification reconfirmed the focused suite, complete verifier, and a real loopback health/start-stop proof with dispatch false. It does not satisfy the separate human-review prerequisite of #12.
 
 ## Context and Orientation
 

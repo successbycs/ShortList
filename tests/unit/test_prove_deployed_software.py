@@ -20,3 +20,11 @@ def test_output_path_rejects_unsafe_location() -> None:
 
 def test_output_path_accepts_repository_proof_location() -> None:
     assert MODULE.output_path("var/proofs/issue-30.json").name == "issue-30.json"
+
+
+def test_proof_environment_removes_compose_audit_override() -> None:
+    environment = MODULE.proof_environment(
+        {"APP_TEMPLATE_AUDIT_DATABASE_PATH": "/var/lib/app-template/audit.sqlite3", "KEEP": "yes"}
+    )
+
+    assert environment == {"KEEP": "yes"}

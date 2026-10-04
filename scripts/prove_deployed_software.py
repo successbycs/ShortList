@@ -28,9 +28,23 @@ def output_path(value: str) -> Path:
     return candidate
 
 
-def command(arguments: list[str]) -> tuple[int, str]:
-    result = subprocess.run(arguments, cwd=ROOT, check=False, capture_output=True, text=True)
+def command(arguments: list[str], *, environ: dict[str, str] | None = None) -> tuple[int, str]:
+    result = subprocess.run(
+        arguments,
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=environ,
+    )
     return result.returncode, result.stdout.strip()
+
+
+def proof_environment(environ: dict[str, str] | None = None) -> dict[str, str]:
+    """Remove host Compose overrides that would invalidate the disposable proof."""
+    values = dict(os.environ if environ is None else environ)
+    values.pop("APP_TEMPLATE_AUDIT_DATABASE_PATH", None)
+    return values
 
 
 def row(
@@ -133,7 +147,10 @@ def prove() -> list[dict[str, str]]:
         invalid.write_text("unknown_key = true\n", encoding="utf-8")
         cli = [sys.executable, "-m", "app_template.cli"]
 
-        code, output = command([*cli, "--config", str(valid), "health"])
+        isolated_environment = proof_environment()
+        code, output = command(
+            [*cli, "--config", str(valid), "health"], environ=isolated_environment
+        )
         rows.append(
             row(
                 "CLI and Pydantic configuration",
@@ -142,7 +159,9 @@ def prove() -> list[dict[str, str]]:
                 f"exit={code}",
             )
         )
-        code, output = command([*cli, "--config", str(invalid), "health"])
+        code, output = command(
+            [*cli, "--config", str(invalid), "health"], environ=isolated_environment
+        )
         rows.append(
             row(
                 "CLI invalid configuration refusal",
@@ -151,7 +170,9 @@ def prove() -> list[dict[str, str]]:
                 f"exit={code}",
             )
         )
-        code, output = command([*cli, "--config", str(valid), "self-test"])
+        code, output = command(
+            [*cli, "--config", str(valid), "self-test"], environ=isolated_environment
+        )
         payload: dict[str, Any] = json.loads(output) if code == 0 else {}
         persisted = database.exists() and any(
             event.event_id == payload.get("event_id")
@@ -165,7 +186,9 @@ def prove() -> list[dict[str, str]]:
                 f"exit={code}; event_reopened={persisted}",
             )
         )
-        code, output = command([*cli, "--config", str(valid), "demo", "--no-op"])
+        code, output = command(
+            [*cli, "--config", str(valid), "demo", "--no-op"], environ=isolated_environment
+        )
         payload = json.loads(output) if code == 0 else {}
         rows.append(
             row(
