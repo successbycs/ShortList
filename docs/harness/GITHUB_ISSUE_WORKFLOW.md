@@ -4,6 +4,69 @@ Use Issues to record requested outcomes, actual dependencies, and acceptance
 evidence. For user-started sessions, labels do not determine whether work may
 begin, and label transitions are not part of execution.
 
+## Collaborative decision capture
+
+VS Code chat is the collaborative working space for a product owner and Codex.
+It is useful context, but it is not the durable audit or approval record. When
+conversation produces a material outcome, update the relevant canonical
+repository document and record a concise GitHub Issue comment that links to
+it. The document holds detailed requirements, specifications, or execution
+evidence; the Issue comment records the reviewable history and resulting work.
+
+Capture a comment when the conversation changes scope, non-goals,
+requirements, acceptance evidence, dependencies, priority, delivery sequence,
+or an external-action boundary. Also capture material review feedback,
+verification evidence, blockers, and human handoffs. Do not turn every working
+thought into a comment: unconfirmed options remain chat context until they are
+recorded as an open question or a decision.
+
+Use one of these headings so a reader can distinguish authority from advice:
+
+- `Decision` — an explicit product-owner agreement.
+- `Open question` — a decision still required; it does not authorize work.
+- `Recommendation` — analysis offered for human decision.
+- `Evidence` — an observed result, verification, or review finding.
+- `Blocker` — an unmet prerequisite and the exact action needed.
+- `Handoff` — concise status, document links, limits, and required human review.
+
+Use this compact comment structure where it helps:
+
+```md
+## Decision
+
+**Decision:**
+**Why:**
+**Canonical document:**
+**Issue impact:**
+**Open questions:**
+**Implementation authority:** none / approved for <bounded scope>
+```
+
+Parent Issues contain concise phase-level summaries and links. Child Issues
+contain detailed requirement decisions, review feedback, acceptance evidence,
+and implementation history. Avoid duplicating a detailed review in both unless
+a human specifically needs it visible at phase level.
+
+An Issue comment never replaces a canonical document, grants authority for a
+deployment, outreach, payment, secret, or host change, or starts automation.
+Follow [Authority and Guardrails](AUTHORITY_AND_GUARDRAILS.md) and
+[Definition of Done](DEFINITION_OF_DONE.md) for those boundaries.
+
+## Two distinct work lanes
+
+**User-directed Codex sessions** begin from an explicit user request. They do
+not require a GitHub label: follow this workflow, the active task, actual
+dependencies, and acceptance evidence.
+
+**Deliberately started upstream Symphony dispatch** is separate. Its upstream
+configuration in `WORKFLOW.md` requires the `symphony:ready` label, and its
+additional eligibility criteria are canonical in
+[Definition of Ready](DEFINITION_OF_READY.md#symphony-runtime-eligibility).
+Keep that requirement intact. A GitHub comment, Project membership, or a
+user-directed Codex session never makes an Issue eligible for Symphony. An
+operator must deliberately apply the label and start the upstream process under
+the repository's Symphony operator guidance.
+
 Read the configured target in `pyproject.toml` under `[tool.app-template.github]`,
 compare it with the Git remote, and use explicit `--repo OWNER/REPOSITORY` with
 `gh`. Verify access before writes. A sandbox network failure is not proof of

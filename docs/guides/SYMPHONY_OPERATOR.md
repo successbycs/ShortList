@@ -11,18 +11,19 @@ The checked-in integration pins upstream `v0.0.3` for Linux x86_64. Symphony is
 prototype software intended for evaluation by its upstream authors. Do not treat
 the template integration as a hardened unattended production service.
 
-The integration evidence is deliberately incremental: #39 verified the pinned
-installation and dashboard baseline; #40 proved one real scheduler-to-Codex
-task and restart behavior; #41 removed the prior duplicate Python runtime. The
-corresponding GitHub Issues remain open as human-review records.
+The integration evidence is deliberately incremental: historical template
+Issues #39, #40, and #41 verified the pinned installation, one bounded
+scheduler-to-Codex task/restart check, and removal of the prior duplicate
+Python runtime. They are template history, not ShortList delivery work.
 
 ## Safe baseline
 
 `WORKFLOW.md` is upstream configuration with Markdown prompt instructions. Its
 safe baseline is deliberately narrow:
 
-- It targets only `successbycs/template` and uses a `GITHUB_TOKEN` supplied at
-  process start; no credential belongs in Git.
+- It targets the `OWNER/REPOSITORY` explicitly configured in `WORKFLOW.md` and
+  uses a `GITHUB_TOKEN` supplied at process start; no credential belongs in
+  Git. Confirm that target is this copied project before starting it.
 - An Issue must be open and have `symphony:ready` before it is a candidate.
   Symphony reads that label; it does not change labels, assign work, close an
   Issue, or create eligibility itself.

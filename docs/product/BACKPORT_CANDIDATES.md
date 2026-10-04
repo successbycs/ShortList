@@ -22,6 +22,19 @@ a project created from V1:
 5. A human accepts, changes, or closes the work. Product work that needs owner
    judgement remains human-led rather than being dispatched automatically.
 
+The V1 backport must preserve the two distinct work lanes:
+
+- A user-directed Codex session follows the explicit human request and does
+  **not** require an automation label.
+- Deliberately started upstream Symphony dispatch requires the upstream
+  `symphony:ready` admission label and the repository's readiness checks. A
+  chat agreement, Issue comment, or Project item does not make an Issue
+  eligible.
+
+Backport the generic collaborative decision-capture procedure to the template's
+GitHub Issue workflow: material agreements update a canonical document and a
+labelled Issue comment; chat itself is not durable approval or evidence.
+
 The template copy should also say what Symphony is **not**: it is not the
 application runtime, website host, customer-facing service, or an autonomous
 product manager. It must not be used to send customer outreach or to make

@@ -10,7 +10,9 @@ Use [GETTING_STARTED.md](GETTING_STARTED.md) to create the local environment, th
 
 Symphony is a GitHub-first engineering-work scheduler. It is not the product
 manager, website host, customer-facing ShortList service, or an autonomous
-decision-maker.
+decision-maker. The canonical procedure for capturing decisions in GitHub and
+for distinguishing user-directed Codex work from upstream Symphony dispatch is
+[the GitHub Issue workflow](docs/harness/GITHUB_ISSUE_WORKFLOW.md).
 
 The working loop is:
 
