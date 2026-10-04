@@ -20,7 +20,9 @@ Before applying `symphony:ready`, confirm that the Issue has:
 - code packets under a `## Code packets` heading, or an explicit statement that
   the work is unscoped and must be serialized;
 - no unsatisfied native GitHub dependency; and
-- the required specification artifact for its declared SDD tier.
+- planning evidence appropriate to the work's risk, as described in
+  [Development Workflow](../workflows/DEVELOPMENT_WORKFLOW.md#planning-evidence-by-work-size).
 
 The upstream workflow selects Codex execution; it does not route work through
-repository-defined model labels. GitHub Assignees remain human accountability.
+repository-defined model labels or enforce a custom planning-artifact tier.
+GitHub Assignees remain human accountability.

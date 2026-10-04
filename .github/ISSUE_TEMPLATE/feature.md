@@ -17,4 +17,6 @@ List repository-relative paths this task may change. If scope is unknown, say
 ## Dependencies and verification
 
 - State actual prerequisites and the command or observation that proves completion.
-- [ ] The appropriate SDD artifact is linked, if this is a tier-2 or tier-3 task.
+- Link a concise specification or living ExecPlan when the
+  [planning guidance](../../docs/workflows/DEVELOPMENT_WORKFLOW.md#planning-evidence-by-work-size)
+  says it is appropriate.
