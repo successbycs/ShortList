@@ -35,6 +35,9 @@ requirements.
   native Search-grounding entries, Gemini 2.5's existing-user access condition,
   the 3.1 Flash-Lite paired-retrieval requirement, and preview lifecycle risk;
   retain every entry as partial and untested.
+- [x] (2026-10-05) Capture first exact Mistral evidence: retain current models
+  as partial while exact Agent/search compatibility remains unproven, and
+  exclude five named deprecated models from a new-production paid-test path.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,

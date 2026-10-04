@@ -68,6 +68,20 @@ structured-analysis workflow. A live test is still required after approval.
 | 35–36 | Gemini 3.1 Pro Preview, Gemini 3 Flash Preview | [Model catalogue](https://ai.google.dev/gemini-api/docs/models), [Search grounding supported-model table](https://ai.google.dev/gemini-api/docs/google-search) | Native Google Search grounding is documented. Both are preview endpoints; Google says preview models can have tighter rate limits and shorter deprecation notice. | exact structured-output support, pricing, citation payload retention, Auckland/location control, and acceptance of preview lifecycle risk | not tested |
 | 37–39 | Gemini 2.5 Pro, 2.5 Flash, 2.5 Flash-Lite | [Model catalogue access note](https://ai.google.dev/gemini-api/docs/models), [Search grounding supported-model table](https://ai.google.dev/gemini-api/docs/google-search), [pricing](https://ai.google.dev/gemini-api/docs/pricing) | Native Google Search grounding is documented, but Google limits 2.5 API access to users who actively used those models in the past and recommends 3.5 Flash-Lite or 3.8 Flash for new projects. | evidence that the intended ShortList account qualifies for access; exact structured-output support, pricing, provenance, location control, and normalized cost. Do not treat these as available to a new project without that evidence. | not tested |
 
+## Individual evidence capture: Mistral first pass
+
+Mistral documents web search, structured outputs, and citations for its Agents
+and Conversations API at product level. It does not, in the cited page, map
+those functions to each named model. That is insufficient to qualify an exact
+configuration for ShortList's workflow. The current model catalogue does,
+however, identify five named configurations as deprecated; those are excluded
+from a new-production path and must not receive paid live tests.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 40–45 | Mistral Large 3; Mistral Medium 3.5; Mistral Small 4; Ministral 3 14B, 8B, 3B | [Current model catalogue](https://docs.mistral.ai/models/), [pricing](https://docs.mistral.ai/inference/pricing), [Agents and Conversations](https://docs.mistral.ai/studio/agents/introduction) | Listed as current models with published standard input/output prices respectively: US$0.50/$1.50; $1.50/$7.50; $0.15/$0.60; $0.20/$0.20; $0.15/$0.15; and $0.10/$0.10 per million tokens. Mistral's agent product documents web search, citations, and structured outputs at product level. | partial — exact model-to-Agent/Search/Structured Output compatibility, web-source payload, location control, agent/tool charges, availability for the selected account, and normalized workflow cost are not established | not tested |
+| 46–50 | Magistral Medium 1.2; Magistral Small 1.2; Mistral Medium 3.1; Mistral Small 3.2; Devstral 2 | [Deprecated-model list](https://docs.mistral.ai/models/) | Each exact named configuration is listed by Mistral as deprecated. | excluded — do not select for a new ShortList production dependency or run a paid live test; retain only as market-screen evidence | not tested |
+
 ## Required fields for each individual configuration
 
 The next collection pass expands each candidate ID into these fields. It must
