@@ -82,9 +82,9 @@ pricing](https://docs.x.ai/developers/pricing).
 
 Official source for DeepSeek: [DeepSeek models and pricing](https://api-docs.deepseek.com/quick_start/pricing/). Peak and off-peak periods are provider-defined and may change.
 
-### Top three price options
+### Full all-model price ranking
 
-Not determined yet. A valid cheapest-three ranking needs the official price
+Not determined yet. A valid cheapest-three ranking across all 67 candidates needs the official price
 capture completed for all eligible backend APIs in the 67-configuration list,
 using the same comparison unit and the same light MVP suitability screen. The
 next section of this review will complete that vendor-by-vendor register. It
