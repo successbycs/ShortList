@@ -31,6 +31,7 @@ OpenAI, process payments, send email, or create public pages.
 - [x] (2026-10-04 09:40Z) Product owner set the pilot unit: test eligible businesses in cohorts of ten and review evidence between cohorts before expanding or changing vertical.
 - [x] (2026-10-04 09:50Z) Product owner narrowed the first cohort to ten Auckland lawn-mowing businesses and proposed outreach for assessment feedback. The candidate records outreach as consent-gated: public addresses alone do not authorise commercial email, and consent, sender identity, unsubscribe, delivery, and feedback evidence must be retained.
 - [x] (2026-10-04 09:55Z) Product owner set two acquisition channels: inbound self-service via the live website and later consent-gated pilot outreach. The live self-service journey is now the first delivery priority.
+- [x] (2026-10-04 10:05Z) Documented the generic Symphony operating model in the ShortList README and recorded it as a V1-template backport candidate, explicitly excluding ShortList product decisions.
 - [ ] (requires product-owner review) Confirm the MVP boundary, unresolved commercial decisions, and requirement wording.
 - [ ] (after requirements approval) Create the MVP scope, architecture, assumptions, user stories, data/prompt contracts, and delivery plan as separate reviewed documents.
 - [ ] (after product-definition approval) Propose dependency-ordered GitHub milestones and Issues; do not create them without explicit approval.
