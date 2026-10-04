@@ -15,8 +15,9 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 - [x] (2026-10-04 02:36Z) Repaired the proof harness's ambient Compose audit-path interference, added a focused regression test, and re-ran its full local proof with zero failed supported rows.
 - [x] (2026-10-04 03:44Z) Retired #10’s non-required dashboard UI while preserving event/reservation recovery; dependent Issue contracts require update before #12.
 - [x] (2026-10-04 03:57Z) Enforced one effective worker in `WORKFLOW.md` and typed defaults; focused scheduler/workflow evidence passed before #12 preparation.
-- [ ] Execute the dedicated safe #12 demonstration only after its human-review and dedicated-Issue prerequisites are satisfied; record its external GitHub boundary result.
-- [ ] Complete #13, #16, and #24 in that order, with their required reviews and evidence.
+- [x] (2026-10-04 04:23Z) Completed the dedicated #12/#38 one-worker demonstration: one real Codex worker ran in an isolated worktree, durable reservation/event evidence was reopened, #38 remained unlabelled, and dispatch remained false. #12 was then closed by its human reviewer.
+- [x] (2026-10-04 04:30Z) Drafted #13's scheduler-only operator guide, linked it from the runbook and index, and completed its fresh-operator walkthrough: validation, host preflight, and Markdown links passed with dispatch false.
+- [ ] Complete #13 evidence handoff, then #16 and #24 in order, with their required reviews and evidence.
 - [x] (2026-10-04 02:45Z) Diagnosed the available #21 evidence without sending mail: the only local durable delivery is Issue #19, `sent`, one attempt, at 2026-10-02T09:02:49Z; #19 records recipient-confirmed receipt. The checked-in notifier is deliberately disabled, so no evidence links #21's report to a Symphony transition.
 - [ ] Refresh #14's duplicate-scope verification if dependencies changed, then leave it for human review.
 - [ ] Refresh the final #17 retrospective only after every earlier Set-up task is evidenced or explicitly blocked; #18 is the last human review and may scope, but not execute, next-milestone work.
@@ -55,12 +56,12 @@ Issue #5 is the parent record for the reusable-template Symphony Set-up programm
 ## Outcomes & Retrospective
 
 As of 2026-10-04, #10’s non-required UI has been retired while scheduler safety
-persistence remains; #21 has an evidence gap recorded rather than a speculative
-SMTP diagnosis; and commit `7d8f723` repairs the proof harness so it remains
-valid under Compose. The programme is not ready for a completion claim: #12
-needs its revised contract and a safe single-worker baseline; #13, #16, and #24
-follow #12; #21 requires event correlation or separately authorized controlled
-receipt proof. #17 and #18 intentionally remain last.
+persistence remains; #12 has a completed bounded one-worker proof and #13 has
+a validated operator-guide draft. #21 has an evidence gap recorded rather than
+a speculative SMTP diagnosis. The programme is not ready for a completion claim:
+#13 needs its evidence handoff, then #16 and #24 must safely establish the
+requested multi-worker capability. #21 requires event correlation or separately
+authorized controlled receipt proof. #17 and #18 intentionally remain last.
 
 ## Context and Orientation
 

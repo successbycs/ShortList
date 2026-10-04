@@ -6,6 +6,10 @@ Use [GETTING_STARTED.md](../../GETTING_STARTED.md) for Compose build, locked ins
 
 ## Symphony local runtime
 
+Read [SYMPHONY_OPERATOR](../guides/SYMPHONY_OPERATOR.md) before operating the
+scheduler. It defines the supported lifecycle, bounded demonstration limits,
+recovery, and human-review handoff.
+
 `WORKFLOW.md` keeps Symphony dispatch disabled by default. Validate its contract
 with `uv run app-template symphony validate-workflow`, then inspect local
 prerequisites without printing credentials with `uv run app-template symphony
