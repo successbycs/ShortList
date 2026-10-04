@@ -26,6 +26,26 @@ capture. It does not include payment, Stripe, Basic Assessment delivery,
 consulting, account login, a report portal, manual normal-case fulfilment,
 recurring monitoring, outbound outreach, or production launch.
 
+### 1.1 MVP 1 feature list
+
+This is the product-owner review view of the MVP. It summarises the canonical
+requirements; it does not replace their detailed acceptance evidence or turn a
+future feature into an approved implementation packet.
+
+| Feature | Visitor or operator value | Primary delivery ownership |
+| --- | --- | --- |
+| 1. Safe public-domain entry | An owner can submit one valid public domain; malformed, private, unsafe, or rate-limited requests stop safely. | #24 design, #10 implementation |
+| 2. Website evidence assessment | The service derives a bounded, evidence-linked description of the business, services, service area, trust signals, strengths, and opportunities. | #7 contract, #10 implementation |
+| 3. Dated AI-search evidence | The service runs one defined Auckland business-type test, retains its question, observed order, date/time, context, and citations, and does not call it an objective rank. | #5 Symphony implementation |
+| 4. Immediate useful teaser | The owner sees a concise, evidence-based result before providing an email. | #10 implementation |
+| 5. Email, consent, and free entitlement | A visitor can request delivery with separate delivery/marketing consent; three lifetime requests, duplicates, and resends are enforced privately. | #7 contract, #11 implementation |
+| 6. Private assessment records | Customer, assessment, recipient, attribution, consent, and report records preserve evidence while preventing cross-recipient disclosure. | #24 design, #7 contract, #11 implementation |
+| 7. Professional Minimum Assessment PDF | A versioned, accessible, professionally reviewed PDF turns the evidence into the free report. | #25 design, #27 implementation |
+| 8. Private delivery and recovery | The report is delivered as an attachment with truthful provider-acceptance status, bounded retries, and the two-hour escalation path. | #22 policy, #27 implementation |
+| 9. Abuse, cost, and secret controls | Bot, rate, domain, concurrency, token, timeout, spend, and server-secret controls keep the automated journey safe and bounded. | #24 design, #9 foundation, #10/#5 implementation |
+| 10. Distinctive accessible public experience | The mobile-first ShortList journey is clear, accessible, and visually distinctive through entry, outcome, consent, and failure. | #28 design, #10/#11 implementation |
+| 11. Honest failure, support, and privacy paths | Insufficient evidence and operational failures remain automated, reason-coded, private, and truthful, with an approved support route. | #7/#24 design, #13/#14 implementation and verification |
+
 ## 2. Design principles and terms
 
 - **Evidence before inference.** A claim must link to captured public-page or
@@ -97,6 +117,28 @@ flowchart TD
 | Application records | Persist customer, assessment, evidence, attribution, recipient, consent, report, delivery, and reason-code data. | Domain uniqueness does not grant report access; records need recipient isolation and deletion/retention controls. |
 | PDF and delivery adapters | Create a versioned report, retain it privately, and hand it to an email provider. | `sent` means provider acceptance only. Apply the bounded retry/two-hour escalation policy; never claim inbox receipt without evidence. |
 | Operator alert adapter | Notify Chris privately when the defined escalation happens. | Carries only the approved minimum operational fields; it is not manual fulfilment or a promise of customer recovery. |
+
+### 3.2 Technology decisions
+
+This table makes the technology position reviewable. **Selected** means Chris
+has made the product decision. **Candidate** means it is a plausible option,
+not an implementation commitment. **Decision needed** means a later task must
+recommend options and obtain product-owner approval before implementation.
+
+| Area | Current choice | Status | Decision boundary / next owner |
+| --- | --- | --- | --- |
+| Product web experience | Loveable.dev is permitted for design exploration; the production frontend framework is not selected. | Decision needed | #28 defines the public experience and stores reviewable artefacts in [product design evidence](design/README.md); #8/#9 select an implementation stack. |
+| Application runtime and hosting | No runtime, host, or deployment platform is selected. | Decision needed | #8 proposes the smallest suitable MVP foundation; #9 implements only the approved choice. |
+| Edge, bot, and rate protection | A Cloudflare-oriented edge/control layer is a candidate; no Cloudflare service or account is configured. | Candidate | #24 specifies controls and #9 implements the approved boundary. |
+| Relational application records | Cloudflare D1 is a lightweight candidate for customer, assessment, recipient, consent, and delivery metadata. | Candidate | #7 defines records/contracts; #24 evaluates security/access; #9 selects and implements. |
+| Private PDF/object storage | Cloudflare R2 is a candidate for versioned report objects. | Candidate | #7/#25 define storage/report requirements; #27 implements the approved choice. |
+| AI model | OpenAI GPT-6 Luna is the selected MVP 1 model. | Selected | #5 chooses only the approved server-side configuration, location method, limits, timeout, and customer terminology. |
+| AI search route | Exact OpenAI tool/endpoint settings, citation normalisation, and location context are not selected. | Decision needed | #7 defines the evidence contract; #5 implements the approved route. |
+| Email provider and sending domain | No provider, sender address, or authenticated mail domain is selected. | Decision needed | Owner decision before #27 can complete an authorised real-boundary test. |
+| PDF renderer | No rendering library/service is selected. | Decision needed | #25 defines visual acceptance; #27 selects and implements a bounded renderer. |
+| Private operator alert | Discord is the approved channel policy, but its integration/configuration is not selected or configured. | Partially selected | #22 supplies the minimum alert policy; #27 selects/configures only with explicit authority. |
+| Analytics and attribution | Cloudflare Web Analytics is a candidate for aggregate measurement; first-party attribution records are required. | Candidate | #24/#7 define privacy/retention and data contracts; #9/#10 implement approved controls. |
+| Engineering work scheduler | Upstream OpenAI Symphony is the selected coding-work scheduler; it is not a ShortList application runtime or customer feature. | Selected | #5 receives `symphony:ready` only through deliberate operator admission; it does not choose product technology. |
 
 ## 4. Core journey and state boundaries
 

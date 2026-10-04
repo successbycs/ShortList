@@ -29,6 +29,9 @@ a secret, or implement the public website.
 - [x] (2026-10-05 00:20Z) Committed and pushed the SDD as `6705b5f` (`docs:
   add ShortList MVP 1 SDD`), then recorded the evidence/handoff in #6 without
   closing the Issue.
+- [x] (2026-10-05 00:30Z) Added the product-design evidence directory,
+  mockup/review-register guidance, and SDD link so #28 has a durable home for
+  exported Loveable/mockup artefacts.
 
 ## Surprises & Discoveries
 
@@ -75,6 +78,8 @@ the required design and foundation work.
 
 The human-review evidence is GitHub #6 comment
 `https://github.com/successbycs/ShortList/issues/6#issuecomment-5985551460`.
+Design evidence is organised in `docs/product/design/README.md`; no mockup has
+been added or approved yet.
 
 ## Context and Orientation
 
