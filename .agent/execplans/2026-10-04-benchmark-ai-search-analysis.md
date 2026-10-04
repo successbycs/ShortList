@@ -38,6 +38,9 @@ requirements.
 - [x] (2026-10-05) Capture first exact Mistral evidence: retain current models
   as partial while exact Agent/search compatibility remains unproven, and
   exclude five named deprecated models from a new-production paid-test path.
+- [x] (2026-10-05) Capture first Anthropic and Cohere evidence: record
+  Anthropic's cited server-side web-search/cost path without assuming exact
+  model compatibility, and retain Cohere only as a paired-retrieval option.
 - [ ] Collect and normalize official API capability and pricing evidence for 67
   named model configurations.
 - [ ] For each of the 67 configurations, record the server-side API route,

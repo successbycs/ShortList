@@ -82,6 +82,34 @@ from a new-production path and must not receive paid live tests.
 | 40–45 | Mistral Large 3; Mistral Medium 3.5; Mistral Small 4; Ministral 3 14B, 8B, 3B | [Current model catalogue](https://docs.mistral.ai/models/), [pricing](https://docs.mistral.ai/inference/pricing), [Agents and Conversations](https://docs.mistral.ai/studio/agents/introduction) | Listed as current models with published standard input/output prices respectively: US$0.50/$1.50; $1.50/$7.50; $0.15/$0.60; $0.20/$0.20; $0.15/$0.15; and $0.10/$0.10 per million tokens. Mistral's agent product documents web search, citations, and structured outputs at product level. | partial — exact model-to-Agent/Search/Structured Output compatibility, web-source payload, location control, agent/tool charges, availability for the selected account, and normalized workflow cost are not established | not tested |
 | 46–50 | Magistral Medium 1.2; Magistral Small 1.2; Mistral Medium 3.1; Mistral Small 3.2; Devstral 2 | [Deprecated-model list](https://docs.mistral.ai/models/) | Each exact named configuration is listed by Mistral as deprecated. | excluded — do not select for a new ShortList production dependency or run a paid live test; retain only as market-screen evidence | not tested |
 
+## Individual evidence capture: Anthropic first pass
+
+Anthropic documents a server-side Claude web-search tool that returns source
+citations and usage/error data. The cited web-search guide does not itself
+provide an exact compatibility table for all three named configurations, so
+this pass does not assume any of them can form the final workflow. The pricing
+page supplies a current token-cost signal and a separate US$10/1,000-search
+charge.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 51 | Claude Opus 4.7 | [Pricing](https://platform.claude.com/docs/en/about-claude/pricing), [web-search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool) | First-party API pricing is US$5/M input and US$25/M output. The web-search tool returns source citations, URL/title/cited text, usage counts, and typed errors; web search costs US$10/1,000 searches plus token charges. | partial — exact model/tool compatibility, structured-output support, location control, availability, and normalized workflow cost | not tested |
+| 52 | Claude Sonnet 4.6 | [Pricing](https://platform.claude.com/docs/en/about-claude/pricing), [web-search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool) | First-party API pricing is US$3/M input and US$15/M output. The web-search guide says dynamic filtering is available on Claude 4.6 and later. | partial — exact web-search tool version/structured-output compatibility, provenance retention, location control, availability, and normalized workflow cost | not tested |
+| 53 | Claude Haiku 4.5 | [Pricing](https://platform.claude.com/docs/en/about-claude/pricing), [web-search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool) | First-party API pricing is US$1/M input and US$5/M output. | partial — the cited documentation does not yet establish exact web-search or structured-output compatibility, provenance, location control, availability, or normalized workflow cost | not tested |
+
+## Individual evidence capture: Cohere first pass
+
+No native, current-web retrieval tool is established for the four named
+Cohere models in this register. Model capability, citation, and structured
+output documentation therefore does not make an entry a search candidate by
+itself: any qualifying workflow must name, price, and test a separate
+retrieval provider.
+
+| Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
+| --- | --- | --- | --- | --- | --- |
+| 54 | Command A+ | [Model page](https://docs.cohere.com/docs/command-a-plus), [pricing overview](https://docs.cohere.com/docs/how-does-cohere-pricing-work) | Cohere documents citations, tool use, and structured outputs for Command A+; its model page says it can be used in production through Model Vault and is free until the relevant rate limit. | partial — approved paired retrieval, current commercial/API path and price after rate limits, source/provenance retention, location control, and normalized combined cost | not tested |
+| 55–57 | Command A; Command R7B; Command R | [Model/pricing overview](https://docs.cohere.com/docs/how-does-cohere-pricing-work) | Cohere lists these as generative API models priced on input/output tokens. | partial — exact structured-output/citation support, approved paired retrieval, API availability and price, provenance/location control, and normalized combined cost | not tested |
+
 ## Required fields for each individual configuration
 
 The next collection pass expands each candidate ID into these fields. It must
