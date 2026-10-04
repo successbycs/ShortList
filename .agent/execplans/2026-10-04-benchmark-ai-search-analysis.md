@@ -77,6 +77,9 @@ promise or defer concrete provider selection to implementation design.
   define an MVP 1 normal planning profile of 9,000 input and 1,600 output
   tokens with one search request; calculate rough model and published-tool
   components for the currently priced candidates.
+- [x] (2026-10-05) Record Chris's confirmation of OpenAI GPT-6 Luna as the MVP
+  1 model decision. Keep configuration, provider access, and production proof
+  explicitly outside this documentation decision.
 
 ## Surprises & Discoveries
 
@@ -167,13 +170,18 @@ promise or defer concrete provider selection to implementation design.
   public-page evidence and the structured assessment are. A hard 12,000 input
   and 2,000 output planning cap remains visible for implementation design.
   Date/Author: 2026-10-05 / Chris, recorded by Codex.
+- Decision: Select OpenAI GPT-6 Luna as the MVP 1 model.
+  Rationale: Chris confirmed the low-cost model as the appropriate MVP 1
+  choice after reviewing the documented price comparison and general
+  suitability screen.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
 
 ## Outcomes & Retrospective
 
-The completed documentary screen does not select a provider, create
-credentials, incur provider charges, change public wording, or authorise
-implementation. It recommends provider-neutral design and retains product-owner
-review of the narrowed evidence boundary.
+The completed documentary screen records OpenAI GPT-6 Luna as the selected MVP
+1 model. It does not create credentials, incur provider charges, select public
+wording, configure an integration, or authorise deployment. Implementation
+still needs explicit settings and real verification evidence.
 
 ## Context and Orientation
 

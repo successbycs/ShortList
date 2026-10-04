@@ -316,7 +316,8 @@ the point of any future implementation decision.
 
 ## What is deliberately not concluded
 
-- No provider is selected.
+- **OpenAI GPT-6 Luna is selected for MVP 1.** This is a product decision, not
+  proof of a configured provider account, API call, or production readiness.
 - No claim is made about a stable, official, or universally correct ranking.
 - No customer-facing terminology is selected.
 - No “lowest cost” conclusion is possible from documentation because the actual
@@ -327,15 +328,15 @@ the point of any future implementation decision.
 
 ## Documentation-only conclusion and recommendation
 
-No provider is selected by #23. The official sources establish that several
-providers document server-side search, provenance, and structured-output
-routes, but documentation alone cannot qualify a provider as production-ready
-for ShortList.
+OpenAI GPT-6 Luna is selected for MVP 1 by product-owner decision. The official
+sources establish its server-side model, web-search, and structured-output
+route, but documentation alone cannot qualify the configured integration as
+production-ready for ShortList.
 
-The recommended direction is provider-neutral application design: keep search
-acquisition and website analysis as separate interfaces, preserve sources and
-timestamps, and decide a concrete provider only during a future implementation
-decision. No public wording may infer a guaranteed ranking, result quality,
+The implementation direction is to configure GPT-6 Luna behind separate search
+acquisition and website-analysis interfaces, preserve sources and timestamps,
+and enforce the approved token, timeout, and failure limits when those are
+specified. No public wording may infer a guaranteed ranking, result quality,
 latency, price, or Auckland precision from this review. This narrows the claim
 that #23 can honestly support while preserving the MVP requirement for dated,
 source-backed results.

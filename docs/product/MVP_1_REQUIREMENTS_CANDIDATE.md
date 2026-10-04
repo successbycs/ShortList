@@ -216,9 +216,10 @@ Auckland-wide question based on the evidence-supported business type. For
 example: “What are the top three lawn-mowing companies in Auckland today?”
 Lawn mowing is illustrative only; the question changes with business type.
 Suburb-level, buyer-situation, and other segmented comparisons belong to the
-future paid Basic Assessment, not the free MVP 1 result. The selected
-model/search capability remains subject to #23. The product owner decides the
-public name and terminology for the test.
+future paid Basic Assessment, not the free MVP 1 result. **OpenAI GPT-6 Luna is
+the selected MVP 1 model.** Its search configuration remains an implementation
+decision; the product owner decides the public name and terminology for the
+test.
 
 The immediate teaser and free email show:
 
@@ -456,8 +457,8 @@ MVP 1 does not include:
 
 ## 8. Decisions still needed before requirements approval
 
-1. What exact AI-search capability, model/search context, location method,
-   cost ceiling, timeout, and failure threshold are acceptable?
+1. For the selected OpenAI GPT-6 Luna model, what exact search configuration,
+   location method, cost ceiling, timeout, and failure threshold are acceptable?
 2. What counts as enough website evidence to generate a buyer question rather
    than issue an insufficient-evidence result?
 3. What authoritative source and update owner define the versioned Auckland

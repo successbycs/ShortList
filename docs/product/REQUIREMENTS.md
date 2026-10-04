@@ -67,8 +67,10 @@ generation, delivery/retry/escalation, and consent-gated outreach.
 The following are intentionally unresolved and must not be silently chosen by
 implementation work:
 
-1. AI-search/model provider, location method, cost ceiling, timeout, failure
-   threshold, and product-owner-approved public terminology (#23).
+1. **OpenAI GPT-6 Luna is the selected MVP 1 model.** Its search configuration,
+   location method, cost ceiling, timeout, failure threshold, and
+   product-owner-approved public terminology remain implementation decisions
+   (#23 decision record).
 2. Evidence threshold for a buyer question versus an insufficient-evidence
    outcome.
 3. Authoritative Auckland-suburb reference source, update owner, aliases, and
