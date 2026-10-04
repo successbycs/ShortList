@@ -7,9 +7,8 @@ This ExecPlan is a living document and must be maintained under `.agent/PLANS.md
 Determine whether ShortList can truthfully offer the approved MVP 1 experience:
 one dated Auckland-wide business-type AI-search result alongside a structured,
 evidence-based website assessment. After this work, Chris can review a
-reproducible comparison and choose a lowest-cost viable production direction—or
-narrow the public promise if no option meets the evidence, provenance, and cost
-requirements.
+documentation-only capability screen and decide whether to narrow the public
+promise or defer concrete provider selection to implementation design.
 
 ## Progress
 
@@ -44,35 +43,23 @@ requirements.
 - [x] (2026-10-05) Capture first xAI, DeepSeek, and Kimi evidence: document
   Grok 4.7's native tool path, retain DeepSeek as paired retrieval only, and
   distinguish Kimi's model API from its separate source-returning search API.
-- [x] (2026-10-05) Define the proposed, no-cost reproducible live-test protocol
-  and per-attempt evidence record; leave every economic, product, and
-  usefulness decision explicitly unapproved pending Chris's review.
+- [x] (2026-10-05) Define a proposed test protocol. **Superseded:** Chris
+  removed the live-test route; the protocol was deleted and no provider request
+  was made.
 - [x] (2026-10-05) Expand OpenAI documentary evidence to all 28 named
   configurations: record GPT-6 native-search/structured-output paths and keep
   older/pro variants partial where the exact model page does not establish the
   complete workflow.
 - [x] (2026-10-05) Audit the full matrix: 62 configurations are partial, five
-  deprecated Mistral configurations are excluded, and no configuration is a
-  documentary pass or observed result. Record both gates that prevent an
-  accidental paid test.
-- [ ] Collect and normalize official API capability and pricing evidence for 67
-  named model configurations.
-- [ ] For each of the 67 configurations, record the server-side API route,
-  native-search or named paired-retrieval path, provenance support, structured
-  output support, pricing, and availability/deprecation status.
-- [ ] Obtain product-owner approval for the usefulness threshold, normalized
-  request profile, public test set, search/retrieval pairing rules, and total
-  spend cap before invoking any billable API.
-- [ ] Run the approved, identical workflow test for every configuration that
-  passes the documented search-path gate; record the quality-rubric result,
-  sources, usage, cost, latency, and failure outcome. Record configurations
-  that fail the documentary gate as excluded without a paid live test.
-- [ ] Obtain product-owner authority for the protocol's neutral evaluation
-  inputs and safe evidence format before making billable or live provider
-  calls. The protocol exists, but its decision fields are deliberately blank.
-- [ ] Compare candidate capabilities, record observed limits and public wording,
-  and recommend a viable direction or product-promise narrowing.
-- [ ] Update requirements/Issue #23 with evidence and leave the decision open
+  deprecated Mistral configurations are excluded, and no configuration has
+  complete documentary evidence for the whole workflow.
+- [x] (2026-10-05) Chris removed the live-test route. Delete the protocol and
+  record that #23 has no provider account, credential, API request, spend, or
+  performance claim in scope.
+- [x] (2026-10-05) Compare documented candidate capabilities, make the
+  unobserved limits explicit, and recommend provider-neutral design rather than
+  selecting a provider.
+- [ ] Update Issue #23 with the documentary-only conclusion and leave it open
   for product-owner review.
 
 ## Surprises & Discoveries
@@ -86,7 +73,8 @@ requirements.
   Evidence: GitHub #23 non-goals and `docs/product/REQUIREMENTS.md`
   MVP1-SEC-001.
 - Observation: A provider API-call price is not the cost of a completed
-  ShortList assessment when the assessment uses more than one capability.
+  ShortList assessment when the assessment uses more than one capability;
+  documentation alone cannot calculate that cost honestly.
   Evidence: `docs/product/feasibility/AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md`,
   “Cost comparison: two units, not one”.
 
@@ -104,7 +92,8 @@ requirements.
   result, not a stable rank or a provider endorsement.
   Date/Author: 2026-10-04 / Chris's approved requirements, recorded by Codex.
 - Decision: Screen all 67 configurations and test every configuration that
-  passes the documentary search-path gate, under an approved cap.
+  passes the documentary search-path gate, under an approved cap. **Superseded
+  by Chris's later removal of the live-test route.**
   Rationale: Chris requires confirmation that every candidate which could form
   the ShortList search-and-analysis workflow is actually useful. Documentary
   failure excludes a configuration before it can create a billable test.
@@ -117,18 +106,25 @@ requirements.
   Date/Author: 2026-10-05 / Chris's clarification, recorded by Codex.
 - Decision: Require a documented search-path gate and an observed usefulness
   test for every configuration before it can be marked viable for ShortList.
+  **Superseded by Chris's later removal of the live-test route.**
   Rationale: API access or generic text quality does not prove that a model can
   obtain dated, source-backed Auckland evidence or produce a useful grounded
   assessment. A model may qualify only as part of a named retrieval-plus-
   analysis workflow.
   Date/Author: 2026-10-05 / Chris's clarified acceptance requirement, recorded
   by Codex.
+- Decision: Remove the live-test route from #23.
+  Rationale: Chris does not require a live test. The Issue is a
+  documentation-only feasibility screen and must not create provider accounts,
+  use credentials, make API calls, incur spend, or imply observed quality.
+  Date/Author: 2026-10-05 / Chris, recorded by Codex.
 
 ## Outcomes & Retrospective
 
-Pending research and product-owner review. This plan does not select a
-provider, create credentials, incur provider charges, change public wording, or
-authorise implementation.
+The completed documentary screen does not select a provider, create
+credentials, incur provider charges, change public wording, or authorise
+implementation. It recommends provider-neutral design and retains product-owner
+review of the narrowed evidence boundary.
 
 ## Context and Orientation
 
@@ -159,34 +155,26 @@ citation/source support, geographic/location controls, structured-output
 support, input/output limits, documented pricing, data/retention terms where
 relevant, authentication boundary, and known limitations.
 
-Second, define a small neutral evaluation set from public, non-sensitive
-representative Auckland business domains. Use the same business-type question
-shape for each candidate, for example “What are the top three lawn-mowing
-companies in Auckland today?” Record the exact question, Auckland-time test
-time, input URLs/evidence, model/capability version, returned text/order,
-citations, latency, token/usage data where available, and failures. Do not
-contact businesses, publish results, or treat a test result as a commercial
-claim.
+Second, make the documentary boundary explicit. Do not create an evaluation
+set or contact provider APIs. Record that documentation cannot establish a
+dated returned order, actual citations, latency, token/usage data, failures, or
+usefulness for a representative Auckland business question.
 
 Third, assess separate capability dimensions:
 
-1. Search grounding: can it expose dated sources/citations and an observed
-   ordering without claiming a stable rank?
-2. Auckland context: can it support or honestly limit location-specific
-   questions?
-3. Website analysis: can it produce required structured findings with clear
-   evidence/inference separation?
-4. Safety and operability: can use remain server-side with bounded input/output,
-   timeout, cost, logging, and reason-coded failure paths?
-5. Cost and latency: can an approved per-assessment budget and user experience
-   be supported with evidenced assumptions rather than estimates presented as
-   fact?
+1. Search grounding: what sources/citations and location controls are
+   documented, and what remains unproven?
+2. Website analysis: what structured-output mechanism is documented, and what
+   exact compatibility remains unproven?
+3. Safety and operability: what server-side and lifecycle constraints are
+   documented?
+4. Cost: what published components are visible, and why can no
+   completed-assessment cost be calculated?
 
 Fourth, provide a recommendation with alternatives and exact public wording.
-The recommendation can be: a qualified provider combination; a provider-neutral
-architecture with a follow-up spike; a website-only MVP if search is not viable;
+The recommendation can be a provider-neutral architecture, a website-only MVP,
 or deferral of the AI-search feature. It must explain what evidence supports
-each conclusion and what needs Chris’s approval before any paid/API test.
+each conclusion and must not infer observed performance from documentation.
 
 ## Concrete Steps
 
@@ -198,35 +186,30 @@ From `/home/chris/ShortList`:
     git diff --check
     python3 scripts/check_markdown_links.py
 
-After explicit authority for web research, use only official provider
-documentation for documented capability and pricing claims. After explicit
-authority for a billable/live spike, record the exact account, cap, test input,
-timestamp, result, and cost before each call. Expected outcome before that
-authority: a reviewable research design, not a provider result.
+Use only official provider documentation for documented capability and pricing
+claims. The expected outcome is a reviewable documentation screen, not a
+provider result.
 
 ## Validation and Acceptance
 
 - The comparison uses direct official evidence for capability/pricing claims and
-  distinguishes documentation from observed test results.
-- Every observed test is reproducible: question, time, model/capability,
-  inputs, output, citations, latency, usage/cost, and failures are retained.
+  clearly distinguishes documented features from unobserved product behaviour.
 - The recommendation explicitly separates search grounding from website
   analysis and identifies unsupported requirements.
 - Public wording is truthful, dated, and does not claim a universal/official
   rank or misname a provider capability.
-- A provider option is not marked viable unless it has an accountable cost,
-  timeout, failure, secret, and provenance story.
+- No provider option is marked selected or production-ready from documentation
+  alone.
 - No provider credential, production integration, customer report, external
   contact, payment, deployment, or Symphony dispatch occurs under this plan.
 
 ## Idempotence and Recovery
 
 Documentation research and local evidence collection are repeatable. Record
-each source's retrieval date and do not overwrite earlier observed results;
-append a new dated entry when a provider changes. A live/billable test requires
-an approved budget cap and can be stopped after any unexpected cost, missing
-provenance, unsafe output, or error. Do not reuse an unverified consumer
-session, expose a key, or infer a successful test from an SDK import.
+each source's retrieval date and do not overwrite earlier documentation;
+append a new dated entry when a provider changes. Do not use a consumer
+session, expose a key, create a provider account, or infer runtime behaviour
+from an SDK import.
 
 ## Artifacts and Notes
 

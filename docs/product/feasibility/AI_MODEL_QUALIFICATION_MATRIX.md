@@ -1,6 +1,6 @@
 # AI model qualification matrix
 
-**Status:** active evidence register for GitHub Issue #23; no provider calls made  
+**Status:** documentation-only evidence register for GitHub Issue #23; no provider account, credential, or API request used
 **Retrieved:** 2026-10-05 (Pacific/Auckland)  
 **Companion review:** [AI-search and website-analysis capability review](AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md)
 
@@ -8,29 +8,28 @@
 
 This register is the authoritative per-candidate evidence record for the 67
 configurations named in the companion review. `Pending` means no claim has
-been made; it is not a pass. A configuration may enter the controlled live test
-only after all documentary gates are evidenced from the cited official source.
+been made; it is not a pass. This Issue does not include a provider test route:
+the register records only cited documentation and its limits.
 
 | Status | Meaning |
 | --- | --- |
 | pending | The exact configuration has not yet been verified from official documentation. |
 | partial | Some exact official evidence is captured, but at least one documentary gate remains open. |
-| documentary pass | Official documentation establishes the required API/search/provenance/format route; it remains untested. |
+| documentary pass | Official documentation establishes the required API/search/provenance/format route; it is not a performance or production qualification. |
 | excluded | Official evidence establishes that the configuration cannot form the required workflow. |
-| observed pass/fail | A separately approved live test has run and its evidence is linked here. |
 
 ## Provider evidence register
 
-| Candidate IDs | Provider | Server-side API evidence | Search and provenance evidence | Structured format evidence | Documentary state | Observed state |
+| Candidate IDs | Provider | Server-side API evidence | Search and provenance evidence | Structured format evidence | Documentary state | Issue #23 scope status |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1–28 | OpenAI | [Model catalogue](https://developers.openai.com/api/docs/models) | [Web-search tool](https://platform.openai.com/docs/quickstart/make-your-first-api-request); verify tool support for each 5.x/6.x configuration | [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs); verify per model | pending per configuration | not tested |
-| 29–39 | Google | [Gemini API models](https://ai.google.dev/gemini-api/docs/models) | [Google Search grounding](https://ai.google.dev/gemini-api/docs/google-search); verify per model | [Structured output](https://ai.google.dev/gemini-api/docs/structured-output); verify per model | pending per configuration | not tested |
-| 40–50 | Mistral | [Model catalogue](https://docs.mistral.ai/models/) | [Agents web-search connector](https://docs.mistral.ai/studio/agents/introduction); verify model/agent compatibility and citations | [Model comparison](https://docs.mistral.ai/getting-started/models/compare); verify per model | pending per configuration | not tested |
-| 51–53 | Anthropic | [Claude API pricing/model source](https://docs.anthropic.com/en/docs/about-claude/pricing) | Official web-search capability and exact model compatibility pending | Official structured-output capability and exact model compatibility pending | pending per configuration | not tested |
-| 54–57 | Cohere | [Command model pricing and API overview](https://docs.cohere.com/docs/how-does-cohere-pricing-work) | No native server-side web-search path evidenced in this register; evaluate a named paired retrieval provider | [Command A+ capabilities](https://docs.cohere.com/docs/command-a-plus); verify other Command models | pending per configuration | not tested |
-| 58–62 | xAI | [Grok 4.7 API guide](https://docs.x.ai/developers/grok-4-7) | Grok 4.7 documents server-side web and X search; capture citation/provenance behaviour and regional difference | Grok 4.7 documents structured outputs | pending exact effort/region evidence | not tested |
-| 63–64 | DeepSeek | [Models and pricing](https://api-docs.deepseek.com/quick_start/pricing/) | No native server-side web-search path evidenced in this register; evaluate a named paired retrieval provider | Exact structured-output evidence pending | pending per configuration | not tested |
-| 65–67 | Moonshot AI / Kimi | [Kimi API overview](https://www.kimi.ai/help/kimi-api/api-overview) | [Kimi Web Search APIs](https://www.kimi.ai/academy/best-practices-for-web-search); verify exact K3/K2.6 pairing | [Kimi JSON mode](https://www.kimi.ai/ja/help/kimi-api/api-model-capabilities); verify exact K3/K2.6 pairing | pending per configuration | not tested |
+| 1–28 | OpenAI | [Model catalogue](https://developers.openai.com/api/docs/models) | [Web-search tool](https://platform.openai.com/docs/quickstart/make-your-first-api-request); verify tool support for each 5.x/6.x configuration | [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs); verify per model | pending per configuration | documentation only |
+| 29–39 | Google | [Gemini API models](https://ai.google.dev/gemini-api/docs/models) | [Google Search grounding](https://ai.google.dev/gemini-api/docs/google-search); verify per model | [Structured output](https://ai.google.dev/gemini-api/docs/structured-output); verify per model | pending per configuration | documentation only |
+| 40–50 | Mistral | [Model catalogue](https://docs.mistral.ai/models/) | [Agents web-search connector](https://docs.mistral.ai/studio/agents/introduction); verify model/agent compatibility and citations | [Model comparison](https://docs.mistral.ai/getting-started/models/compare); verify per model | pending per configuration | documentation only |
+| 51–53 | Anthropic | [Claude API pricing/model source](https://docs.anthropic.com/en/docs/about-claude/pricing) | Official web-search capability and exact model compatibility pending | Official structured-output capability and exact model compatibility pending | pending per configuration | documentation only |
+| 54–57 | Cohere | [Command model pricing and API overview](https://docs.cohere.com/docs/how-does-cohere-pricing-work) | No native server-side web-search path evidenced in this register; evaluate a named paired retrieval provider | [Command A+ capabilities](https://docs.cohere.com/docs/command-a-plus); verify other Command models | pending per configuration | documentation only |
+| 58–62 | xAI | [Grok 4.7 API guide](https://docs.x.ai/developers/grok-4-7) | Grok 4.7 documents server-side web and X search; capture citation/provenance behaviour and regional difference | Grok 4.7 documents structured outputs | pending exact effort/region evidence | documentation only |
+| 63–64 | DeepSeek | [Models and pricing](https://api-docs.deepseek.com/quick_start/pricing/) | No native server-side web-search path evidenced in this register; evaluate a named paired retrieval provider | Exact structured-output evidence pending | pending per configuration | documentation only |
+| 65–67 | Moonshot AI / Kimi | [Kimi API overview](https://www.kimi.ai/help/kimi-api/api-overview) | [Kimi Web Search APIs](https://www.kimi.ai/academy/best-practices-for-web-search); verify exact K3/K2.6 pairing | [Kimi JSON mode](https://www.kimi.ai/ja/help/kimi-api/api-model-capabilities); verify exact K3/K2.6 pairing | pending per configuration | documentation only |
 
 ## Individual evidence capture: OpenAI first pass
 
@@ -66,7 +65,7 @@ Google Search guide explicitly names the configurations with native search
 support. Its structured-output guide demonstrates JSON-schema response formats
 with Gemini 3.8 Flash, but this documentation pass does **not** establish that
 every listed configuration supports the exact combined grounded-search plus
-structured-analysis workflow. A live test is still required after approval.
+structured-analysis workflow. This Issue does not invoke that combined route.
 
 | Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Remaining documentary work | Observed state |
 | --- | --- | --- | --- | --- | --- |
@@ -83,12 +82,12 @@ and Conversations API at product level. It does not, in the cited page, map
 those functions to each named model. That is insufficient to qualify an exact
 configuration for ShortList's workflow. The current model catalogue does,
 however, identify five named configurations as deprecated; those are excluded
-from a new-production path and must not receive paid live tests.
+from a new-production path.
 
 | Candidate IDs | Exact configuration(s) | Official evidence | Current documented result | Documentary state | Observed state |
 | --- | --- | --- | --- | --- | --- |
 | 40–45 | Mistral Large 3; Mistral Medium 3.5; Mistral Small 4; Ministral 3 14B, 8B, 3B | [Current model catalogue](https://docs.mistral.ai/models/), [pricing](https://docs.mistral.ai/inference/pricing), [Agents and Conversations](https://docs.mistral.ai/studio/agents/introduction) | Listed as current models with published standard input/output prices respectively: US$0.50/$1.50; $1.50/$7.50; $0.15/$0.60; $0.20/$0.20; $0.15/$0.15; and $0.10/$0.10 per million tokens. Mistral's agent product documents web search, citations, and structured outputs at product level. | partial — exact model-to-Agent/Search/Structured Output compatibility, web-source payload, location control, agent/tool charges, availability for the selected account, and normalized workflow cost are not established | not tested |
-| 46–50 | Magistral Medium 1.2; Magistral Small 1.2; Mistral Medium 3.1; Mistral Small 3.2; Devstral 2 | [Deprecated-model list](https://docs.mistral.ai/models/) | Each exact named configuration is listed by Mistral as deprecated. | excluded — do not select for a new ShortList production dependency or run a paid live test; retain only as market-screen evidence | not tested |
+| 46–50 | Magistral Medium 1.2; Magistral Small 1.2; Mistral Medium 3.1; Mistral Small 3.2; Devstral 2 | [Deprecated-model list](https://docs.mistral.ai/models/) | Each exact named configuration is listed by Mistral as deprecated. | excluded — do not select for a new ShortList production dependency; retain only as market-screen evidence | documentation only |
 
 ## Individual evidence capture: Anthropic first pass
 
@@ -159,26 +158,19 @@ performs web search.
 | 65 | Kimi K3 (`kimi-k3`) | [API overview](https://www.kimi.ai/help/kimi-api/api-overview), [Web Search API](https://www.kimi.ai/academy/best-practices-for-web-search), [JSON mode](https://www.kimi.ai/help/kimi-api/api-model-capabilities) | Chat Completions API is documented; K3 has a stated 1M-token context. Kimi documents valid-JSON mode. Its separate Web Search API returns source URLs and dates. | partial — confirm K3-to-Search API pairing and commercial pricing, source/citation presentation, location controls, search timeout/cost, and normalized combined cost | not tested |
 | 66–67 | Kimi K2.6 — thinking and non-thinking modes | [API overview](https://www.kimi.ai/help/kimi-api/api-overview), [Web Search API](https://www.kimi.ai/academy/best-practices-for-web-search), [JSON mode](https://www.kimi.ai/help/kimi-api/api-model-capabilities) | K2.6 is documented with thinking and non-thinking modes; the same separate Kimi Web Search API and JSON mode are documented. | partial — exact endpoint/model-mode pairing, commercial pricing, source/citation presentation, location controls, search timeout/cost, and normalized combined cost | not tested |
 
-## Qualification status checkpoint
+## Documentation completion checkpoint
 
 The following is a count of the recorded states, not a quality ranking:
 
 | Documentary state | Configuration count | Consequence |
 | --- | ---: | --- |
-| partial | 62 | Do not run a billable test. Complete missing exact capability, provenance, pricing, availability and/or paired-retrieval evidence. |
-| excluded | 5 | Do not run a billable test. These are Mistral IDs 46–50, which its current catalogue lists as deprecated. |
-| documentary pass | 0 | No live-test candidate has passed every documentary gate. |
-| observed pass/fail | 0 | No provider call has been authorised or made. |
+| partial | 62 | Missing exact capability, provenance, pricing, availability and/or paired-retrieval evidence remains visible. |
+| excluded | 5 | Mistral IDs 46–50 are deprecated in its current catalogue. |
+| documentary pass | 0 | No exact configuration has complete documentary evidence for the whole workflow. |
 
-Two independent gates remain before an observed test starts:
-
-1. The configuration must reach `documentary pass` through exact cited evidence
-   in this matrix; and
-2. Chris must approve the spend, workload, usefulness, retrieval, timeout and
-   retry fields in [AI model qualification test protocol](AI_MODEL_TEST_PROTOCOL.md).
-
-An approval cannot turn a `partial` configuration into a test candidate; a
-documentary pass cannot authorise spending.
+No provider call is part of #23. The absence of a `documentary pass` does not
+turn into an implied failure of a provider; it records that documentation alone
+does not support a production selection for this workflow.
 
 ## Required fields for each individual configuration
 
@@ -192,12 +184,12 @@ not copy a vendor-level assertion to a model without official support:
 5. structured-output mechanism and context/output limits;
 6. published token, search/tool, storage, and platform prices;
 7. documentary qualification outcome and source links; and
-8. approved live-test result, including prompt, UTC/Auckland time, sources,
-   result, schema validation, latency, usage, cost, and failure state.
+8. any future implementation evidence separately, without treating it as
+   evidence that was collected under #23.
 
 ## Current evidence limits
 
-Only the provider-level documentation above has been collected. It is enough to
-start per-configuration evidence capture; it is not enough to mark a single
-candidate as viable or to calculate comparable cost. No credentials, external
+The evidence is documentation-only. It is enough to identify possible routes
+and their limits; it is not enough to mark a single candidate production-ready
+or to calculate comparable completed-assessment cost. No credentials, external
 requests, customer data, or charges have been used.

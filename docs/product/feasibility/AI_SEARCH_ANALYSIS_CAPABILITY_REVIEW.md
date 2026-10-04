@@ -15,42 +15,39 @@ ShortList needs two distinct capabilities:
 Official documentation establishes that several server-side options can be
 evaluated. It does **not** establish that any option produces useful Auckland
 results, follows the desired meaning of “top three”, meets a latency or cost
-target, or is ready for production. Those questions require a separately
-approved, capped live test.
+target, or is ready for production. Issue #23 deliberately makes no provider
+request, so those questions remain unobserved rather than silently assumed.
 
 The product owner retains control of the customer-facing name for this result.
 This review records technical capability and provenance only.
 
 ## Assumptions and decisions required
 
-| Topic | Current position | Status needed before live testing |
+| Topic | Current position | Documentation-only disposition |
 | --- | --- | --- |
 | Runtime boundary | A production candidate must be a commercially usable, server-side API integration. Consumer chat use and browser automation are outside scope. | retained working boundary |
 | Candidate coverage | The 67 configurations are a market screen. A configuration means a base model plus a materially different reasoning effort or endpoint where applicable. | retained working boundary |
 | Qualification coverage | Every configuration must have documented API, search-path, provenance, structured-output, pricing, and availability/deprecation evidence. | required evidence |
-| Observed-test coverage | Every configuration that passes the documentary search-path gate must run the same controlled ShortList workflow test. Entries failing the documentary gate are recorded as excluded and do not incur a live test. | corrected execution rule |
-| “Useful” threshold | The rubric identifies dimensions but has no agreed score, evaluator, or maximum unsupported-claim threshold. | product-owner decision required |
-| Standard test workload | Input/output allowance, search-query cap, retries, timeouts, and whether retrieval is separate from analysis are not fixed. | product-owner decision required |
-| Test set | The number of Auckland questions, business types, public websites, repeat runs, and evaluation method are not fixed. | product-owner decision required |
-| Retrieval pairing | A non-native-search model may be paired with a named retrieval provider, but approved provider pairings are not fixed. | product-owner decision required |
-| Cost and authority | No total spend cap, accounts, credentials, or provider configurations are approved. | explicit approval required |
+| Observed quality and cost | Usefulness, ordering, latency, actual token use, and completed-assessment cost cannot be established from documentation. | explicitly unobserved in #23 |
+| Evaluation workload | Input/output allowance, search-query cap, retries, timeouts, evaluation set, and retrieval pairing are not product decisions made by this Issue. | deferred to a later implementation/design decision |
+| Provider authority | No account, credential, provider configuration, or API request is in scope. | no live-test route |
 | Provider terms | Commercial eligibility, data handling, regional availability, quotas, and current prices must be proven from official sources per configuration. | required evidence |
 
 No unresolved item in this table is silently converted into a product decision.
 
 ## Documentation comparison
 
-| Candidate approach | Documented search/provenance capability | Documented structured-analysis capability | Documented cost signal at retrieval | What live evidence must establish |
+| Candidate approach | Documented search/provenance capability | Documented structured-analysis capability | Documented cost signal at retrieval | Documentation limit |
 | --- | --- | --- | --- | --- |
-| OpenAI Responses API with web search | The server-side web-search tool can return URL citations and accepts approximate user-location context. | Structured Outputs can constrain a response to a JSON schema. | Web search is listed at US$10 per 1,000 calls, in addition to model and search-content token charges. | Whether a dated Auckland query returns adequate sources, useful ordering, repeatable evidence, latency, and total per-assessment cost. |
-| Google Gemini API with Google Search grounding | Grounding can expose search queries, web results, citations, and grounding metadata. | Gemini structured output supports JSON-schema-shaped results with built-in tools. | Search-grounding pricing is documented per search request, with model-token pricing separate; model execution may involve more than one search query. | Whether location and citation detail meet the product need, and how many billable searches/tokens a bounded assessment uses. |
-| Perplexity Search API plus a separately selected analysis model | Search API returns structured, ranked, real-time results and offers domain, language, and region controls. | The Search API is a retrieval API; a separate structured-analysis step is required. Perplexity also documents an Agent API for generated cited answers, but that is a distinct evaluation option. | Standard Search is listed at US$5 per 1,000 successful requests and Fast Search at US$1 per 1,000; generated-answer/Agent use has separate invocation and model-token charges. | Whether raw retrieved results are sufficient for the product experience, or whether a cited-answer path is needed; quality, provenance, latency, and total combined cost. |
+| OpenAI Responses API with web search | The server-side web-search tool can return URL citations and accepts approximate user-location context. | Structured Outputs can constrain a response to a JSON schema. | Web search is listed at US$10 per 1,000 calls, in addition to model and search-content token charges. | It does not prove useful dated Auckland output, ordering, latency, or completed-assessment cost. |
+| Google Gemini API with Google Search grounding | Grounding can expose search queries, web results, citations, and grounding metadata. | Gemini structured output supports JSON-schema-shaped results with built-in tools. | Search-grounding pricing is documented per search request, with model-token pricing separate; model execution may involve more than one search query. | It does not prove location fit, combined tool/schema behaviour, or a bounded assessment cost. |
+| Perplexity Search API plus a separately selected analysis model | Search API returns structured, ranked, real-time results and offers domain, language, and region controls. | The Search API is a retrieval API; a separate structured-analysis step is required. Perplexity also documents an Agent API for generated cited answers, but that is a distinct evaluation option. | Standard Search is listed at US$5 per 1,000 successful requests and Fast Search at US$1 per 1,000; generated-answer/Agent use has separate invocation and model-token charges. | It does not prove that a retrieval-plus-analysis combination is useful, attributable, or economical for the product. |
 
 Primary documentation: [OpenAI web-search quickstart](https://platform.openai.com/docs/quickstart/make-your-first-api-request), [OpenAI pricing](https://platform.openai.com/pricing), [OpenAI Structured Outputs guide](https://platform.openai.com/docs/guides/structured-outputs), [Google Search grounding](https://ai.google.dev/gemini-api/docs/google-search), [Google structured output](https://ai.google.dev/gemini-api/docs/structured-output), [Google pricing](https://ai.google.dev/gemini-api/docs/pricing), [Perplexity Search quickstart](https://docs.perplexity.ai/docs/search/quickstart), and [Perplexity pricing](https://docs.perplexity.ai/docs/getting-started/pricing).
 
 Pricing is a documented signal, not a ShortList budget or a promise. It can
-change and must be rechecked immediately before any live test or provider
-selection.
+change and must be rechecked before any future provider selection or
+implementation.
 
 ## Expanded 67-configuration evaluation
 
@@ -91,8 +88,8 @@ This is the named market-screen list. “Configuration” is intentional: where 
 provider bills or behaves materially differently by reasoning effort or region,
 that combination is a separate comparison entry. It is not a quality ranking,
 provider selection, or a claim that every entry has the same search capability.
-Each entry must still pass official capability and pricing capture before it can
-enter the live-test set.
+Each entry must still have official capability and pricing evidence before it
+can inform a future provider-selection decision.
 
 ## Mandatory per-configuration qualification
 
@@ -105,14 +102,14 @@ record for each entry must answer all of the following.
 | Server-side implementation | Official documentation shows a supported API route suitable for a commercial server-side integration. | eligible, conditional, or excluded |
 | Search path | Official documentation shows either a native server-side web-search/grounding tool **or** a compatible, separately named retrieval-provider path. Consumer-chat browsing is not evidence. | native search, paired retrieval required, or no supported path |
 | Provenance | The selected search path returns usable source URLs/citations or retains the underlying sources used to form the result. | passes, conditional, or fails |
-| Structured website analysis | Official documentation and an observed response show that the configuration can return the required schema from supplied public-page evidence. | passes, conditional, or fails |
-| Useful result | A controlled test produces a helpful Auckland business result and a grounded website assessment under the published rubric below. | passes, conditional, or fails |
-| Cost and operation | The test captures real usage, total cost, latency, timeout/failure behaviour, and server-only secret handling. | passes, conditional, or fails |
+| Structured website analysis | Official documentation establishes whether a schema-shaped response route is documented for supplied public-page evidence. | documented, conditional, or absent |
+| Useful result | No provider request is made. Usefulness, Auckland relevance, and grounded assessment quality are unobserved. | explicitly unobserved |
+| Cost and operation | Published prices and operational limits are recorded where documented. Actual usage, cost, latency, and failure behaviour are unobserved. | documentation-only or incomplete |
 
 “Paired retrieval required” is valid only when the resulting combination is
-tested and priced as one workflow. It must name both the retrieval provider and
-analysis model. We will not imply that a text-only model has searched the web
-when it has not.
+designed and priced as one workflow. It must name both the retrieval provider
+and analysis model. We will not imply that a text-only model has searched the
+web when it has not.
 
 | # | Provider | Candidate model configuration |
 | ---: | --- | --- |
@@ -186,8 +183,8 @@ when it has not.
 
 The OpenAI 5.x entries are included for coverage, not presumed suitable for a
 new production dependency. The pricing pass must record their then-current API
-availability, deprecation state, and supported tools before they can be
-entered into live testing. An older model that remains callable but has a published
+availability, deprecation state, and supported tools before they can inform a
+future selection. An older model that remains callable but has a published
 replacement or retirement date will be compared for evidence only and not
 recommended as the default without an explicit exception.
 
@@ -199,79 +196,42 @@ itself satisfy the dated-search result. A search provider can still be paired
 with a different analysis model, which creates a provider *combination* rather
 than a single-model choice.
 
-### 2. Controlled quality test set
+### 2. Documentation-only assessment limits
 
-Documentation cannot tell us whether a result is meaningful for ShortList.
-Each configuration that passes the documentary search-path gate must undergo
-the same, approved live test. Each result will be scored against a published
-rubric:
+Documentation can establish API routes, stated provenance mechanics,
+structured-output options, lifecycle notices, and published price components.
+It cannot establish whether a ShortList result is useful, whether it reflects
+the intended Auckland context, whether sources support the output, or actual
+latency, token use, cost, and failure behaviour. Those are deliberately not
+claimed by this Issue.
 
-| Dimension | Passing evidence |
-| --- | --- |
-| Auckland relevance | The response uses the stated Auckland context and records any location limitation. |
-| Source provenance | It retains usable source URLs/citations and makes clear what is observed versus inferred. |
-| Meaningful business result | It answers the fixed business question without inventing unsupported companies, claims, or certainty. |
-| Website assessment quality | Required structured fields are complete, grounded in supplied public-page evidence, and useful to a small-business owner. |
-| Operability | Server-side secret boundary, bounded inputs/outputs, usage data, latency, and reason-coded failure can be recorded. |
-
-The rubric must be applied to the same public, non-sensitive test set and
-reviewed before any provider is declared preferable. A real result is evidence
-for that exact time, prompt, model, retrieval configuration, and configuration
-only.
-
-The live test is not 67 unrelated chat prompts. It is a repeatable ShortList
-workflow test: the same dated Auckland business-type question, the same
-public-page evidence for website analysis, recorded sources, and the same
-schema. An entry fails if it cannot make the relevant search provenance visible,
-cannot produce the required analysis format, or produces an unhelpful or
-unsupported result under the agreed rubric.
-
-## Cost comparison: two units, not one
-
-The review will report both of these, in USD and with the retrieval date:
-
-1. **1,000 provider API calls:** a normalized request profile applied to every
-   eligible model. This makes published per-token and per-tool prices
-   comparable, but is not a customer journey.
-2. **1,000 completed Minimum Assessments:** the observed full workflow cost,
-   including each search/retrieval call, website-analysis call, model tokens,
-   retries, and any required storage or delivery step. This is the product
-   decision measure.
-
-Before calculating either number, the review must lock one explicit request
-profile: input-token allowance, output-token allowance, whether retrieval is a
-separate call, maximum search queries, and whether reasoning/tool tokens count
-inside the cap. Otherwise a “price for 1,000 calls” comparison would be false
-precision. Provider prices and tool charging rules differ: for example,
-OpenAI lists web search separately from model tokens, Gemini documents
-grounding/search charges separately from model tokens, and Perplexity separates
-retrieval and generated-answer pricing.
+Published prices are retained as comparison signals only. A completed-
+assessment price would require a fixed request profile and observed usage, so
+this review does not calculate one. Provider price pages must be rechecked at
+the point of any future implementation decision.
 
 ## What is deliberately not concluded
 
 - No provider is selected.
 - No claim is made about a stable, official, or universally correct ranking.
 - No customer-facing terminology is selected.
-- No “lowest cost” conclusion is possible until the actual search count, token
-  use, latency, failure rate, and result quality are observed under the same
-  bounded test.
+- No “lowest cost” conclusion is possible from documentation because the actual
+  search count, token use, latency, failure rate, and result quality are
+  unobserved.
 - Anthropic, DeepSeek, consumer ChatGPT use, and other options are not excluded;
   they are simply outside this first official-documentation comparison.
 
-## Proposed controlled test, pending approval
+## Documentation-only conclusion and recommendation
 
-Before a live test, Chris should approve a total spend cap, the test workload,
-the test set, and permitted retrieval pairings. The test should use the same
-public, non-sensitive Auckland business queries for every configuration that
-passes the documentary search-path gate and retain:
+No provider is selected by #23. The official sources establish that several
+providers document server-side search, provenance, and structured-output
+routes, but documentation alone cannot qualify a provider as production-ready
+for ShortList.
 
-- exact question and Auckland-local and UTC time;
-- configured location/context and capability or model identity;
-- returned result, source URLs/citations, and any declared ordering;
-- structured website-analysis output from the same supplied public-page
-  evidence;
-- latency, token/usage data, billed cost, and reason-coded failures.
-
-The outcome is a decision record for #23: select a bounded provider design,
-run a further spike, narrow the feature promise, or defer the AI-search part of
-MVP 1. It is not a customer-facing benchmark or outreach activity.
+The recommended direction is provider-neutral application design: keep search
+acquisition and website analysis as separate interfaces, preserve sources and
+timestamps, and decide a concrete provider only during a future implementation
+decision. No public wording may infer a guaranteed ranking, result quality,
+latency, price, or Auckland precision from this review. This narrows the claim
+that #23 can honestly support while preserving the MVP requirement for dated,
+source-backed results.
