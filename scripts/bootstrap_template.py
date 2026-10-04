@@ -58,6 +58,7 @@ def _build_plan(
         raise ValueError(f"refusing to overwrite existing package directory: {target_path}")
     files = (
         root / "pyproject.toml",
+        root / "WORKFLOW.md",
         root / "README.md",
         root / "compose.yaml",
         root / "scripts" / "prove_deployed_software.py",
@@ -90,6 +91,11 @@ def _replace(text: str, plan: BootstrapPlan, path: Path) -> str:
         result = result.replace(
             'repository = "successbycs/template"',
             f'repository = "{plan.github_repository}"',
+        )
+    if path.name == "WORKFLOW.md":
+        result = result.replace(
+            "repo: successbycs/template",
+            f"repo: {plan.github_repository}",
         )
     return result
 

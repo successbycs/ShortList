@@ -70,6 +70,9 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert 'repository = "example-owner/demo-app"' in (
         copied_template / "pyproject.toml"
     ).read_text(encoding="utf-8")
+    assert "repo: example-owner/demo-app" in (copied_template / "WORKFLOW.md").read_text(
+        encoding="utf-8"
+    )
     assert not (copied_template / "src" / "demo_app" / "symphony").exists()
     assert (copied_template / "WORKFLOW.md").is_file()
     assert (copied_template / "scripts" / "install_upstream_symphony.sh").is_file()

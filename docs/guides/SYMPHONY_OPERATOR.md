@@ -11,6 +11,11 @@ The checked-in integration pins upstream `v0.0.3` for Linux x86_64. Symphony is
 prototype software intended for evaluation by its upstream authors. Do not treat
 the template integration as a hardened unattended production service.
 
+The integration evidence is deliberately incremental: #39 verified the pinned
+installation and dashboard baseline; #40 proved one real scheduler-to-Codex
+task and restart behavior; #41 removed the prior duplicate Python runtime. The
+corresponding GitHub Issues remain open as human-review records.
+
 ## Safe baseline
 
 `WORKFLOW.md` is upstream configuration with Markdown prompt instructions. Its
@@ -35,6 +40,14 @@ safe baseline is deliberately narrow:
 An empty eligible queue is the normal safe state. Starting the service in that
 state proves connectivity and the dashboard only; it does not prove task
 execution. The dedicated #40 proof is the only authorized first dispatch.
+
+## Copied project targeting
+
+Before operating Symphony from a copied template, run the standard bootstrap
+command with the copied repository's `OWNER/REPOSITORY`. It retargets both
+`pyproject.toml`'s user-directed session setting and `WORKFLOW.md`'s upstream
+tracker setting. Confirm both files name the copied repository before supplying
+a token or starting the launcher. See [Getting Started](../../GETTING_STARTED.md).
 
 ## Install and start the dashboard
 
@@ -89,3 +102,16 @@ and the workspace, and record the state in the relevant GitHub Issue. Do not
 start duplicate services, delete a workspace, or use a label change to force a
 retry. The normal coding-session policy remains
 [GITHUB_ISSUE_WORKFLOW](../harness/GITHUB_ISSUE_WORKFLOW.md).
+
+## Update and rollback
+
+The pinned version and SHA-256 live in `scripts/install_upstream_symphony.sh`.
+Before changing either, review the official upstream release and checksum, then
+repeat the installation, dashboard, and bounded-task evidence appropriate to
+the change. Do not vendor or fork upstream as part of an update.
+
+For a checked-in integration regression, use Git to revert the reviewed commit.
+For a running-process problem, stop the exact foreground process, preserve the
+ignored workspace and logs, and start again only after reviewing tracker
+eligibility. Do not delete `var/` state as a recovery shortcut; it contains
+diagnostic evidence but is not a custom durable scheduler history.

@@ -30,9 +30,11 @@ VS Code attachment is a manual check: run **Dev Containers: Reopen in Container*
 
 ## Configure the copied project
 
-Before running a Codex Issue session in a copied template, set the GitHub target
-during bootstrap. This prevents a copied repository from operating on the
-source template's Issues:
+Before running a Codex Issue session or upstream Symphony in a copied template,
+set the GitHub target during bootstrap. This changes both the user-directed
+session target in `pyproject.toml` and upstream Symphony's queue target in
+`WORKFLOW.md`, preventing a copied repository from operating on the source
+template's Issues:
 
     docker compose run --rm app uv run python scripts/bootstrap_template.py \
       --project-name my-project --package-name my_project \
@@ -44,6 +46,13 @@ source template's Issues:
 The command requires an explicit `OWNER/REPOSITORY`; it changes only the
 bounded template markers and records the selected values in an ignored local
 state file. See [the GitHub Issue workflow](docs/harness/GITHUB_ISSUE_WORKFLOW.md).
+
+## Optional upstream Symphony
+
+Symphony is an optional upstream preview integration, not the Python template
+runtime. After bootstrap, read [the upstream Symphony operator guide](docs/guides/SYMPHONY_OPERATOR.md)
+for its prerequisites, deliberate queue admission, one-worker baseline,
+foreground start/stop commands, dashboard, review handoff, and recovery limits.
 
 ## Configuration
 
