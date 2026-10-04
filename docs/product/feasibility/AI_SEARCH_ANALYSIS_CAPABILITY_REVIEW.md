@@ -35,7 +35,7 @@ Pricing is a documented signal, not a ShortList budget or a promise. It can
 change and must be rechecked immediately before any live test or provider
 selection.
 
-## Expanded 50-configuration evaluation
+## Expanded 67-configuration evaluation
 
 **Working assumption:** “AI CI implementation” means a server-side,
 commercially usable API integration for this product. It does not mean a
@@ -45,9 +45,9 @@ interpretation if “CI” means something else.
 
 The comparison will have two deliberately separate stages.
 
-### 1. Documentation screen: 50 named model configurations
+### 1. Documentation screen: 67 named model configurations
 
-The next evidence update will catalogue 50 currently offered, server-side
+The next evidence update will catalogue 67 currently offered, server-side
 model configurations across multiple providers. Each entry must have a direct
 official source and record:
 
@@ -68,7 +68,7 @@ Responses API and SDKs, and documents Astra with web-search and structured-
 output support; the exact model IDs, availability, and current pricing will be
 captured against the official model catalogue at the time of the screen.
 
-### Initial 50-configuration candidate list
+### Initial 67-configuration candidate list
 
 This is the named market-screen list. “Configuration” is intentional: where a
 provider bills or behaves materially differently by reasoning effort or region,
@@ -129,10 +129,34 @@ enter the live-test shortlist.
 | 48 | xAI | Grok 4.7 — standard endpoint, high effort |
 | 49 | xAI | Grok 4.7 — standard endpoint, xhigh effort |
 | 50 | xAI | Grok 4.7 — US regional endpoint, high effort |
+| 51 | DeepSeek | DeepSeek-V4.1-Flash |
+| 52 | DeepSeek | DeepSeek-V4-Pro-0813 |
+| 53 | Moonshot AI | Kimi K3 |
+| 54 | Moonshot AI | Kimi K2.6 — thinking mode |
+| 55 | Moonshot AI | Kimi K2.6 — non-thinking mode |
+| 56 | OpenAI | GPT-5.6 Sol |
+| 57 | OpenAI | GPT-5.6 Luna |
+| 58 | OpenAI | GPT-5.5 |
+| 59 | OpenAI | GPT-5.5 Pro |
+| 60 | OpenAI | GPT-5.4 |
+| 61 | OpenAI | GPT-5.4 Mini |
+| 62 | OpenAI | GPT-5.4 Pro |
+| 63 | OpenAI | GPT-5.2 |
+| 64 | OpenAI | GPT-5.2 Pro |
+| 65 | OpenAI | GPT-5 |
+| 66 | OpenAI | GPT-5 Mini |
+| 67 | OpenAI | GPT-5 Nano |
 
-Provider sources for this initial list: [OpenAI model catalogue](https://developers.openai.com/api/docs/models), [Google Gemini models](https://ai.google.dev/gemini-api/docs/models), [Mistral model catalogue](https://docs.mistral.ai/models/), [Anthropic model pricing](https://docs.anthropic.com/en/docs/about-claude/pricing), [Cohere model documentation](https://docs.cohere.com/docs/how-does-cohere-pricing-work), and [xAI models](https://docs.x.ai/developers/models). The formal pricing pass will replace provider-level references with a direct price source and retrieval date for every entry.
+The OpenAI 5.x entries are included for coverage, not presumed suitable for a
+new production dependency. The pricing pass must record their then-current API
+availability, deprecation state, and supported tools before they can be
+shortlisted. An older model that remains callable but has a published
+replacement or retirement date will be compared for evidence only and not
+recommended as the default without an explicit exception.
 
-Fifty configurations are a market screen, not a promise that all fifty are
+Provider sources for this initial list: [OpenAI model catalogue](https://developers.openai.com/api/docs/models), [Google Gemini models](https://ai.google.dev/gemini-api/docs/models), [Mistral model catalogue](https://docs.mistral.ai/models/), [Anthropic model pricing](https://docs.anthropic.com/en/docs/about-claude/pricing), [Cohere model documentation](https://docs.cohere.com/docs/how-does-cohere-pricing-work), [xAI models](https://docs.x.ai/developers/models), [DeepSeek models and pricing](https://api-docs.deepseek.com/quick_start/pricing/), and [Kimi API overview](https://www.kimi.ai/help/kimi-api/api-overview). The formal pricing pass will replace provider-level references with a direct price source and retrieval date for every entry.
+
+Sixty-seven configurations are a market screen, not a promise that all sixty-seven are
 interchangeable candidates. A model without source-backed retrieval cannot by
 itself satisfy the dated-search result. A search provider can still be paired
 with a different analysis model, which creates a provider *combination* rather
@@ -141,7 +165,7 @@ than a single-model choice.
 ### 2. Controlled quality test: a smaller comparable shortlist
 
 Documentation cannot tell us whether a result is meaningful for ShortList.
-After the 50-configuration screen, the evidence should nominate a small shortlist for
+After the 67-configuration screen, the evidence should nominate a small shortlist for
 the same, approved live test. Each result will be scored against a published
 rubric:
 
