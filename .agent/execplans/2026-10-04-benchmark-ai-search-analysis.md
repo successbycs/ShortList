@@ -59,8 +59,9 @@ promise or defer concrete provider selection to implementation design.
 - [x] (2026-10-05) Compare documented candidate capabilities, make the
   unobserved limits explicit, and recommend provider-neutral design rather than
   selecting a provider.
-- [ ] Update Issue #23 with the documentary-only conclusion and leave it open
-  for product-owner review.
+- [x] (2026-10-05) Update Issue #23 with the documentary-only conclusion and
+  leave it open for product-owner review. Evidence: GitHub comment
+  `issuecomment-5984826269` and commit `9a444ff`.
 
 ## Surprises & Discoveries
 
