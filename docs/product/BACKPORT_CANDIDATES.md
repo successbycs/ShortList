@@ -17,8 +17,10 @@ a project created from V1:
 3. Symphony assigns the Issue to the configured number of Codex workers. Keep
    the upstream default/concurrency configuration unless there is an approved
    reason to change it.
-4. A worker implements the Issue, records observable evidence in GitHub, and
-   leaves the Issue open for human review.
+4. A worker implements the Issue, records observable evidence in GitHub, then
+   removes only its own `symphony:ready` label. The Issue remains open for human
+   review, but the removed label gives upstream Symphony a tracker-visible stop
+   condition so it cannot continue or retry the completed work.
 5. A human accepts, changes, or closes the work. Product work that needs owner
    judgement remains human-led rather than being dispatched automatically.
 
@@ -29,7 +31,14 @@ The V1 backport must preserve the two distinct work lanes:
 - Deliberately started upstream Symphony dispatch requires the upstream
   `symphony:ready` admission label and the repository's readiness checks. A
   chat agreement, Issue comment, or Project item does not make an Issue
-  eligible.
+  eligible. After a successful worker handoff, that worker removes only this
+  label from its own Issue; a human re-applies it only when specific, reviewed
+  follow-up work is ready for another run.
+
+This is a repository handoff policy implemented through upstream's normal
+label-based routing, not a replacement scheduler or an MCP configuration. It
+must be proved first on one explicit, disposable offline Issue before it is
+relied upon for product work.
 
 Backport the generic collaborative decision-capture procedure to the template's
 GitHub Issue workflow: material agreements update a canonical document and a

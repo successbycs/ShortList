@@ -22,8 +22,10 @@ The working loop is:
    clear way to verify it.
 3. When the Issue is eligible, Symphony may assign it to one configured Codex
    worker for implementation.
-4. The worker records evidence in GitHub and leaves the Issue open for human
-   review. A person decides whether to accept, change, or close the work.
+4. The worker records evidence in GitHub, removes only its own
+   `symphony:ready` label to stop further dispatch, and leaves the Issue open
+   for human review. A person decides whether to accept, change, close, or
+   deliberately re-queue the work.
 
 For ShortList, product-discovery and commercial decisions stay human-led.
 Symphony becomes useful after the requirements are approved, for bounded
