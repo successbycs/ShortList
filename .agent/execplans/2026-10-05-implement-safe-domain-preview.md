@@ -48,6 +48,11 @@ authorities.
   and website-evidence repository with a fake-D1 contract test. The binding and
   migration application remain unobserved until a named local/test D1 target is
   configured.
+- [x] (2026-10-05 08:02Z) With Chris’ explicit approval, created the empty
+  `shortlist-mvp1` Cloudflare D1 database in the Oceania region and generated
+  the checked-in `SHORTLIST_DB` Worker binding. `npm run types`, TypeScript,
+  and the repository fixture tests passed. No Worker deployment, database
+  migration, customer data, DNS change, or live provider request occurred.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -71,6 +76,14 @@ authorities.
   hostname will resolve publicly when fetched.
   Evidence: hostname validation has no DNS result. The later safe fetcher must
   validate resolved addresses and every redirect at connection time.
+
+- Observation: creating D1 with Wrangler's named binding updated
+  `apps/web/wrangler.jsonc` with the generated database ID. The ID identifies a
+  Cloudflare resource but is not a secret; it is required for the Worker
+  binding. The empty database has no schema until a migration is explicitly
+  applied.
+  Evidence: `npx wrangler d1 create shortlist-mvp1 --location oc --binding
+  SHORTLIST_DB` on 2026-10-05.
 
 ## Decision Log
 
@@ -142,7 +155,8 @@ The D1 persistence boundary is now implemented in
 `apps/web/src/server/assessment-repository.ts`. It uses parameter-bound queries
 only, reuses an existing customer by normalised domain, creates a fresh dated
 assessment run, and stores bounded website evidence separately. Tests supply a
-fake D1 implementation; no actual database is yet bound or mutated.
+fake D1 implementation. The empty `shortlist-mvp1` D1 resource is now bound in
+the Worker configuration but has not been migrated or mutated.
 
 ## Context and Orientation
 
