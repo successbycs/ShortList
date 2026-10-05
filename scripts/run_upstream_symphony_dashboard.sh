@@ -19,6 +19,10 @@ if [[ "${SYMPHONY_UNSAFE_PREVIEW_ACK:-}" != "I understand" ]]; then
   printf '%s\n' "Set SYMPHONY_UNSAFE_PREVIEW_ACK='I understand' to explicitly acknowledge the upstream preview warning." >&2
   exit 2
 fi
+if [[ "${SYMPHONY_FULL_ACCESS_ACK:-}" != "I understand" ]]; then
+  printf '%s\n' "Set SYMPHONY_FULL_ACCESS_ACK='I understand' to explicitly acknowledge the Codex full-access worker policy." >&2
+  exit 2
+fi
 if ! command -v codex >/dev/null; then
   printf '%s\n' "missing prerequisite: codex" >&2
   exit 2

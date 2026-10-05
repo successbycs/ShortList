@@ -29,8 +29,15 @@ safe baseline is deliberately narrow:
   Issue, or create eligibility itself.
 - `agent.max_concurrent_agents: 1` limits the upstream scheduler to one active
   worker.
-- Codex runs in `workspace-write` sandbox mode. Network access is enabled for
-  normal repository setup, but approvals and MCP elicitation are rejected.
+- Codex runs with `danger-full-access` for Symphony-dispatched workers. This
+  is not the normal interactive Codex setting. Codex protects `.git`
+  recursively in `workspace-write`, which prevents the worker from making the
+  local commit required before the label-release handoff. The launcher therefore
+  requires a second, explicit `SYMPHONY_FULL_ACCESS_ACK="I understand"` for
+  every start. It is suitable only for an isolated, reviewed Issue and a host
+  whose accessible files and network are within the operator's trust boundary.
+  It does not bypass the prompt's no-push/no-deploy/no-broader-GitHub-change
+  rules; those remain behavioural constraints, not sandbox enforcement.
 - The worker workspace and runtime logs live below ignored `var/`; they are not
   the repository checkout.
 - The workspace hook clones the current committed local checkout by default.
@@ -60,12 +67,14 @@ executable below ignored `var/tools/`.
 scripts/install_upstream_symphony.sh --dry-run
 scripts/install_upstream_symphony.sh
 SYMPHONY_UNSAFE_PREVIEW_ACK="I understand" \\
+  SYMPHONY_FULL_ACCESS_ACK="I understand" \\
   GITHUB_TOKEN="$(gh auth token)" scripts/run_upstream_symphony_dashboard.sh
 ```
 
 The final command stays in the foreground and does not write the token to a
-file. Its acknowledgement is intentionally required by upstream before the
-launcher passes the upstream preview-warning flag. It serves the dashboard at <http://127.0.0.1:8765/> and its JSON state at
+file. Its two acknowledgements are intentionally required: the first for the
+upstream preview warning and the second for the Codex full-access worker
+policy. It serves the dashboard at <http://127.0.0.1:8765/> and its JSON state at
 <http://127.0.0.1:8765/api/v1/state>. Stop it with `Ctrl-C` in the same
 terminal. Use `SYMPHONY_DASHBOARD_PORT`, `SYMPHONY_WORKSPACE_ROOT`, or
 `SYMPHONY_LOGS_ROOT` only when an operator needs a different host-local path or
@@ -73,9 +82,9 @@ port; never commit their values if they contain sensitive locations.
 
 Before any start, confirm `codex` and `gh auth status` work on the host. The
 upstream binary also requires `git`. Failure to start is a safe failure: no
-Issue becomes eligible merely because the process was attempted. Never set the
-acknowledgement automatically in a shell profile, service definition, or CI;
-the person starting each preview must make that explicit decision.
+Issue becomes eligible merely because the process was attempted. Never set
+either acknowledgement automatically in a shell profile, service definition,
+or CI; the person starting each preview must make both decisions explicitly.
 
 ## Dashboard and restart behaviour
 
@@ -93,10 +102,12 @@ upstream session resume. #40 records the actual observed restart behaviour.
 ## Bounded task proof and recovery
 
 Do not add `symphony:ready` to an Issue or start the service against an eligible
-Issue except under the approved #40 proof or a later explicitly authorized
-operation. A worker may use the upstream `github_api` tool with the permissions
-of the temporary GitHub token, so every eligible Issue needs clear scope and
-human review.
+Issue except under a later explicitly authorized operation. A worker may use
+the upstream `github_api` tool with the permissions of the temporary GitHub
+token, so every eligible Issue needs clear scope and human review. After a
+successful local commit and evidence comment, the worker removes only its own
+admission label and leaves the Issue open for review. A human deliberately
+re-applies the label only for bounded, reviewed follow-up work.
 
 If Symphony or Codex blocks, stop the foreground process, preserve ignored logs
 and the workspace, and record the state in the relevant GitHub Issue. Do not

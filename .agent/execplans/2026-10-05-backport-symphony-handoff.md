@@ -15,9 +15,9 @@ full-access worker and observe a safe tracker-visible stop condition.
 
 - [x] (2026-10-05 05:50Z) Confirmed template #46 proof passed and #29's #34
   dependency is closed.
-- [ ] Update the ShortList workflow, launcher, and operator/readiness guides.
-  Blocked pending explicit authorization to widen **ShortList's** worker
-  filesystem and network policy to `danger-full-access`.
+- [x] (2026-10-05 06:00Z) Chris explicitly approved full access for deliberately
+  started Symphony workers in ShortList only; update the workflow, launcher,
+  and operator/readiness guides accordingly.
 - [ ] Commit only those policy files, admit #29, and run it in a fresh
   host-local workspace.
 - [ ] Record actual result and stop the foreground process.
