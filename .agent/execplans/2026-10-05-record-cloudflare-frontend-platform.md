@@ -10,7 +10,7 @@ Record the agreed MVP 1 deployment boundary: Cloudflare will host the public fro
 
 - [x] (2026-10-05 00:00Z) Inspected the ShortList SDD technology table and dependency-ordered delivery plan.
 - [x] (2026-10-05 00:00Z) Recorded the Cloudflare frontend-platform decision and preserved the remaining foundation decisions.
-- [ ] (2026-10-05 00:00Z) Validate, commit, push, and record the bounded decision on Issue #9.
+- [x] (2026-10-05 00:00Z) Validated, committed/pushed the bounded decision as `1e16942`, and recorded it on Issue #9.
 
 ## Surprises & Discoveries
 
@@ -28,7 +28,7 @@ Record the agreed MVP 1 deployment boundary: Cloudflare will host the public fro
 
 ## Outcomes & Retrospective
 
-Pending. This plan records a platform decision only. It does not create a Cloudflare account/project, deploy code, configure credentials, or adopt the Loveable prototype as production code.
+The platform decision was committed as `1e16942` and handed off in [Issue #9](https://github.com/successbycs/ShortList/issues/9#issuecomment-5986241154). It does not create a Cloudflare account/project, deploy code, configure credentials, or adopt the Loveable prototype as production code.
 
 ## Context and Orientation
 
@@ -46,6 +46,8 @@ From `/home/chris/ShortList`:
 2. Run `git diff --check` and inspect the Cloudflare terminology in both documents.
 3. Commit and push the documentation-only decision.
 4. Re-read #9 and post a durable `Decision` comment describing the selected and unselected boundaries.
+
+Actual result: `git diff --check` passed; `1e16942` was pushed to `origin/main`; and the Issue #9 decision handoff was posted on 2026-10-05.
 
 ## Validation and Acceptance
 
