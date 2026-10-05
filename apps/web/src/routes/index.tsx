@@ -30,17 +30,17 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ShortList — See what AI search sees" },
+      { title: "ShortList — See the web result and model view" },
       {
         name: "description",
         content:
-          "A dated, evidence-based look at how your Auckland business appears online and in one AI search test.",
+          "A dated, evidence-based look at how your Auckland business appears online, plus a clearly separate model-knowledge view.",
       },
-      { property: "og:title", content: "ShortList — See what AI search sees" },
+      { property: "og:title", content: "ShortList — See the web result and model view" },
       {
         property: "og:description",
         content:
-          "A dated, evidence-based look at how your Auckland business appears online and in one AI search test.",
+          "A dated, evidence-based look at how your Auckland business appears online, plus a clearly separate model-knowledge view.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -66,7 +66,7 @@ const screenLabels: Array<{ id: Screen; label: string }> = [
   { id: "refusal", label: "Invalid" },
   { id: "progress", label: "Checking" },
   { id: "teaser", label: "Findings" },
-  { id: "result", label: "AI result" },
+  { id: "result", label: "AI results" },
   { id: "consent", label: "Delivery" },
   { id: "entitlement", label: "Sent" },
   { id: "rateLimit", label: "Rate limited" },
@@ -213,11 +213,12 @@ function Entry({
           <Leaf className="size-4" aria-hidden="true" /> A quick public-web check
         </div>
         <h1 className="display-face max-w-3xl text-5xl leading-[1.02] font-bold sm:text-7xl">
-          See what customers — and one AI search — can find.
+          See what customers, the web, and AI knowledge can tell you.
         </h1>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-          We’ll look at your public website, then run one specific, dated search. Evidence first.
-          Grand claims firmly left at the gate.
+          We’ll look at your public website, then show two clearly labelled AI views: one
+          current-web result and one no-web model-knowledge result. Evidence first. Grand claims
+          firmly left at the gate.
         </p>
         <form className="mt-8 max-w-xl" onSubmit={onSubmit} noValidate>
           <label htmlFor="domain" className="mb-2 block text-sm font-bold">
@@ -333,7 +334,7 @@ function AssessmentProgress({ onComplete }: { onComplete: () => void }) {
       icon={<FileSearch />}
       kicker="Assessment in progress"
       title="Following the public trail."
-      body="This demo shows the future journey for a public business website and one dated Auckland AI-search test."
+      body="This demo shows the future journey for a public business website, one dated current-web result, and one separately labelled no-web model-knowledge result."
     >
       <div className="mt-7 overflow-hidden rounded-md border border-border bg-card">
         <div className="relative h-2 overflow-hidden bg-leaf-soft">
@@ -343,7 +344,8 @@ function AssessmentProgress({ onComplete }: { onComplete: () => void }) {
           {[
             ["Website opened", "Public pages are reachable", true],
             ["Business details checked", "Services and Auckland signals found", true],
-            ["AI search being tested", "One specific question, stamped in time", false],
+            ["Current-web result", "One specific question, stamped in time", false],
+            ["Model-knowledge result", "A separate answer with no live web search", false],
           ].map(([title, note, done]) => (
             <li key={String(title)} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 p-4">
               <span
@@ -407,10 +409,11 @@ function Teaser({ onView }: { onView: () => void }) {
       </div>
       <div className="mt-7 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-lg text-sm text-muted-foreground">
-          Next: see the exact question, returned order, sources and Auckland timestamp.
+          Next: compare the dated current-web result with a clearly separate model-knowledge
+          response.
         </p>
         <Button onClick={onView} size="lg" className="h-12">
-          View the dated AI result <ArrowRight />
+          View the two AI results <ArrowRight />
         </Button>
       </div>
     </div>
@@ -451,7 +454,7 @@ function EvidenceBlock({
   );
 }
 
-const businesses: Array<[string, string, string, string]> = [
+const currentWebBusinesses: Array<[string, string, string, string]> = [
   ["1", "Harbour Handywork", "Central Auckland", "Website · business directory"],
   ["2", "Tāmaki Home Care", "East Auckland", "Website · map listing"],
   ["3", "Kauri Property Services", "North Shore", "Website · business directory"],
@@ -462,9 +465,9 @@ function SearchResult({ onContinue }: { onContinue: () => void }) {
     <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-bold uppercase text-primary">One dated AI-search test</p>
+          <p className="text-sm font-bold uppercase text-primary">Two distinct AI views</p>
           <h1 className="display-face mt-2 text-4xl font-bold sm:text-5xl">
-            The returned shortlist
+            Keep current-web evidence and model knowledge separate.
           </h1>
         </div>
         <div className="rounded-md bg-ink px-4 py-3 text-sm font-semibold text-primary-foreground">
@@ -474,20 +477,23 @@ function SearchResult({ onContinue }: { onContinue: () => void }) {
         </div>
       </div>
       <section
-        aria-labelledby="query-title"
+        aria-labelledby="current-web-title"
         className="mt-6 rounded-lg border-2 border-ink bg-card p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7"
       >
         <div className="flex items-start gap-3">
           <Search className="mt-1 size-6 shrink-0 text-primary" aria-hidden="true" />
           <div>
-            <p className="text-xs font-bold uppercase text-muted-foreground">Example question</p>
-            <h2 id="query-title" className="display-face mt-1 text-2xl font-bold sm:text-3xl">
+            <p className="text-xs font-bold uppercase text-muted-foreground">Current-web result</p>
+            <h2 id="current-web-title" className="display-face mt-1 text-2xl font-bold sm:text-3xl">
               “Which Auckland businesses offer this type of service today?”
             </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This result uses a live web-search tool. Sources are shown where available.
+            </p>
           </div>
         </div>
         <ol className="mt-7 divide-y divide-border border-y border-border">
-          {businesses.map(([number, name, area, sources]) => (
+          {currentWebBusinesses.map(([number, name, area, sources]) => (
             <li key={name} className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-5">
               <span className="display-face grid size-10 place-items-center rounded-full bg-sun text-xl font-bold text-ink">
                 {number}
@@ -517,7 +523,43 @@ function SearchResult({ onContinue }: { onContinue: () => void }) {
           <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
           <p>
             <strong>
-              This is the order returned in this specific dated AI-search test. Results may vary.
+              This is the order returned in this specific dated current-web test. Results may vary.
+            </strong>
+          </p>
+        </div>
+      </section>
+      <section
+        aria-labelledby="model-knowledge-title"
+        className="mt-7 rounded-lg border-2 border-ink bg-secondary p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7"
+      >
+        <div className="flex items-start gap-3">
+          <Sparkles className="mt-1 size-6 shrink-0 text-coral" aria-hidden="true" />
+          <div>
+            <p className="text-xs font-bold uppercase text-muted-foreground">
+              Model-knowledge result · no live web search
+            </p>
+            <h2
+              id="model-knowledge-title"
+              className="display-face mt-1 text-2xl font-bold sm:text-3xl"
+            >
+              A separate model view, not a current ranking.
+            </h2>
+          </div>
+        </div>
+        <div className="mt-6 rounded-md border border-border bg-card p-5">
+          <p className="font-bold">What this fictional demo would show</p>
+          <p className="mt-2 text-muted-foreground">
+            A model can offer a general response to the same business-type question without looking
+            at the live web. It may be useful context, but it cannot confirm who is visible today or
+            provide current sources.
+          </p>
+        </div>
+        <div className="mt-5 flex items-start gap-3 rounded-md bg-coral-soft p-4 text-sm">
+          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-coral" aria-hidden="true" />
+          <p>
+            <strong>
+              This response did not use a live web search. It may be incomplete or out of date and
+              is not a verified current result.
             </strong>
           </p>
         </div>
