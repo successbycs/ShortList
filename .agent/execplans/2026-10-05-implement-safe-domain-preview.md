@@ -220,9 +220,11 @@ provisioning token: `CLOUDFLARE_API_TOKEN` may be kept in the already
 Git-ignored root `.env` file. It remains out of source control and must not be
 printed or copied to an Issue. Its lifecycle hardening (replacement by a
 managed local secret store, expiry/rotation, and removal after provisioning)
-is deferred to the existing credentials/security task #30. This exception does
-not apply to the deployed `TURNSTILE_SECRET`, which must use Cloudflare's
-Worker secret store.
+is deferred to the existing credentials/security task #30. Once Cloudflare has
+created the widget, its `TURNSTILE_SECRET` may also be placed in that ignored
+local `.env` for local V1 development. A later deployment remains required to
+use Cloudflare's Worker secret store rather than a checked-in configuration or
+browser-exposed variable.
 
 ## Context and Orientation
 
