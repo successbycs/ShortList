@@ -37,6 +37,13 @@ authorities.
 - [x] (2026-10-05 07:15Z) Connected the existing public prototype to the
   tested domain-admission gate. It stops invalid/local/private input before the
   checking state and displays the normalised submitted domain during checking.
+- [x] (2026-10-05 07:45Z) Chris approved the conservative MVP safe-fetch,
+  abuse, Auckland-context and public-limited-state policy recorded in
+  `docs/product/SAFE_FETCH_POLICY.md` and GitHub #10.
+- [x] (2026-10-05 07:46Z) Implemented the policy's server-only single-page
+  fetch boundary with injected fake transport tests: manual redirects, target
+  validation at every hop, abort timeout, allowed-content enforcement and
+  byte-bounded streamed reads.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -81,6 +88,15 @@ authorities.
   silently chosen in source code.
   Date/Author: pending / Chris.
 
+- Decision: Approve the conservative MVP safe-fetch policy: entry page plus two
+  same-origin pages, HTML/XHTML only, 1 MiB per page, 8 seconds per page,
+  20 seconds per assessment, three validated redirects, two global runs, one
+  active run per domain, five starts per privacy-minimised IP/day, server-side
+  Turnstile before costly work, and versioned curated Auckland-suburb data.
+  Rationale: Chris approved the recorded #10 recommendation to bound cost and
+  abuse while retaining a useful small-business assessment path.
+  Date/Author: 2026-10-05 / Chris.
+
 ## Outcomes & Retrospective
 
 Planning is complete and implementation is ready to start. It will stop at a
@@ -108,6 +124,15 @@ The prototype now demonstrates the first part of the intended single-page
 journey without pretending to fetch a real customer site: input is validated,
 then the normalised domain remains visible above the checking steps. A later
 server action replaces the prototype's manual completion control.
+
+The safe-fetch transport boundary is now implemented in
+`apps/web/src/server/safe-website-fetch.ts`. It does not automatically follow
+redirects, validates every submitted/redirected URL using the domain-admission
+gate, sends no visitor credentials, accepts only the approved content types,
+uses an abort signal, and cancels streamed reads above the byte limit. The
+Cloudflare Worker platform, not application code, supplies public-outbound DNS
+resolution; a platform-boundary test remains unobserved until a later approved
+local/remote Worker invocation.
 
 ## Context and Orientation
 
@@ -225,6 +250,16 @@ npm run lint                      # 0 errors; 8 existing warnings
 git diff --check                  # passed
 ```
 
+Observed on 2026-10-05 for the safe-fetch boundary:
+
+```text
+npx tsc --noEmit                  # passed
+npm test -- safe-website-fetch.test.ts domain-admission.test.ts website-evidence.test.ts prototype-journey.test.tsx
+# Test Files  4 passed (4); Tests  40 passed (40)
+npm run lint                      # 0 errors; 8 existing warnings
+git diff --check                  # passed
+```
+
 Observed on 2026-10-05 for the visible-domain journey slice:
 
 ```text
@@ -240,7 +275,8 @@ git diff --check                  # passed
 | Capability | Required proof | Current status |
 | --- | --- | --- |
 | Domain admission | Tests cover malformed, private/local, scheme, credential and port outcomes before network access | Passed (offline boundary only) |
-| Bounded website evidence | Fixtures cover content type, size ceiling, inert extraction and sparse page text | Passed (extractor only; safe fetch pending) |
+| Safe public fetch | Fake-transport tests cover manual redirect, unsafe redirect, content and streamed byte limits | Passed (local/fake); Cloudflare boundary unobserved |
+| Bounded website evidence | Fixtures cover content type, size ceiling, inert extraction and sparse page text | Passed (extractor only; safe fetch pending integration) |
 | Record isolation | Local D1 tests cover customer uniqueness and no domain-as-authorisation | Planned |
 | Honest teaser | UI tests prove malformed/private input is stopped and the normalised domain remains visible during checking | Partially passed (prototype; real route pending) |
 | Dated AI modes | Integration uses the #5 fixture provider and preserves labels/citations/warnings | Planned |

@@ -91,6 +91,13 @@ function isPrivateOrLocalHostname(hostname: string): boolean {
     return true;
   }
 
+  // Literal IPv6 addresses are never a valid public business-domain input.
+  // They are refused before a future fetcher could reach a loopback, link-local
+  // or another non-public address form.
+  if (hostname.startsWith("[") && hostname.endsWith("]")) {
+    return true;
+  }
+
   if (!IPV4_ADDRESS.test(hostname)) {
     return false;
   }
@@ -105,9 +112,15 @@ function isPrivateOrLocalHostname(hostname: string): boolean {
     first === 10 ||
     first === 127 ||
     first === 0 ||
+    first >= 224 ||
+    (first === 100 && second >= 64 && second <= 127) ||
     (first === 169 && second === 254) ||
     (first === 172 && second >= 16 && second <= 31) ||
-    (first === 192 && second === 168)
+    (first === 192 && second === 0) ||
+    (first === 192 && second === 168) ||
+    (first === 192 && second === 2) ||
+    (first === 198 && (second === 18 || second === 19 || second === 51)) ||
+    (first === 203 && second === 0)
   );
 }
 

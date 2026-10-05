@@ -31,6 +31,13 @@ describe("admitPublicDomain", () => {
     "172.16.0.10",
     "192.168.0.1",
     "169.254.169.254",
+    "100.64.0.1",
+    "192.0.2.1",
+    "198.51.100.1",
+    "203.0.113.1",
+    "224.0.0.1",
+    "http://[::1]",
+    "http://[fe80::1]",
   ])("rejects a local or private target %# without resolving it", (input) => {
     expect(admitPublicDomain(input)).toEqual({
       kind: "rejected",
