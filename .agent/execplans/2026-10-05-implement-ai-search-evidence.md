@@ -30,13 +30,14 @@ record, calling an email/PDF provider, or exposing a public API route.
 - [x] (2026-10-05 06:02Z) Chris resumed #5. Corrected the GitHub Project item
   from Done to In Progress and recorded the bounded implementation scope in
   Issue #5.
-- [ ] Record Chris's exact GPT-6 Luna reasoning/tool/location/limit decisions
-  for both modes in the canonical product documents and #5.
+- [x] (2026-10-05 05:45Z) Recorded Chris's approved GPT-6 Luna tool, location,
+  timeout, token, spend, and retention decisions in
+  `docs/product/AI_SEARCH_RUNTIME_CONFIGURATION.md` and GitHub #5.
 - [x] (2026-10-05 06:11Z) Implemented provider-independent evidence types,
   limits, normalisation, and fixture-driven tests under
   `apps/web/src/server/ai-search/`.
-- [ ] Add the selected OpenAI adapter behind a configuration interface with no
-  credential value or live request in tests.
+- [x] (2026-10-05 06:24Z) Added the selected OpenAI adapter behind a
+  configuration interface with no credential value or live request in tests.
 - [x] (2026-10-05 06:11Z) Ran test, generated binding types, lint, build, and
   whitespace verification. Local Worker HTTP proof remains pending until an
   adapter/route exists; it is not implied by this pure-contract milestone.
@@ -81,22 +82,16 @@ record, calling an email/PDF provider, or exposing a public API route.
   read, printed, committed, or used by fixture verification.
   Date/Author: 2026-10-05 / Chris.
 
-- Decision required: exact GPT-6 Luna reasoning level, native OpenAI search
-  tool configuration, Auckland location context, timeout, and per-assessment
-  spend cap.
-  Rationale: these values change customer-visible result behaviour and cost;
-  the repository must not invent them.
-  Date/Author: pending / Chris.
-
-- Recommendation: use `gpt-6-luna` with no reasoning, the Responses API
-  `web_search` tool forced as required, low search context, approximate
-  Auckland/New Zealand location (`Pacific/Auckland`), a 45-second timeout, and
-  a US$0.03 per-assessment cap.
-  Rationale: the MVP needs one bounded dated observation with citations, not
-  an open-ended research loop. The selected model and current OpenAI API
-  documentation support this route. This is not approved configuration until
-  Chris accepts it.
-  Date/Author: 2026-10-05 / Codex.
+- Decision: use `gpt-6-luna` with no reasoning, the Responses API `web_search`
+  tool forced as required for the current-web mode, low search context,
+  approximate Auckland/New Zealand location (`Pacific/Auckland`), a
+  45-second timeout, a 12,000-input/2,000-output-token boundary, a US$0.03
+  estimated-spend cap, and provider retention disabled (`store: false`). The
+  model-knowledge mode has no web-search tool.
+  Rationale: Chris approved this previously stated MVP 1 recommendation by
+  directing Codex to keep pushing MVP 1. It gives the MVP one bounded dated
+  observation with citations without an open-ended research loop.
+  Date/Author: 2026-10-05 / Chris and Codex.
 
 - Decision: MVP 1 will retain two separately labelled AI-model result modes:
   `web_grounded`, which runs with a web-search tool, and `model_knowledge`,
@@ -113,9 +108,10 @@ The first bounded milestone is complete. A server-only, provider-independent
 contract now emits dated evidence for either the cited current-web mode or the
 explicitly non-current model-knowledge mode. It blocks over-limit work before
 calling a provider and turns malformed, uncited, timed-out, failed, and
-over-limit responses into safe records. The OpenAI adapter, exact configuration
-values, route integration, persistence, credentials, live response, deployment,
-and customer use remain outside this milestone.
+over-limit responses into safe records. The selected OpenAI adapter and
+approved configuration are documented and fixture-tested. Route integration,
+persistence, runtime credential binding, live response, deployment, and
+customer use remain outside this milestone.
 
 ## Context and Orientation
 
@@ -200,6 +196,9 @@ After the adapter addition, `npm test` passed 4 files / 13 tests; lint remained
 at 0 errors and 8 existing warnings; and the production Cloudflare-module build
 passed with the same existing warnings. The OpenAI transport tests inject a
 fake `fetch` implementation and make no network request.
+
+The stricter project check, `npx tsc --noEmit`, also passed after the adapter's
+failure union and untrusted provider JSON access were made type-safe.
 
 Before any real-boundary test, Chris must separately approve the account,
 credential storage path, exact request, maximum spend, and redacted evidence
