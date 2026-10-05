@@ -97,7 +97,7 @@ defaults/rejection, and #10/#5 must prove each limit before costly work.
 | Malformed input | `invalid_input` | Explain required public-domain format. | Visitor corrects input; no stored customer. |
 | Private/DNS/redirect target | `unsafe_target` / `unsafe_redirect` | Safe unable-to-check message. | No automatic retry of the target. |
 | Bot/rate/concurrency/spend block | `rate_limited` / `limit_exceeded` | Honest try-later/limit outcome without internal values. | Bounded future request only; no background queue. |
-| Unreadable/sparse site | `site_unreadable` / `evidence_insufficient` | Explain assessment limitation and support route. | No invented evidence; retry only from new safe admission. |
+| Unreadable/sparse site | `site_unreadable` / `evidence_insufficient` | Explain assessment limitation and support route. | No invented evidence; retry only from new safe admission. A final `evidence_insufficient` event records one privacy-minimised Discord alert to Chris; it does not create a manual-fulfilment promise. |
 | AI malformed/timeout/limit | `search_failed` / `search_limited` | State that the dated test could not be completed. | Do not claim result; only approved idempotent reconciliation. |
 | Report render/store failure | `report_failed` | Honest delivery-status path. | Follow recipient-specific delivery policy. |
 | Email temporary/permanent failure | `delivery_failed` | Never claim inbox receipt; use approved update/escalation wording. | Bounded 5/20/60-minute temporary retries; no permanent retry. |
@@ -113,7 +113,7 @@ defaults/rejection, and #10/#5 must prove each limit before costly work.
 | Duplicate/resend | Same recipient/domain makes no new run/allowance; allowed resend is a new private delivery attempt. |
 | Limits | Repeated IP/domain, concurrent domain, token/timeout/search/spend cases stop at their named stage with a safe reason. |
 | Attribution/privacy | Recognised UTM/referrer persist; unknown parameters and raw IP do not become product attribution. |
-| Failure honesty | Each matrix event maps to a reason code, no unsupported claim, and permitted retry/escalation state. |
+| Failure honesty | Each matrix event maps to a reason code, no unsupported claim, and permitted retry/escalation state. A final `evidence_insufficient` event emits at most one private, minimised operator alert. |
 
 ## 8. Decisions required before implementation
 

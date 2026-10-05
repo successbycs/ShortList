@@ -86,6 +86,7 @@ or a statement that email was received/read.
 | --- | --- | --- |
 | Entitlement decision v1 | recipient ID, request time, lifetime used count, allowlist decision, duplicate/resend/exhausted outcome | Same normalised recipient/domain is idempotent: no new assessment or allowance. Chris allowlist is server-only and does not bypass safety controls. |
 | Delivery attempt v1 | attempt ID, recipient ID, report ID/version, UTC trigger/deadline/transitions, state, reason code, retry number, provider-acceptance reference, update/alert status | New recipient-specific attempt for a permitted resend; never disclose another recipient or their report. |
+| Operator alert v1 | alert ID, assessment ID, normalised public domain, UTC occurrence time, safe reason code, private operational-record reference, alert outcome | A final `evidence_insufficient` outcome creates at most one alert per assessment run. It includes no recipient data, report content, raw IP, credential, or internal stack trace. |
 
 States: `triggered`, `generating`, `stored`, `sending`, `provider_accepted`,
 `retrying`, `terminal_failure`, and `escalated`. `provider_accepted` is the
@@ -93,6 +94,12 @@ only customer-facing `sent` state. Temporary failures may retry at approximately
 5, 20, and 60 minutes; permanent failure does not retry. At two hours without
 acceptance, record `escalated`, attempt one approved update email, alert Chris
 with the approved minimum fields, and stop automatic retry.
+
+Separately, when an assessment reaches final `evidence_insufficient`, record
+and send one `Operator alert v1` to Chris. The alert is an internal observation
+of a limited result, not an escalation of a delivery failure and not a promise
+of manual customer fulfilment. If the alert channel fails, record that private
+outcome; do not alter the customer result or re-run the assessment.
 
 ## 6. Failure contract
 
@@ -110,7 +117,7 @@ inbox receipt.
 
 These contracts directly support M1-AC-01–04 (assessment/evidence), 05 and
 07–07c (consent/entitlement/isolation), 08–12 (context/safety/limits), 13–14
-(report/attribution), and 18–18c (delivery/retry/escalation).
+(report/attribution), 18–18c (delivery/retry/escalation), and `MVP1-FAIL-002`.
 
 Still required from the product owner: exact GPT-6 Luna search configuration,
 location method, token/timeout/spend limits, evidence threshold, suburb source,

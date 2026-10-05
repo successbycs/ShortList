@@ -21,7 +21,7 @@ it does not make unresolved scope safe.
 | Email, consent, entitlement, private records | #9 -> #11 | Separate consents, three-lifetime rule, duplicate/resend and cross-recipient isolation tests. |
 | Professional PDF | #25 visual contract -> #27 report generation/delivery | Versioned accessible PDF passes rubric and private-storage tests. |
 | Delivery/retry/escalation | #27 | Provider-acceptance boundary, 5/20/60 retry, terminal and two-hour escalation tests. |
-| Privacy/support/failure | #13 after #11/#27 | Public privacy/support/deletion paths and reason-coded operator recovery tests. |
+| Privacy/support/failure | #13 after #11/#27 | Public privacy/support/deletion paths, including one privacy-minimised Discord alert for a final `evidence_insufficient` run, and reason-coded operator recovery tests. |
 | Website experience | #28 approved mockups -> #10/#11 implementation | Desktop/mobile state coverage, keyboard/accessibility and truthful-content review. |
 | End-to-end confidence | #14 -> #15 -> #16 | Requirement acceptance matrix, UAT/launch gate, then controlled learning. |
 
@@ -54,7 +54,7 @@ approval is an input to #9/#10, not a reason to build unsafe fetching early.
 | #10 Assessment/preview | Admission gate, safe fetch/extraction, evidence/claim assembly, Auckland-context adapter, teaser UI route. | Safe target/DNS/redirect/untrusted-content/limit tests and pre-email teaser evidence tests. | Email/PDF/payment/customer outreach. |
 | #11 Email/entitlement | Recipient/consent/entitlement/re-send service and private request flow. | Consent separation, lifetime count, duplicate and cross-recipient isolation tests. | PDF rendering/delivery provider or marketing send. |
 | #27 PDF/delivery | Report renderer, private object boundary, delivery state/retry/escalation adapters. | Template/rubric, private object, temporary/permanent failure, retry and escalation tests; authorised provider test separately. | Stripe, customer login, manual fulfilment, launch. |
-| #13 Support/recovery | Public privacy/support/status/deletion-request routes and authorised operator lookup. | No-leak status/support/deletion and reason-code visibility tests. | Full customer dashboard or unapproved retention promise. |
+| #13 Support/recovery | Public privacy/support/status/deletion-request routes, authorised operator lookup, and idempotent limited-evidence alert adapter. | No-leak status/support/deletion, reason-code visibility, one-alert-per-limited-run, and alert-content minimisation tests. | Full customer dashboard, manual fulfilment, or unapproved retention promise. |
 | #14 End-to-end | Acceptance harness and documented observed/unobserved result matrix. | Every MVP1 requirement mapped to reproducible proof or explicit blocker. | Launch/payment/outreach. |
 
 Exact files, framework, endpoint paths, schema migrations, platform bindings,

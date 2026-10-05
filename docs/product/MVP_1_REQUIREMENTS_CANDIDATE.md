@@ -358,11 +358,15 @@ insufficient-evidence website—or for a failed AI-search test—the system must
 2. avoid invented business, ICP, gap, or ranking findings;
 3. create a stored assessment-run status and machine-readable failure reason;
 4. offer the visitor a route to the SuccessByCS support email; and
-5. send an automated internal support notification if an address is configured.
+5. when the final outcome is `evidence_insufficient`, send Chris one private,
+   privacy-minimised Discord alert for that assessment run.
 
-The support route is not a promise of manual report completion. The support
-email address, notification behaviour, and customer wording are decisions still
-required before implementation.
+The support route and Discord alert are not a promise of manual report
+completion. The support email address and customer wording remain decisions
+required before implementation. The alert contains only the assessment ID,
+normalised public domain, UTC occurrence time, safe reason code, and private
+operational-record reference; it contains no recipient data, report content,
+raw IP, credentials, or internal stack trace.
 
 The same recorded-failure and escalation journey applies when report generation,
 PDF storage, email-provider acceptance, or email delivery cannot complete. The
@@ -436,6 +440,7 @@ MVP 1 does not include:
 | M1-AC-04 | The submitted business is absent, mentioned, or described inaccurately. | The teaser states the observed outcome and cites/records the tested response. |
 | M1-AC-05 | A visitor chooses to receive the free assessment without marketing consent. | The email is delivered or receives the defined delivery-failure escalation; no optional marketing consent is stored. |
 | M1-AC-06 | Website analysis or search cannot complete. | The visitor receives an honest automated outcome, the run is stored with a reason, and a support route is offered without promising manual fulfilment. |
+| M1-AC-06a | A run reaches final `evidence_insufficient`. | The system records one private, privacy-minimised Discord alert for Chris; repeat/replay does not create another alert and the visitor outcome remains automated. |
 | M1-AC-07 | An email address has already used its three lifetime MVP 1 report requests. | The system does not run a fourth free assessment, records the entitlement decision, and shows the MVP 1 feedback route or the future MVP 2 Basic Assessment route when available. |
 | M1-AC-07a | The same normalised email requests the same normalised domain again within 30 days. | The system does not create a new assessment run or consume another allowance; it may resend the retained recipient-specific PDF attachment without exposing other recipients. |
 | M1-AC-07b | A different normalised email requests a domain already requested by someone else. | The request is evaluated against the new recipient's own allowance. The response, stored records, and delivered report do not disclose any earlier recipient, consent, attribution, report, or delivery state. |

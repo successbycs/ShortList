@@ -70,6 +70,11 @@ An untagged renderer is not automatically accepted because it “looks good”. 
 
 The attachment is recipient-private but not a customer account. It must not include recipient email addresses, internal IDs, provider/API secrets, raw IP, or other recipients' information in visible content, filenames, links, document properties, or embedded source metadata. Use opaque report identifiers only where an identifier is needed.
 
+When a final report outcome is `evidence_insufficient`, the future service sends
+one private, privacy-minimised Discord alert to Chris. This is operational
+behaviour, not customer-facing report content: the PDF must not imply that a
+person will manually prepare or repair the assessment.
+
 Each generated report records the report/template version and its required claim/evidence references as defined in [CONTRACTS.md](../CONTRACTS.md). A future implementation must verify that embedded links, footnotes, and document metadata cannot bypass recipient isolation or expose storage paths.
 
 ## Human review rubric and sample set
