@@ -31,6 +31,9 @@ authorities.
 - [x] (2026-10-05 07:10Z) Added the additive D1 migration source for the
   Customer, Assessment run and Website evidence contracts. It is not applied:
   the Worker has no D1 binding or named local/test database yet.
+- [x] (2026-10-05 07:12Z) Added a bounded, fixture-tested HTML evidence
+  extractor. It is non-networking and requires explicit caller-supplied content
+  and byte limits; it cannot bypass the pending safe-fetch configuration.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -91,6 +94,12 @@ The second preparatory slice is also complete:
 foreign-key relationships, bounded evidence fields and query indexes. A later
 configured local D1 run must apply and exercise the migration before persistence
 can be claimed.
+
+The third preparatory slice is complete:
+`apps/web/src/server/website-evidence.ts` accepts an already-approved response,
+does not execute page content, strips inactive script/style/noscript content,
+and returns only bounded title, description and text evidence or an honest
+limited reason. It is not a DNS resolver or HTTP fetcher.
 
 ## Context and Orientation
 
@@ -198,12 +207,22 @@ npm run lint              # 0 errors; 8 existing warnings
 git diff --check          # passed
 ```
 
+Observed on 2026-10-05 for the bounded-extractor slice:
+
+```text
+npx tsc --noEmit                  # passed
+npm test -- website-evidence.test.ts
+# Test Files  1 passed (1); Tests  6 passed (6)
+npm run lint                      # 0 errors; 8 existing warnings
+git diff --check                  # passed
+```
+
 ## Validation and Acceptance
 
 | Capability | Required proof | Current status |
 | --- | --- | --- |
 | Domain admission | Tests cover malformed, private/local, scheme, credential and port outcomes before network access | Passed (offline boundary only) |
-| Bounded website evidence | Fixtures cover allowed content, ceilings, extraction and untrusted page text | Planned |
+| Bounded website evidence | Fixtures cover content type, size ceiling, inert extraction and sparse page text | Passed (extractor only; safe fetch pending) |
 | Record isolation | Local D1 tests cover customer uniqueness and no domain-as-authorisation | Planned |
 | Honest teaser | UI/route tests cover checking, teaser, insufficient and safe failure states | Planned |
 | Dated AI modes | Integration uses the #5 fixture provider and preserves labels/citations/warnings | Planned |
