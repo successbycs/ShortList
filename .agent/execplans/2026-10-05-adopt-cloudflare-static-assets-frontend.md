@@ -18,7 +18,7 @@ but every assessment result remains clearly fictional frontend state.
 - [x] (2026-10-05 01:22Z) Added a reviewed Workers + Static Assets configuration, local commands, and source-only security boundaries.
 - [x] (2026-10-05 01:23Z) Reconciled fictional content and unconfigured-service language with the MVP requirements.
 - [x] (2026-10-05 01:25Z) Ran lint, tests, build, Worker type generation, local Worker preview, and static-boundary checks; recorded actual results.
-- [ ] (2026-10-05 01:17Z) Record the handoff on #9 and leave it open for Chris's review.
+- [x] (2026-10-05 01:29Z) Pushed the reviewable foundation commit and recorded the handoff on #9; the Issue remains open for Chris's review.
 
 ## Surprises & Discoveries
 
@@ -50,11 +50,12 @@ but every assessment result remains clearly fictional frontend state.
 ## Outcomes & Retrospective
 
 The starting frontend is now `apps/web/`, locally buildable and locally served
-as a Worker with static assets. Lint has six non-fatal inherited Fast Refresh
-warnings, and a real-browser visual check remains unobserved because this host
-does not have Playwright Chromium installed. No Cloudflare account/project or
-any external product service was configured. The final handoff comment and
-human review remain pending.
+as a Worker with static assets. Commit `466ceb7` contains the implementation
+and its GitHub Issue #9 handoff records the evidence. Lint has six non-fatal
+inherited Fast Refresh warnings, and a real-browser visual check remains
+unobserved because this host does not have Playwright Chromium installed. No
+Cloudflare account/project or any external product service was configured. The
+human review remains pending.
 
 ## Context and Orientation
 
@@ -220,7 +221,7 @@ or any credential command as a recovery action.
 - `docs/product/SDD.md` and `docs/product/DELIVERY_PLAN.md`: revised to record
   that this exact #9 foundation is now selected while external components
   remain deferred.
-- GitHub Issue #9: human review handoff with commands and actual results.
+- GitHub Issue #9: [human review handoff](https://github.com/successbycs/ShortList/issues/9#issuecomment-5986561664) with commands and actual results.
 
 ## Interfaces and Dependencies
 
