@@ -28,6 +28,9 @@ authorities.
   URL, normalises the hostname, and rejects malformed input, credentials,
   non-HTTP(S) schemes, ports and syntactically local/private targets before a
   network operation.
+- [x] (2026-10-05 07:10Z) Added the additive D1 migration source for the
+  Customer, Assessment run and Website evidence contracts. It is not applied:
+  the Worker has no D1 binding or named local/test database yet.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -83,6 +86,12 @@ The first implementation slice is complete: the app can now make a safe,
 offline accept/reject decision before any website request. It does not claim to
 be a complete safe fetcher or to persist an assessment.
 
+The second preparatory slice is also complete:
+`apps/web/migrations/0001_assessment_core.sql` defines the first D1 tables,
+foreign-key relationships, bounded evidence fields and query indexes. A later
+configured local D1 run must apply and exercise the migration before persistence
+can be claimed.
+
 ## Context and Orientation
 
 `docs/product/REQUIREMENTS.md` defines the immediate journey as
@@ -123,6 +132,10 @@ has evidence IDs or is marked insufficient.
 
 Observable result: tests prove duplicate-domain reuse, invalid non-persistence
 and evidence-backed versus insufficient fields.
+
+**Status:** the migration source is prepared. Repository functions and a local
+D1 test harness remain to be implemented after an approved binding/test target
+exists.
 
 ### Milestone 3: Teaser route and journey
 
