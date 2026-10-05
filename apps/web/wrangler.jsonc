@@ -1,19 +1,32 @@
 {
-  // Local-only foundation. This file deliberately contains no account, route,
-  // secret, database, object storage, queue, or environment binding.
-  "name": "shortlist-web",
-  "main": ".output/server/index.mjs",
-  "compatibility_date": "2026-10-05",
-  "compatibility_flags": ["nodejs_compat"],
-  "assets": {
-    "binding": "ASSETS",
-    "directory": ".output/public"
-  },
-  "no_bundle": true,
-  "rules": [
-    {
-      "type": "ESModule",
-      "globs": ["**/*.mjs", "**/*.js"]
-    }
-  ]
+	// This file deliberately contains no account, route, secret, object storage,
+	// queue, or environment binding. The D1 entry identifies an empty MVP 1
+	// database only; it does not deploy the Worker or apply its schema.
+	"name": "shortlist-web",
+	"main": ".output/server/index.mjs",
+	"compatibility_date": "2026-10-05",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".output/public"
+	},
+	"no_bundle": true,
+	"rules": [
+		{
+			"type": "ESModule",
+			"globs": [
+				"**/*.mjs",
+				"**/*.js"
+			]
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "SHORTLIST_DB",
+			"database_name": "shortlist-mvp1",
+			"database_id": "445a6145-5fe1-422d-800c-e152ded2b0a3"
+		}
+	]
 }

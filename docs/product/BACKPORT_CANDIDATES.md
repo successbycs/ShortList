@@ -94,6 +94,35 @@ Backport the generic collaborative decision-capture procedure to the template's
 GitHub Issue workflow: material agreements update a canonical document and a
 labelled Issue comment; chat itself is not durable approval or evidence.
 
+### GitHub integration operating skill
+
+Backport a short GitHub integration skill or operating guide for repository
+administration. It should prevent configuration churn when an agent creates or
+maintains Issues, milestones, labels, comments, or Project items:
+
+1. Read the repository's configured GitHub owner/name and confirm the target
+   before every write. Never infer the target from the local directory name.
+2. Prefer GitHub REST endpoints for ordinary repository operations: Issues,
+   comments, labels, milestones, and their relationships. They are direct,
+   stable, and easier to inspect when something fails.
+3. Use GraphQL only where GitHub exposes a feature solely through GraphQL,
+   chiefly Projects v2 fields and item status. Query the project/item IDs first,
+   then make the smallest mutation required.
+4. Do not retry a failed write blindly. First read the target state, distinguish
+   an authentication/rate-limit/schema error from a completed-but-unobserved
+   write, and retry only when the desired change is still absent.
+5. Create a milestone before assigning Issues to it. Create parent work before
+   child work, and record dependencies explicitly in the Issue body or a
+   canonical planning document; neither REST nor GraphQL creates meaningful
+   dependency semantics by itself.
+6. Keep product status and execution eligibility separate: Project status is
+   for human visibility; an upstream `symphony:ready` label is an explicit
+   automation admission decision. Do not alter either as a side effect of
+   unrelated work.
+
+This is not a custom GitHub orchestration layer. It is a small, reusable
+decision guide for selecting the native API surface and verifying each change.
+
 The template copy should also say what Symphony is **not**: it is not the
 application runtime, website host, customer-facing service, or an autonomous
 product manager. It must not be used to send customer outreach or to make
