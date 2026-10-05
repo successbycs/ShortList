@@ -25,6 +25,16 @@ export type NewAssessmentAdmission = {
   createId?: () => string;
 };
 
+export type AssessmentRunOutcome = "preview_ready" | "limited" | "failed";
+
+export type WebsiteExtractionOutcome =
+  | "not_run"
+  | "captured"
+  | "site_unreadable"
+  | "content_rejected"
+  | "size_limit_exceeded"
+  | "evidence_insufficient";
+
 type CustomerRow = { customer_id: string };
 
 /**
@@ -88,6 +98,7 @@ export async function recordWebsiteEvidence(
       | "content_rejected"
       | "size_limit_exceeded"
       | "timeout";
+    extractionOutcome: WebsiteExtractionOutcome;
     contractVersion: string;
   },
 ): Promise<void> {
@@ -95,8 +106,8 @@ export async function recordWebsiteEvidence(
     .prepare(
       `INSERT INTO website_evidence (
         evidence_id, assessment_id, source_url, observed_at_utc, content_type,
-        bounded_excerpt, fetch_outcome, created_at_utc, contract_version
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        bounded_excerpt, fetch_outcome, extraction_outcome, created_at_utc, contract_version
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       input.evidenceId,
@@ -106,6 +117,7 @@ export async function recordWebsiteEvidence(
       input.contentType,
       input.boundedExcerpt,
       input.fetchOutcome,
+      input.extractionOutcome,
       input.observedAtUtc,
       input.contractVersion,
     )
@@ -113,6 +125,25 @@ export async function recordWebsiteEvidence(
 
   if (!result.success) {
     throw new Error("Could not store website evidence.");
+  }
+}
+
+/** Records the final safe public state after evidence collection. */
+export async function completeAssessmentRun(
+  database: D1DatabaseLike,
+  input: {
+    assessmentId: string;
+    status: AssessmentRunOutcome;
+    reasonCode: string | null;
+  },
+): Promise<void> {
+  const result = await database
+    .prepare("UPDATE assessment_runs SET status = ?, reason_code = ? WHERE assessment_id = ?")
+    .bind(input.status, input.reasonCode, input.assessmentId)
+    .run();
+
+  if (!result.success) {
+    throw new Error("Could not complete an assessment run.");
   }
 }
 

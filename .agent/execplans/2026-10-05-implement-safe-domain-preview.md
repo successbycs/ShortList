@@ -62,6 +62,12 @@ authorities.
   Wrangler's local D1 emulator only. The `customers`, `assessment_runs` and
   `website_evidence` tables and both application indexes were observed. The
   remote database remains empty and unmigrated.
+- [x] (2026-10-05 08:16Z) Added an additive second D1 migration which records
+  website extraction separately from fetch outcome, and a fixture-tested
+  website-assessment coordinator. It admits a domain, records a dated run,
+  safely fetches and extracts bounded evidence, and stores either a
+  `preview_ready` or honest limited outcome. It remains unexposed to public
+  traffic until the route's abuse controls are implemented.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -179,6 +185,13 @@ assessment run, and stores bounded website evidence separately. Tests supply a
 fake D1 implementation. The empty `shortlist-mvp1` D1 resource is now bound in
 the Worker configuration. The migration is proven locally but has not been
 applied to, or otherwise mutated, the remote database.
+
+The coordinator in `apps/web/src/server/website-assessment.ts` now joins these
+boundaries without invoking AI: invalid input makes no database or fetch call;
+captured evidence produces `preview_ready`; and a failed fetch or insufficient
+evidence produces a stored, public-safe limited outcome. Its dependencies are
+injected for deterministic tests. It is not yet a public server route, which
+prevents bypassing the pending Turnstile, rate and concurrency gates.
 
 ## Context and Orientation
 

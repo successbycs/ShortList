@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createAssessmentAdmission,
+  completeAssessmentRun,
   recordWebsiteEvidence,
   type D1DatabaseLike,
   type D1StatementLike,
@@ -98,11 +99,29 @@ describe("assessment repository", () => {
       contentType: "text/html",
       boundedExcerpt: "Reliable home repairs",
       fetchOutcome: "captured",
+      extractionOutcome: "captured",
       contractVersion: "v1",
     });
 
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.query).toContain("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    expect(calls[0]?.query).toContain("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     expect(calls[0]?.values).toContain("Reliable home repairs");
+  });
+
+  it("records a final public-safe outcome against the admitted assessment", async () => {
+    const { database, calls } = fakeDatabase();
+
+    await completeAssessmentRun(database, {
+      assessmentId: "assessment-1",
+      status: "limited",
+      reasonCode: "evidence_insufficient",
+    });
+
+    expect(calls).toEqual([
+      {
+        query: "UPDATE assessment_runs SET status = ?, reason_code = ? WHERE assessment_id = ?",
+        values: ["limited", "evidence_insufficient", "assessment-1"],
+      },
+    ]);
   });
 });
