@@ -11,7 +11,7 @@ Define the reviewable visual and accessibility bar for the Minimum Assessment PD
 - [x] (2026-10-05 00:00Z) Inspected the approved report/data contract and the in-review website experience brief.
 - [x] (2026-10-05 00:00Z) Added the PDF visual-acceptance standard and registered it as a review input.
 - [x] (2026-10-05 00:00Z) Created and locally rendered fictional successful and limited-evidence PDF review examples, with editable HTML sources.
-- [ ] (2026-10-05 00:00Z) Validate Markdown/link integrity, commit the documentation, and record the review handoff on Issue #25.
+- [x] (2026-10-05 00:00Z) Validated whitespace, rendered and visually inspected both PDFs, committed/pushed the documentation, and recorded the review handoff on Issue #25.
 
 ## Surprises & Discoveries
 
@@ -19,6 +19,8 @@ Define the reviewable visual and accessibility bar for the Minimum Assessment PD
   Evidence: `CONTRACTS.md`, sections 3–5, inspected 2026-10-05.
 - Observation: Chromium successfully rendered both local examples to PDF. The host printed harmless D-Bus availability warnings while writing the files.
   Evidence: 2026-10-05 local Chromium output: `83323 bytes written` for the successful example and `59205 bytes written` for the limited-evidence example; `file` identified valid PDF 1.4 documents.
+- Observation: The repository-wide Markdown checker still reports pre-existing placeholder and non-file reference links under `docs/product/discovery/Workflow.md`.
+  Evidence: `python3 scripts/check_markdown_links.py` on 2026-10-05 reported `URL`, `IMAGE_PATH_OR_URL`, `{{ thread_url }}`, and non-file scheme targets in that existing discovery document; none are from the #25 files.
 
 ## Decision Log
 
@@ -28,7 +30,7 @@ Define the reviewable visual and accessibility bar for the Minimum Assessment PD
 
 ## Outcomes & Retrospective
 
-Pending Chris's review. The standard and two rendered illustrative samples now exist. A production renderer, live evidence, email attachment delivery, accessibility tagging audit, and customer-facing report remain unbuilt and unproven.
+The standard and two rendered illustrative samples were committed as `6db5f25` and handed to Chris in [Issue #25](https://github.com/successbycs/ShortList/issues/25#issuecomment-5986033853). Chris's visual acceptance remains pending. A production renderer, live evidence, email attachment delivery, accessibility tagging audit, and customer-facing report remain unbuilt and unproven.
 
 ## Context and Orientation
 
@@ -60,6 +62,8 @@ From `/home/chris/ShortList`:
 
    Expected result: no whitespace errors; Markdown links point to repository-relative documents; the diff changes only the visual-acceptance standard, its register entry, and this plan.
 4. Commit and push the reviewed files. Re-read Issue #25, then post concise evidence and the owner review required.
+
+Actual result: `git diff --check` passed before commit; local Chromium rendered and visually inspected the two examples; `6db5f25` was pushed to `origin/main`; and the Issue handoff was posted on 2026-10-05.
 
 ## Validation and Acceptance
 
