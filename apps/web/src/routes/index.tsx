@@ -54,6 +54,7 @@ type Screen =
   | "refusal"
   | "progress"
   | "teaser"
+  | "confirmation"
   | "result"
   | "consent"
   | "entitlement"
@@ -65,16 +66,16 @@ const screenLabels: Array<{ id: Screen; label: string }> = [
   { id: "entry", label: "Start" },
   { id: "refusal", label: "Invalid" },
   { id: "progress", label: "Checking" },
-  { id: "teaser", label: "Findings" },
-  { id: "result", label: "AI results" },
-  { id: "consent", label: "Delivery" },
-  { id: "entitlement", label: "Sent" },
+  { id: "teaser", label: "Teaser" },
+  { id: "consent", label: "Email" },
+  { id: "confirmation", label: "Confirm" },
+  { id: "result", label: "Full result" },
   { id: "rateLimit", label: "Rate limited" },
   { id: "exhausted", label: "Limit reached" },
   { id: "failure", label: "No evidence" },
 ];
 
-function Index() {
+export function Index() {
   const [screen, setScreen] = useState<Screen>("entry");
   const [domain, setDomain] = useState("harbourhandyman.co.nz");
   const [domainError, setDomainError] = useState("");
@@ -110,7 +111,7 @@ function Index() {
       return;
     }
     setEmailError("");
-    setScreen("entitlement");
+    setScreen("confirmation");
   }
 
   return (
@@ -167,8 +168,15 @@ function Index() {
         )}
         {screen === "refusal" && <Refusal onBack={() => setScreen("entry")} />}
         {screen === "progress" && <AssessmentProgress onComplete={() => setScreen("teaser")} />}
-        {screen === "teaser" && <Teaser onView={() => setScreen("result")} />}
-        {screen === "result" && <SearchResult onContinue={() => setScreen("consent")} />}
+        {screen === "teaser" && <Teaser onRequest={() => setScreen("consent")} />}
+        {screen === "confirmation" && (
+          <Confirmation
+            email={email}
+            onConfirm={() => setScreen("result")}
+            onChange={() => setScreen("consent")}
+          />
+        )}
+        {screen === "result" && <SearchResult onStartOver={() => setScreen("entry")} />}
         {screen === "consent" && (
           <Consent
             email={email}
@@ -371,7 +379,7 @@ function AssessmentProgress({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-function Teaser({ onView }: { onView: () => void }) {
+function Teaser({ onRequest }: { onRequest: () => void }) {
   return (
     <div>
       <div className="mb-8 max-w-3xl">
@@ -407,13 +415,32 @@ function Teaser({ onView }: { onView: () => void }) {
           ]}
         />
       </div>
+      <section
+        aria-label="Locked fuller result preview"
+        className="relative mt-8 overflow-hidden rounded-lg border-2 border-ink bg-card p-5 shadow-[5px_5px_0_var(--ink)]"
+      >
+        <div className="pointer-events-none select-none blur-sm" aria-hidden="true">
+          <p className="text-xs font-bold uppercase text-muted-foreground">Fuller result preview</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="h-20 rounded bg-leaf-soft" />
+            <div className="h-20 rounded bg-sun-soft" />
+          </div>
+        </div>
+        <div className="absolute inset-0 grid place-items-center bg-card/65 px-5 text-center">
+          <div>
+            <p className="font-bold">The fuller on-page result is ready to unlock.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Enter an email and confirm it in this local demo. No email is sent.
+            </p>
+          </div>
+        </div>
+      </section>
       <div className="mt-7 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-lg text-sm text-muted-foreground">
-          Next: compare the dated current-web result with a clearly separate model-knowledge
-          response.
+          The full result keeps the dated current-web and no-web model-knowledge views separate.
         </p>
-        <Button onClick={onView} size="lg" className="h-12">
-          View the two AI results <ArrowRight />
+        <Button onClick={onRequest} size="lg" className="h-12">
+          Send my free assessment <ArrowRight />
         </Button>
       </div>
     </div>
@@ -460,7 +487,7 @@ const currentWebBusinesses: Array<[string, string, string, string]> = [
   ["3", "Kauri Property Services", "North Shore", "Website · business directory"],
 ];
 
-function SearchResult({ onContinue }: { onContinue: () => void }) {
+function SearchResult({ onStartOver }: { onStartOver: () => void }) {
   return (
     <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
@@ -564,12 +591,63 @@ function SearchResult({ onContinue }: { onContinue: () => void }) {
           </p>
         </div>
       </section>
+      <section className="mt-8 rounded-lg border-2 border-dashed border-border bg-paper p-5">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Future MVP 2</p>
+        <h2 className="display-face mt-1 text-2xl font-bold">
+          A deeper paid assessment belongs here later.
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Pricing, payment and the paid scope are not decided or active in this prototype.
+        </p>
+        <Button disabled className="mt-4">
+          Future full assessment
+        </Button>
+      </section>
       <div className="mt-7 flex justify-end">
-        <Button size="lg" className="h-12" onClick={onContinue}>
-          Email me the full assessment <Mail aria-hidden="true" />
+        <Button variant="outline" className="h-12 bg-card" onClick={onStartOver}>
+          <ArrowLeft /> Check another website
         </Button>
       </div>
     </div>
+  );
+}
+
+function maskEmail(email: string) {
+  const [local, domain] = email.trim().split("@");
+  return `${local?.slice(0, 1) ?? ""}•••@${domain ?? ""}`;
+}
+
+function Confirmation({
+  email,
+  onConfirm,
+  onChange,
+}: {
+  email: string;
+  onConfirm: () => void;
+  onChange: () => void;
+}) {
+  return (
+    <StateShell
+      icon={<Mail />}
+      kicker="One last check"
+      title="Is this the right email?"
+      body="This prototype only confirms your intended delivery address. It does not send mail or prove mailbox ownership."
+    >
+      <div className="mt-6 rounded-md border-2 border-ink bg-leaf-soft p-5">
+        <p className="text-sm font-bold uppercase">Assessment for</p>
+        <p className="mt-1 text-xl font-bold" data-testid="masked-email">
+          {maskEmail(email)}
+        </p>
+      </div>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <Button className="h-12" onClick={onConfirm}>
+          Confirm and reveal result <ArrowRight />
+        </Button>
+        <Button variant="outline" className="h-12 bg-card" onClick={onChange}>
+          Change email
+        </Button>
+      </div>
+    </StateShell>
   );
 }
 
