@@ -215,6 +215,15 @@ printed, or pasted into chat. After a new session with that token starts, run
 the Turnstile skill's scope probe first; only then create the widget and store
 its secret through the confirmed Worker secret destination.
 
+Chris has chosen a V1 local-development exception for the short-lived widget
+provisioning token: `CLOUDFLARE_API_TOKEN` may be kept in the already
+Git-ignored root `.env` file. It remains out of source control and must not be
+printed or copied to an Issue. Its lifecycle hardening (replacement by a
+managed local secret store, expiry/rotation, and removal after provisioning)
+is deferred to the existing credentials/security task #30. This exception does
+not apply to the deployed `TURNSTILE_SECRET`, which must use Cloudflare's
+Worker secret store.
+
 ## Context and Orientation
 
 `docs/product/REQUIREMENTS.md` defines the immediate journey as
