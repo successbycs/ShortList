@@ -1,8 +1,6 @@
 /**
- * First, offline boundary for a visitor-supplied website target.
- *
- * This deliberately does not resolve DNS or fetch a page. A later safe fetcher
- * must re-check the resolved address and every redirect before connecting.
+ * Offline validation shared by the browser's input feedback and the server's
+ * authoritative safe-fetch boundary. It never resolves or fetches a target.
  */
 export type DomainAdmission =
   | { kind: "accepted"; normalisedDomain: string }

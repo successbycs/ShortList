@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { admitPublicDomain } from "./domain-admission";
+import { admitPublicDomain } from "@/lib/domain-admission";
 
 describe("admitPublicDomain", () => {
   it.each([

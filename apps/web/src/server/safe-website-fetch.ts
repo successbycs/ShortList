@@ -1,4 +1,4 @@
-import { admitPublicDomain } from "./domain-admission";
+import { admitPublicDomain } from "@/lib/domain-admission";
 
 export const MVP1_SAFE_FETCH_POLICY = {
   maxPagesPerAssessment: 3,

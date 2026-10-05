@@ -53,6 +53,11 @@ authorities.
   the checked-in `SHORTLIST_DB` Worker binding. `npm run types`, TypeScript,
   and the repository fixture tests passed. No Worker deployment, database
   migration, customer data, DNS change, or live provider request occurred.
+- [x] (2026-10-05 08:07Z) Repaired the production build: the public route had
+  imported domain validation from `src/server/`, which TanStack Start correctly
+  rejects in the browser bundle. The offline, non-secret input validator now
+  lives in `src/lib/` and remains shared with the server fetch boundary. Focused
+  tests, typecheck, lint (0 errors), whitespace check and production build pass.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -84,6 +89,13 @@ authorities.
   applied.
   Evidence: `npx wrangler d1 create shortlist-mvp1 --location oc --binding
   SHORTLIST_DB` on 2026-10-05.
+
+- Observation: TanStack Start prevents browser modules from importing files
+  inside `src/server/`, even if the specific export is pure. The generated
+  Cloudflare deployment configuration preserves the D1 binding from the source
+  Wrangler configuration.
+  Evidence: successful `npm run build` on 2026-10-05 and generated
+  `.output/server/wrangler.json`.
 
 ## Decision Log
 
@@ -141,6 +153,11 @@ The prototype now demonstrates the first part of the intended single-page
 journey without pretending to fetch a real customer site: input is validated,
 then the normalised domain remains visible above the checking steps. A later
 server action replaces the prototype's manual completion control.
+
+The project now produces a valid Cloudflare Worker package after the shared
+domain-admission function was moved out of the server-only source tree. This
+preserves a browser-side early error message while the future server route still
+performs the authoritative check again before persistence or fetching.
 
 The safe-fetch transport boundary is now implemented in
 `apps/web/src/server/safe-website-fetch.ts`. It does not automatically follow

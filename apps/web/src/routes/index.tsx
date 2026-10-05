@@ -26,7 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { admitPublicDomain } from "@/server/domain-admission";
+import { admitPublicDomain } from "@/lib/domain-admission";
 
 export const Route = createFileRoute("/")({
   head: () => ({
