@@ -32,7 +32,7 @@ it does not make unresolved scope safe.
                        ├─ #25 PDF visual/evaluation contract
                        └─ #24 safety/data/access design
 
-#8 + approved technology decision ─> #9 product foundation
+#8 + selected Cloudflare frontend platform + approved foundation choice ─> #9 product foundation
 #9 + #24 + approved #28 mockups ──> #10 safe domain assessment and teaser
 #9 + #7 + exact AI configuration ─> #5 AI-search evidence adapter
 #10 + #5 ──────────────────────────> #11 email/consent/entitlement
@@ -49,7 +49,7 @@ approval is an input to #9/#10, not a reason to build unsafe fetching early.
 
 | Issue | Code boundary once technology is approved | Required verification | Not authorised by the packet |
 | --- | --- | --- | --- |
-| #9 Foundation | Configuration validation, application skeleton, test/preview environment, record/repository interfaces, secret boundary. | Automated config/secret-boundary tests; reproducible local preview; no external credentials required. | Production host, Cloudflare account, provider account, or customer data. |
+| #9 Foundation | Cloudflare-compatible frontend application skeleton, configuration validation, test/preview environment, record/repository interfaces, and secret boundary. | Automated config/secret-boundary tests; reproducible local preview; no external credentials required. | A Cloudflare account/project, production deployment, provider account, or customer data. |
 | #5 AI-search evidence | Server-side adapter, normalisation into `AI-search evidence v1`, usage/limit guard, test-double route. | Fixture tests for ordered results/citations/malformed/timeout/limit outcomes; separately authorised real-boundary proof only. | A provider credential, charge, or public result wording not approved by Chris. |
 | #10 Assessment/preview | Admission gate, safe fetch/extraction, evidence/claim assembly, Auckland-context adapter, teaser UI route. | Safe target/DNS/redirect/untrusted-content/limit tests and pre-email teaser evidence tests. | Email/PDF/payment/customer outreach. |
 | #11 Email/entitlement | Recipient/consent/entitlement/re-send service and private request flow. | Consent separation, lifetime count, duplicate and cross-recipient isolation tests. | PDF rendering/delivery provider or marketing send. |
@@ -65,7 +65,8 @@ They must not be guessed in this plan.
 
 | Gate | Needed for | Owner |
 | --- | --- | --- |
-| Technology recommendation and foundation choice | #9 and all implementation packets | Chris, informed by #8 |
+| Cloudflare frontend platform | #9 and all implementation packets | Selected by Chris |
+| Exact Cloudflare service, frontend framework, server/runtime, record/storage foundation | #9 and all implementation packets | Chris, informed by #8 |
 | Safe-fetch and abuse thresholds; retention/deletion; suburb source | #9/#10 | Chris, using #24 design |
 | Exported desktop/mobile mockups and visual approval | #10/#11 | Chris, using #28 |
 | PDF examples/rubric | #27 | Chris, using #25 |

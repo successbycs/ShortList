@@ -127,9 +127,9 @@ recommend options and obtain product-owner approval before implementation.
 
 | Area | Current choice | Status | Decision boundary / next owner |
 | --- | --- | --- | --- |
-| Product web experience | Loveable.dev is permitted for design exploration; the production frontend framework is not selected. | Decision needed | #28 defines the public experience and stores reviewable artefacts in [product design evidence](design/README.md); #8/#9 select an implementation stack. |
-| Application runtime and hosting | No runtime, host, or deployment platform is selected. | Decision needed | #8 proposes the smallest suitable MVP foundation; #9 implements only the approved choice. |
-| Edge, bot, and rate protection | A Cloudflare-oriented edge/control layer is a candidate; no Cloudflare service or account is configured. | Candidate | #24 specifies controls and #9 implements the approved boundary. |
+| Product web experience | Cloudflare is the selected public frontend platform. Loveable.dev remains permitted for design exploration; the production frontend framework is not selected. | Partially selected | #28 defines the public experience and stores reviewable artefacts in [product design evidence](design/README.md); #9 selects a Cloudflare-compatible implementation stack. |
+| Server-side runtime and hosting | No server-side runtime, exact Cloudflare service, or deployment configuration is selected. | Decision needed | #9 proposes the smallest suitable foundation consistent with the selected Cloudflare frontend platform. |
+| Edge, bot, and rate protection | A Cloudflare-oriented edge/control layer is a candidate; no Cloudflare service or account is configured. | Candidate | #24 specifies controls and #9 implements the approved boundary. The frontend-platform decision alone does not select this control layer. |
 | Relational application records | Cloudflare D1 is a lightweight candidate for customer, assessment, recipient, consent, and delivery metadata. | Candidate | #7 defines records/contracts; #24 evaluates security/access; #9 selects and implements. |
 | Private PDF/object storage | Cloudflare R2 is a candidate for versioned report objects. | Candidate | #7/#25 define storage/report requirements; #27 implements the approved choice. |
 | AI model | OpenAI GPT-6 Luna is the selected MVP 1 model. | Selected | #5 chooses only the approved server-side configuration, location method, limits, timeout, and customer terminology. |
