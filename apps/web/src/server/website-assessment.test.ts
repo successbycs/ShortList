@@ -20,6 +20,10 @@ function databaseFixture(): { database: D1DatabaseLike; calls: Call[] } {
           calls.push({ query, values });
           return null as T | null;
         },
+        async all<T>() {
+          calls.push({ query, values });
+          return { results: [] as T[] };
+        },
         async run() {
           calls.push({ query, values });
           return { success: true };

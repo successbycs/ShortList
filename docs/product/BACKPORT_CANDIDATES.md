@@ -35,6 +35,22 @@ The V1 backport must preserve the two distinct work lanes:
   label from its own Issue; a human re-applies it only when specific, reviewed
   follow-up work is ready for another run.
 
+### Make Symphony eligibility visible
+
+When a product owner intends an Issue to be executed by Symphony, make that
+intent visible in the Issue rather than relying on chat context. Before adding
+`symphony:ready`, the Issue must name the accountable human reviewer and use a
+clear `## Code packets` section. Each packet states the bounded code outcome,
+files or boundaries it may affect, explicit non-goals, and the verification the
+worker must record. Remove stale dependency statements first.
+
+This does not turn every directly requested Codex task into an automated task.
+It gives the product owner a deliberate, reviewable switch: a direct session
+can prepare a packet; the `symphony:ready` label admits that specific packet to
+upstream Symphony. The label is not a general priority marker and must not be
+added to work that still needs product decisions, credentials, deployment
+approval, or an unbounded investigation.
+
 This is a repository handoff policy implemented through upstream's normal
 label-based routing, not a replacement scheduler or an MCP configuration. It
 must be proved first on one explicit, disposable offline Issue before it is
@@ -93,6 +109,24 @@ service, permit product deployments, or prove a particular ShortList Issue.
 Backport the generic collaborative decision-capture procedure to the template's
 GitHub Issue workflow: material agreements update a canonical document and a
 labelled Issue comment; chat itself is not durable approval or evidence.
+
+### Human-readable Issue comments
+
+Backport a short writing rule to the V1 GitHub Issue workflow. GitHub comments
+are a durable review record for a product owner, future contributor, or auditor
+who may not know the current conversation or codebase. They must therefore use
+plain Markdown: a short opening sentence, clear headings, normal paragraphs,
+and short lists only where they improve scanning.
+
+Do not paste terminal output, raw JSON, hidden reasoning, internal shorthand,
+or literal escaped characters such as `\\n` into a comment. Summarise the
+decision, evidence, remaining boundary, and any required human action in plain
+language, linking to the canonical document for detail. If an API response is
+machine-formatted, convert it to normal prose before publishing it.
+
+This candidate arose after a review found historical ShortList comments with
+literal escaped newline text. Those comments were repaired on 2026-10-05. The
+rule is generic delivery hygiene, not a product-specific requirement.
 
 ### GitHub integration operating skill
 

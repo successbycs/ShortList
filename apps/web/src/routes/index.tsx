@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
 import {
   AlertTriangle,
@@ -27,6 +28,12 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { admitPublicDomain } from "@/lib/domain-admission";
+import { TurnstileWidget } from "@/components/turnstile-widget";
+import {
+  submitDomainAssessment,
+  type DomainAssessmentSubmissionResult,
+} from "@/functions/submit-domain-assessment";
+import type { StoredAiEvidence } from "@/server/ai-evidence-repository";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -67,12 +74,16 @@ export function Index() {
   const [screen, setScreen] = useState<Screen>("entry");
   const [domain, setDomain] = useState("harbourhandyman.co.nz");
   const [domainError, setDomainError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [submissionResult, setSubmissionResult] = useState<DomainAssessmentSubmissionResult>();
   const [email, setEmail] = useState("");
   const [deliveryConsent, setDeliveryConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const submitAssessment = useServerFn(submitDomainAssessment);
+  const assessmentResult = getAssessmentResult(submissionResult);
 
-  function submitDomain(event: FormEvent) {
+  async function submitDomain(event: FormEvent) {
     event.preventDefault();
     const admission = admitPublicDomain(domain);
     if (admission.kind === "rejected") {
@@ -90,9 +101,29 @@ export function Index() {
       return;
     }
 
+    if (!turnstileToken) {
+      setDomainError("Complete the security check before we assess your website.");
+      return;
+    }
+
     setDomain(admission.normalisedDomain);
     setDomainError("");
     setScreen("progress");
+    const result = await submitAssessment({
+      data: { domain: admission.normalisedDomain, turnstileToken },
+    });
+    setSubmissionResult(result);
+    setTurnstileToken(null);
+    if (result.kind === "completed" || result.kind === "cached") {
+      setScreen("teaser");
+      return;
+    }
+    if (result.kind === "invalid_input") {
+      setDomainError("Enter a public website address like yourbusiness.co.nz.");
+      setScreen("entry");
+      return;
+    }
+    setScreen("failure");
   }
 
   function submitEmail(event: FormEvent) {
@@ -138,14 +169,15 @@ export function Index() {
             domain={domain}
             setDomain={setDomain}
             error={domainError}
+            onTurnstileTokenChange={setTurnstileToken}
             onSubmit={submitDomain}
           />
         )}
         {screen === "refusal" && <Refusal onBack={() => setScreen("entry")} />}
-        {screen === "progress" && (
-          <AssessmentProgress domain={domain} onComplete={() => setScreen("teaser")} />
+        {screen === "progress" && <AssessmentProgress domain={domain} result={submissionResult} />}
+        {screen === "teaser" && assessmentResult && (
+          <Teaser result={assessmentResult} onRequest={() => setScreen("consent")} />
         )}
-        {screen === "teaser" && <Teaser onRequest={() => setScreen("consent")} />}
         {screen === "confirmation" && (
           <Confirmation
             email={email}
@@ -153,7 +185,9 @@ export function Index() {
             onChange={() => setScreen("consent")}
           />
         )}
-        {screen === "result" && <SearchResult onStartOver={() => setScreen("entry")} />}
+        {screen === "result" && assessmentResult && (
+          <SearchResult result={assessmentResult} onStartOver={() => setScreen("entry")} />
+        )}
         {screen === "consent" && (
           <Consent
             email={email}
@@ -180,6 +214,12 @@ export function Index() {
   );
 }
 
+function getAssessmentResult(
+  result: DomainAssessmentSubmissionResult | undefined,
+): StoredAiEvidence | undefined {
+  return result?.kind === "completed" || result?.kind === "cached" ? result.result : undefined;
+}
+
 function isSocialProfile(domain: string): boolean {
   return ["facebook.com", "instagram.com"].some(
     (socialDomain) => domain === socialDomain || domain.endsWith(`.${socialDomain}`),
@@ -190,11 +230,13 @@ function Entry({
   domain,
   setDomain,
   error,
+  onTurnstileTokenChange,
   onSubmit,
 }: {
   domain: string;
   setDomain: (value: string) => void;
   error: string;
+  onTurnstileTokenChange: (token: string | null) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
   return (
@@ -248,6 +290,7 @@ function Entry({
               Use your own domain, not a social-media profile.
             </p>
           )}
+          <TurnstileWidget onTokenChange={onTurnstileTokenChange} />
         </form>
       </div>
       <WebsiteSketch />
@@ -319,13 +362,19 @@ function Refusal({ onBack }: { onBack: () => void }) {
   );
 }
 
-function AssessmentProgress({ domain, onComplete }: { domain: string; onComplete: () => void }) {
+function AssessmentProgress({
+  domain,
+  result,
+}: {
+  domain: string;
+  result: DomainAssessmentSubmissionResult | undefined;
+}) {
   return (
     <StateShell
       icon={<FileSearch />}
       kicker="Assessment in progress"
       title="Following the public trail."
-      body="This local prototype shows the intended journey. The submitted domain stays visible while future server-side checks assemble dated evidence."
+      body="Your submitted domain stays visible while secure server-side checks assemble dated public evidence."
     >
       <div className="mt-5 flex items-center gap-2 rounded-md border border-border bg-card px-4 py-3 text-sm font-bold">
         <Globe2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -359,25 +408,30 @@ function AssessmentProgress({ domain, onComplete }: { domain: string; onComplete
           ))}
         </ul>
       </div>
-      <Button onClick={onComplete} className="mt-6 h-11">
-        Show completed assessment <ArrowRight />
-      </Button>
+      {result ? (
+        <p className="mt-6 text-sm text-muted-foreground" role="status">
+          {result.kind === "limited"
+            ? "We could not gather enough safe public evidence for a fair assessment."
+            : "We could not complete that assessment just now. Please try again."}
+        </p>
+      ) : null}
     </StateShell>
   );
 }
 
-function Teaser({ onRequest }: { onRequest: () => void }) {
+function Teaser({ result, onRequest }: { result: StoredAiEvidence; onRequest: () => void }) {
   return (
     <div>
       <div className="mb-8 max-w-3xl">
         <p className="mb-3 text-sm font-bold uppercase text-primary">
-          Example Auckland small business · first look
+          {result.normalisedDomain} · first look
         </p>
         <h1 className="display-face text-4xl font-bold sm:text-6xl">
           A public website can give us something solid to work with.
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          This fictional preview keeps observation separate from interpretation.
+          Here is the bounded evidence captured for this website. The dated AI views remain separate
+          and are shown after you confirm the delivery address.
         </p>
       </div>
       <div className="grid gap-5 md:grid-cols-2">
@@ -386,9 +440,9 @@ function Teaser({ onRequest }: { onRequest: () => void }) {
           title="What we observed"
           icon={<CheckCircle2 />}
           items={[
-            "An Auckland service area appears on the home page.",
-            "The core service is clearly named.",
-            "A phone number is visible, but opening hours are not.",
+            result.excerpt,
+            `Assessment recorded at ${formatAucklandTime(result.triggeredAtUtc)}.`,
+            "The fuller result keeps current-web evidence separate from model knowledge.",
           ]}
         />
         <EvidenceBlock
@@ -396,9 +450,9 @@ function Teaser({ onRequest }: { onRequest: () => void }) {
           title="What this may suggest"
           icon={<Sparkles />}
           items={[
-            "Customers can quickly understand the core service.",
-            "Clearer location details may help local discovery.",
-            "Adding hours could reduce uncertainty before contact.",
+            "The current-web view is a dated observation, not a permanent ranking.",
+            "The model-knowledge view does not use a live web search.",
+            "The next screen shows only the stored result for this assessment.",
           ]}
         />
       </div>
@@ -468,13 +522,15 @@ function EvidenceBlock({
   );
 }
 
-const currentWebBusinesses: Array<[string, string, string, string]> = [
-  ["1", "Harbour Handywork", "Central Auckland", "Website · business directory"],
-  ["2", "Tāmaki Home Care", "East Auckland", "Website · map listing"],
-  ["3", "Kauri Property Services", "North Shore", "Website · business directory"],
-];
-
-function SearchResult({ onStartOver }: { onStartOver: () => void }) {
+function SearchResult({
+  result,
+  onStartOver,
+}: {
+  result: StoredAiEvidence;
+  onStartOver: () => void;
+}) {
+  const currentWeb = result.currentWeb;
+  const modelKnowledge = result.modelKnowledge;
   return (
     <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
@@ -485,7 +541,8 @@ function SearchResult({ onStartOver }: { onStartOver: () => void }) {
           </h1>
         </div>
         <div className="rounded-md bg-ink px-4 py-3 text-sm font-semibold text-primary-foreground">
-          <Clock3 className="mr-2 inline size-4" aria-hidden="true" />5 October 2026 · 1:14 pm NZDT
+          <Clock3 className="mr-2 inline size-4" aria-hidden="true" />
+          {formatAucklandTime(result.triggeredAtUtc)}
           <br />
           <span className="font-normal opacity-80">Auckland, New Zealand</span>
         </div>
@@ -499,7 +556,7 @@ function SearchResult({ onStartOver }: { onStartOver: () => void }) {
           <div>
             <p className="text-xs font-bold uppercase text-muted-foreground">Current-web result</p>
             <h2 id="current-web-title" className="display-face mt-1 text-2xl font-bold sm:text-3xl">
-              “Which Auckland businesses offer this type of service today?”
+              {currentWeb.question}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               This result uses a live web-search tool. Sources are shown where available.
@@ -507,32 +564,40 @@ function SearchResult({ onStartOver }: { onStartOver: () => void }) {
           </div>
         </div>
         <ol className="mt-7 divide-y divide-border border-y border-border">
-          {currentWebBusinesses.map(([number, name, area, sources]) => (
-            <li key={name} className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-5">
+          {currentWeb.observedResults.map(({ position, name, summary }) => (
+            <li
+              key={`${position}-${name}`}
+              className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-5"
+            >
               <span className="display-face grid size-10 place-items-center rounded-full bg-sun text-xl font-bold text-ink">
-                {number}
+                {position}
               </span>
               <div className="min-w-0">
                 <h3 className="text-lg font-bold">{name}</h3>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                   <MapPin className="size-4 shrink-0" aria-hidden="true" />
-                  {area}
+                  {summary}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {sources.split(" · ").map((source) => (
-                    <span
-                      key={source}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-semibold"
-                    >
-                      <ExternalLink className="size-3" aria-hidden="true" />
-                      {source}
-                    </span>
-                  ))}
-                </div>
               </div>
             </li>
           ))}
         </ol>
+        {currentWeb.citations.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2" aria-label="Current-web sources">
+            {currentWeb.citations.map((citation) => (
+              <a
+                key={citation.url}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-semibold hover:bg-sun-soft"
+                href={citation.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <ExternalLink className="size-3" aria-hidden="true" />
+                {citation.title}
+              </a>
+            ))}
+          </div>
+        )}
         <div className="mt-5 flex items-start gap-3 rounded-md bg-sun-soft p-4 text-sm">
           <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
           <p>
@@ -556,18 +621,26 @@ function SearchResult({ onStartOver }: { onStartOver: () => void }) {
               id="model-knowledge-title"
               className="display-face mt-1 text-2xl font-bold sm:text-3xl"
             >
-              A separate model view, not a current ranking.
+              {modelKnowledge.question}
             </h2>
           </div>
         </div>
-        <div className="mt-6 rounded-md border border-border bg-card p-5">
-          <p className="font-bold">What this fictional demo would show</p>
-          <p className="mt-2 text-muted-foreground">
-            A model can offer a general response to the same business-type question without looking
-            at the live web. It may be useful context, but it cannot confirm who is visible today or
-            provide current sources.
-          </p>
-        </div>
+        <ol className="mt-6 divide-y divide-border border-y border-border">
+          {modelKnowledge.observedResults.map(({ position, name, summary }) => (
+            <li
+              key={`${position}-${name}`}
+              className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-5"
+            >
+              <span className="display-face grid size-10 place-items-center rounded-full bg-coral-soft text-xl font-bold text-ink">
+                {position}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold">{name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{summary}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
         <div className="mt-5 flex items-start gap-3 rounded-md bg-coral-soft p-4 text-sm">
           <AlertTriangle className="mt-0.5 size-5 shrink-0 text-coral" aria-hidden="true" />
           <p>
@@ -597,6 +670,14 @@ function SearchResult({ onStartOver }: { onStartOver: () => void }) {
       </div>
     </div>
   );
+}
+
+function formatAucklandTime(value: string): string {
+  return new Intl.DateTimeFormat("en-NZ", {
+    dateStyle: "long",
+    timeStyle: "short",
+    timeZone: "Pacific/Auckland",
+  }).format(new Date(value));
 }
 
 function maskEmail(email: string) {

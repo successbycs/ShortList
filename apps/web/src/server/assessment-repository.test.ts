@@ -27,6 +27,10 @@ function fakeDatabase(firstResults: Array<unknown | null> = []): {
           calls.push({ query, values });
           return (firstResults.shift() ?? null) as T | null;
         },
+        async all<T>() {
+          calls.push({ query, values });
+          return { results: [] as T[] };
+        },
         async run() {
           calls.push({ query, values });
           return { success: true };

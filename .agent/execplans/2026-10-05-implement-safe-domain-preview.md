@@ -11,9 +11,10 @@ private targets, unreadable sites, insufficient evidence and safety-limit
 failures will show clear public-safe states rather than causing uncontrolled
 fetches or invented claims.
 
-This is not email confirmation, the full result, PDF delivery, payment,
-production deployment, or a live OpenAI request. Those are separate Issues and
-authorities.
+This V1 slice includes the live Cloudflare deployment, `shortlist.successbycs.com`,
+the existing D1 record store, server-side secrets, Turnstile verification, and
+real, bounded OpenAI evidence calls. It excludes PDF/R2 delivery, Discord,
+Workflows, dashboards, and other advanced automation.
 
 ## Progress
 
@@ -72,13 +73,48 @@ authorities.
   migrations to remote `shortlist-mvp1` D1 and queried the schema. The three
   application tables are present in the Cloudflare Oceania/Auckland-serving
   database and all customer, assessment and evidence counts are zero.
-- [ ] (2026-10-05 08:31Z) Blocked before the approved Turnstile widget can be
-  created. The current session has no `CLOUDFLARE_API_TOKEN` carrying
-  `Account.Turnstile:Edit`; the existing D1-capable login is not assumed to
-  have that separate account permission. Chris must supply that token to a new
-  local session without pasting it into chat, then the governed Turnstile
-  setup can resume for `localhost`, `127.0.0.1` and
-  `shortlist.successbycs.com`.
+- [x] (2026-10-05 08:31Z) Chris created the approved managed Turnstile widget
+  through Cloudflare Dashboard Turnstile Spin. Cloudflare displayed a site key
+  and private secret, neither of which is recorded in this repository or plan.
+- [x] (2026-10-05 09:16Z) Chris approved the browser-to-server Turnstile
+  contract: the domain form supplies a one-time token; the server requires a
+  successful Siteverify result for `domain_assessment` and the actual approved
+  hostname before D1 persistence or a website fetch.
+- [x] (2026-10-05 09:30Z) Added the explicit browser widget, server-only
+  Siteverify boundary, Worker binding adapter, server-function route, and
+  journey tests. The prior prototype-only completion button is removed.
+- [x] (2026-10-05 09:30Z) Added `docs/product/REQUEST_FLOW.md` and an Issue #10
+  flowchart comment so a human reader can trace each request boundary and D1
+  write without reading source code.
+- [ ] (2026-10-05 09:30Z) Run the real local Worker proof with a fresh
+  Turnstile response once the ignored root `.env` values are visible to the
+  local runtime. It must prove one accepted request and one rejected replay
+  without exposing either credential or creating production customer data.
+- [x] (2026-10-05 10:10Z) Chris clarified that a live site, DNS, the existing
+  D1 database, server-side secrets and Turnstile are V1 completion work. R2,
+  PDF storage, Discord, Workflows, dashboards and advanced automation are not.
+- [x] (2026-10-05 10:14Z) Chris approved reuse of the existing project-specific
+  `OPENAI_API_KEY` for bounded live V1 assessment calls. Its value was only
+  presence-checked in ignored local configuration and was not displayed.
+- [ ] (2026-10-05 10:14Z) Extend the existing server route and D1 schema to
+  persist the two approved AI-evidence records, then run one explicit local
+  live assessment against a chosen public domain before deployment.
+- [x] (2026-10-05 10:14Z) Added the `ai_evidence` migration and the
+  server-side assessment path, including cache-first reuse by normalised domain,
+  two separately labelled AI evidence modes, and fixture tests.
+- [x] (2026-10-05 10:20Z) Applied `0003_ai_evidence.sql` to the named remote
+  `shortlist-mvp1` D1 database. The additive table and index are present; no
+  customer assessment has been created.
+- [x] (2026-10-05 11:14Z) Confirmed ignored local configuration contains the
+  OpenAI key, public Turnstile site key and server-only Turnstile secret without
+  printing any value. Full test, lint and production build validation passed.
+- [ ] (2026-10-05 11:14Z) Commit the reviewed #10 implementation before any
+  Symphony admission. Symphony clones committed history and must not receive an
+  older baseline than the active local implementation.
+- [ ] (2026-10-05 11:14Z) Deploy the V1 Worker, set only server-side secrets
+  in Cloudflare, attach `shortlist.successbycs.com`, and run the one approved
+  real assessment for `www.greengeckogardens.co.nz` with a fresh Turnstile
+  response.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -118,6 +154,19 @@ authorities.
   Evidence: successful `npm run build` on 2026-10-05 and generated
   `.output/server/wrangler.json`.
 
+- Observation: Cloudflare Dashboard Turnstile Spin can create the approved
+  widget without the project needing to invoke the Turnstile API. The dashboard
+  returned the widget credentials only in Chris's browser.
+  Evidence: Chris's confirmed “Turnstile is ready” dashboard screen on
+  2026-10-05.
+
+- Observation: upstream Symphony workers clone committed source, while the
+  current #10 implementation remains in the active uncommitted worktree.
+  Applying `symphony:ready` before a scoped commit would give the worker a stale
+  baseline and could duplicate or conflict with the active implementation.
+  Evidence: `WORKFLOW.md` uses `git clone` in `after_create`; `git status
+  --short` on 2026-10-05 lists the active #10 changes.
+
 ## Decision Log
 
 - Decision: Use Cloudflare Workers + Static Assets with D1 as the later record
@@ -145,6 +194,26 @@ authorities.
   Turnstile before costly work, and versioned curated Auckland-suburb data.
   Rationale: Chris approved the recorded #10 recommendation to bound cost and
   abuse while retaining a useful small-business assessment path.
+  Date/Author: 2026-10-05 / Chris.
+
+- Decision: Protect the public domain-assessment submission with the managed
+  Turnstile widget created in Cloudflare Dashboard. The browser receives only
+  the site key; a TanStack Start server function verifies the one-time response
+  against Siteverify before D1 persistence or a website fetch.
+  Rationale: this enforces the approved bot-control boundary without exposing
+  the private verification secret to browser code.
+  Date/Author: 2026-10-05 / Chris and Codex (implementation approval pending).
+
+- Decision: Treat the minimum Cloudflare delivery path as V1, not V3: Worker
+  deployment, custom hostname, D1, server-side OpenAI secret and Turnstile are
+  required for a real public assessment. Defer R2/PDF storage, Discord,
+  Workflows, dashboards and advanced automation.
+  Rationale: a website is not V1-complete until Chris can use the public URL.
+  Date/Author: 2026-10-05 / Chris.
+
+- Decision: Reuse the existing project-specific OpenAI API key for the first
+  bounded live assessment proof.
+  Rationale: Chris explicitly approved reuse; the key remains server-only.
   Date/Author: 2026-10-05 / Chris.
 
 ## Outcomes & Retrospective
@@ -204,16 +273,15 @@ evidence produces a stored, public-safe limited outcome. Its dependencies are
 injected for deterministic tests. It is not yet a public server route, which
 prevents bypassing the pending Turnstile, rate and concurrency gates.
 
-## Stop point: Turnstile account permission
+## Stop point: Turnstile integration approval
 
-The confirmed next integration is a managed Cloudflare Turnstile widget for
-`localhost`, `127.0.0.1`, and `shortlist.successbycs.com`. Creation and
-server-side Siteverify wiring require a Cloudflare API token whose scope is
-`Account.Turnstile:Edit` for the account holding `successbycs.com`. The token
-must be supplied through a user-controlled local environment, never committed,
-printed, or pasted into chat. After a new session with that token starts, run
-the Turnstile skill's scope probe first; only then create the widget and store
-its secret through the confirmed Worker secret destination.
+The managed Turnstile widget has been created through Cloudflare Dashboard.
+The next integration is to embed it on the domain form and verify its
+one-time response inside the assessment's server function. The handler must
+require a successful response, action `domain_assessment`, and the expected
+frontend hostname before it creates any D1 record or fetches the submitted
+website. Explicit approval is pending because this changes a visitor-facing
+form and its server behavior.
 
 Chris has chosen a V1 local-development exception for the short-lived widget
 provisioning token: `CLOUDFLARE_API_TOKEN` may be kept in the already
@@ -234,6 +302,10 @@ browser-exposed variable.
 `docs/product/CONTRACTS.md` defines Customer, Assessment run, Website evidence,
 Auckland context and AI evidence records. The AI configuration is fixed in
 `docs/product/AI_SEARCH_RUNTIME_CONFIGURATION.md`.
+
+`docs/product/REQUEST_FLOW.md` is the human-readable system flow. It names the
+browser, Turnstile, TanStack server function, Worker, D1 and public-website
+boundaries, and lists exactly which D1 writes the domain-assessment path makes.
 
 `apps/web/src/routes/index.tsx` is the public prototype. Its normal brand
 header must remain while the screen transitions from submitted domain to
@@ -410,6 +482,19 @@ discarding only isolated test data; never reset an uninspected working tree.
 The central risk is turning a simple URL field into an unrestricted server-side
 fetch facility. The safety envelope and fixtures are therefore prerequisites,
 not later polish.
+
+Observed on 2026-10-05 for the live-assessment implementation:
+
+```text
+npm test       # 11 files passed; 60 tests passed
+npm run lint   # 0 errors; 8 existing warnings
+npm run build  # passed; generated Cloudflare Worker package
+```
+
+The build now reads the public Turnstile site key from the ignored root `.env`.
+The OpenAI key and Turnstile secret remain server-only values and were only
+presence-checked. This proves code packaging, not deployment, a real API call,
+or a public-domain request.
 
 ## Interfaces and Dependencies
 

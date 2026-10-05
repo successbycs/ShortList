@@ -1,6 +1,7 @@
 export type D1StatementLike = {
   bind(...values: unknown[]): D1StatementLike;
   first<T>(): Promise<T | null>;
+  all<T>(): Promise<{ results: T[] }>;
   run(): Promise<{ success: boolean }>;
 };
 
