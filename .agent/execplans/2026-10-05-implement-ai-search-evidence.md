@@ -40,6 +40,9 @@ record, calling an email/PDF provider, or exposing a public API route.
 - [x] (2026-10-05 06:11Z) Ran test, generated binding types, lint, build, and
   whitespace verification. Local Worker HTTP proof remains pending until an
   adapter/route exists; it is not implied by this pure-contract milestone.
+- [x] (2026-10-05 06:24Z) Chris approved reuse of the existing ShortList-only
+  local API key. Added the isolated OpenAI Responses adapter with mocked
+  transport tests; no live request, server route, or browser import was added.
 
 ## Surprises & Discoveries
 
@@ -70,6 +73,13 @@ record, calling an email/PDF provider, or exposing a public API route.
   Rationale: #5 acceptance requires fixture/test-double evidence; credentials
   and authorised real-boundary proof belong to later explicit authority.
   Date/Author: 2026-10-05 / Chris and Codex.
+
+- Decision: Reuse the existing ShortList-specific local API key when a later
+  server route is explicitly authorised to invoke the adapter.
+  Rationale: Chris confirmed that the existing key was created specifically for
+  this project. The key remains in an ignored local environment file and is not
+  read, printed, committed, or used by fixture verification.
+  Date/Author: 2026-10-05 / Chris.
 
 - Decision required: exact GPT-6 Luna reasoning level, native OpenAI search
   tool configuration, Auckland location context, timeout, and per-assessment
@@ -155,6 +165,12 @@ must receive its credential through a runtime binding/configuration interface,
 never an importable frontend constant. It must make no request during build,
 test, or local browser preview. Test doubles exercise all outcomes.
 
+**Status:** Implemented as `openai-responses.ts`. It requires every provider
+choice at construction time (model, timeout, retention, search controls and
+instructions) and has no product-setting default. It translates the official
+Responses API `web_search` and structured-output shape to the stable evidence
+contract. No route creates the adapter yet.
+
 ### Milestone 4: Verify and hand off
 
 Add focused Vitest cases for valid ordered/cited evidence and each safe failure.
@@ -180,6 +196,11 @@ warnings; `npm run build` passed with existing Vite/Nitro/Wrangler warnings;
 and `git diff --check` passed. These commands did not initiate an OpenAI
 request. Local Worker HTTP evidence is deferred until an adapter/route exists.
 
+After the adapter addition, `npm test` passed 4 files / 13 tests; lint remained
+at 0 errors and 8 existing warnings; and the production Cloudflare-module build
+passed with the same existing warnings. The OpenAI transport tests inject a
+fake `fetch` implementation and make no network request.
+
 Before any real-boundary test, Chris must separately approve the account,
 credential storage path, exact request, maximum spend, and redacted evidence
 record. That check is not a prerequisite for fixture-based completion.
@@ -192,8 +213,8 @@ record. That check is not a prerequisite for fixture-based completion.
 | Current-web result carries order/citations; model knowledge carries its warning | Fixture tests for mode-specific normalisation and render data | Passed (fixture) |
 | Bad provider data is safe | Tests for malformed, uncited, error and timeout outcomes | Passed (fixture) |
 | Token and spend guard acts before unbounded processing | Tests using synthetic usage/estimate values | Passed (fixture) |
-| Key cannot reach browser code or logs | Static scan plus configuration tests with synthetic values | Partially passed: no key/configuration code exists yet |
-| App stays buildable as a Cloudflare Worker | Existing local commands plus HTTP loopback proof | Build passed; HTTP proof not applicable before a route exists |
+| Key cannot reach browser code or logs | Static scan plus configuration tests with synthetic values | Partially passed: adapter receives a server-only constructor value; no browser route exists |
+| App stays buildable as a Cloudflare Worker | Existing local commands plus HTTP loopback proof | Build passed; HTTP proof remains pending because no route invokes the adapter |
 | Actual OpenAI response | Explicitly authorised bounded request and redacted record | Unobserved |
 
 ## Idempotence and Recovery
@@ -224,3 +245,11 @@ and expose no provider secret to the route bundle. OpenAI-specific
 request/response types remain unimplemented and will stay isolated from this
 stable evidence contract so later provider changes do not alter report or teaser
 inputs.
+
+`createOpenAiResponsesProvider(config)` is the OpenAI-specific adapter. Its
+configuration requires a server-only API key, model ID, timeout, explicit
+provider-side retention choice, web-search controls, and mode-specific
+instructions. It uses `POST /v1/responses` only if a future server caller calls
+`run`; test code injects `fetchImplementation`. The current-web path sends the
+official `web_search` tool and structured output schema; the no-web path omits
+the tool. This adapter does not itself choose the unresolved values.
