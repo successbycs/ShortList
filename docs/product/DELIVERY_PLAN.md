@@ -1,6 +1,7 @@
 # ShortList MVP 1 delivery plan
 
-**Status:** draft for #8 review; no implementation or external service is authorised  
+**Status:** approved planning baseline; implementation and external service
+authority remain Issue-specific
 **Requirements:** [REQUIREMENTS.md](REQUIREMENTS.md)  
 **Design inputs:** [SDD.md](SDD.md), [CONTRACTS.md](CONTRACTS.md), and [SAFE_ASSESSMENT_DESIGN.md](SAFE_ASSESSMENT_DESIGN.md)
 
@@ -32,9 +33,9 @@ it does not make unresolved scope safe.
                        ├─ #25 PDF visual/evaluation contract
                        └─ #24 safety/data/access design
 
-#8 + selected Cloudflare Workers + Static Assets foundation ─> #9 product foundation
-#9 + #24 + approved #28 mockups ──> #10 safe domain assessment and teaser
-#9 + #7 + exact AI configuration ─> #5 AI-search evidence adapter
+#8 + selected Cloudflare Workers + Static Assets foundation ─> #9 product foundation (closed)
+#9 (closed) + #24 + #28 visual acceptance (closed) ──> #10 safe domain assessment and teaser
+#9 (closed) + #7 (closed) + exact AI configuration ─> #5 AI-search evidence adapter
 #10 + #5 ──────────────────────────> #11 email/consent/entitlement
 #7 + #25 + #11 ───────────────────> #27 PDF generation/delivery
 #11 + #27 ─────────────────────────> #13 privacy/support/recovery
@@ -42,7 +43,7 @@ it does not make unresolved scope safe.
 #14 ────────────────────────────────> #15 launch readiness -> #16 learning
 ```
 
-#25 and #28 are independent review/design work now. #24 is in review and its
+#25 is independent review/design work. #24 is in review and its
 approval is an input to #9/#10, not a reason to build unsafe fetching early.
 
 ## 4. Implementation packet definitions
@@ -68,7 +69,7 @@ They must not be guessed in this plan.
 | Cloudflare frontend platform | #9 and all implementation packets | Selected by Chris |
 | Record/storage foundation | #9 and all implementation packets | Chris, informed by #8; Workers + Static Assets and the adopted frontend are selected, but records/storage remain open |
 | Safe-fetch and abuse thresholds; retention/deletion; suburb source | #9/#10 | Chris, using #24 design |
-| Exported desktop/mobile mockups and visual approval | #10/#11 | Chris, using #28 |
+| Interactive Loveable export and visual approval | #10/#11 | Approved by Chris in closed #28 |
 | PDF examples/rubric | #27 | Chris, using #25 |
 | GPT-6 Luna endpoint/tool/location, token/timeout/spend cap, public terminology | #5 | Chris |
 | Sender/support domain, email provider, alert configuration, real-boundary tests | #27/#13 | Chris |
@@ -80,13 +81,11 @@ dependencies, a concise outcome/non-goals, named code packets, exact
 verification, and an accountable human owner. It does not decide any gate in
 section 5.
 
-#5 currently has `symphony:ready` by explicit owner instruction. It is therefore
-**queue-admitted but not execution-ready**: #9 is still open, its code packet
-is intentionally technology-dependent, and its exact configuration decisions
-are open. Do not start a Symphony worker while it remains the only admitted
-Issue unless Chris deliberately wants it to attempt the currently incomplete
-packet. The safe options are to remove the label until #5 is ready (requires a
-new explicit owner instruction) or retain it and keep the worker stopped.
+#5 is currently **not** Symphony-admitted: it has no `symphony:ready` label.
+Its native dependencies are now closed and its implementation plan exists, but
+the exact GPT-6 Luna tool/location, timeout, spend cap, and public terminology
+remain owner decisions. Do not start Symphony while the separate #29
+continuation/handoff defect remains unresolved.
 
 ## 7. Definition of done for #8
 
