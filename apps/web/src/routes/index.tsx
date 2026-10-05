@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { admitPublicDomain } from "@/server/domain-admission";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,16 +74,23 @@ export function Index() {
 
   function submitDomain(event: FormEvent) {
     event.preventDefault();
-    const safeDomain = domain.trim().toLowerCase();
-    if (!safeDomain || safeDomain.includes(" ") || !safeDomain.includes(".")) {
-      setDomainError("Enter a website address like yourbusiness.co.nz.");
+    const admission = admitPublicDomain(domain);
+    if (admission.kind === "rejected") {
+      setDomainError(
+        admission.reasonCode === "private_or_local_target"
+          ? "Enter a public business website, not a local or private address."
+          : "Enter a public website address like yourbusiness.co.nz.",
+      );
       return;
     }
-    if (safeDomain.includes("facebook.com") || safeDomain.includes("instagram.com")) {
+
+    if (isSocialProfile(admission.normalisedDomain)) {
       setDomainError("");
       setScreen("refusal");
       return;
     }
+
+    setDomain(admission.normalisedDomain);
     setDomainError("");
     setScreen("progress");
   }
@@ -134,7 +142,9 @@ export function Index() {
           />
         )}
         {screen === "refusal" && <Refusal onBack={() => setScreen("entry")} />}
-        {screen === "progress" && <AssessmentProgress onComplete={() => setScreen("teaser")} />}
+        {screen === "progress" && (
+          <AssessmentProgress domain={domain} onComplete={() => setScreen("teaser")} />
+        )}
         {screen === "teaser" && <Teaser onRequest={() => setScreen("consent")} />}
         {screen === "confirmation" && (
           <Confirmation
@@ -167,6 +177,12 @@ export function Index() {
         <p>ShortList prototype · Auckland, Aotearoa</p>
       </footer>
     </main>
+  );
+}
+
+function isSocialProfile(domain: string): boolean {
+  return ["facebook.com", "instagram.com"].some(
+    (socialDomain) => domain === socialDomain || domain.endsWith(`.${socialDomain}`),
   );
 }
 
@@ -303,14 +319,18 @@ function Refusal({ onBack }: { onBack: () => void }) {
   );
 }
 
-function AssessmentProgress({ onComplete }: { onComplete: () => void }) {
+function AssessmentProgress({ domain, onComplete }: { domain: string; onComplete: () => void }) {
   return (
     <StateShell
       icon={<FileSearch />}
       kicker="Assessment in progress"
       title="Following the public trail."
-      body="This demo shows the future journey for a public business website, one dated current-web result, and one separately labelled no-web model-knowledge result."
+      body="This local prototype shows the intended journey. The submitted domain stays visible while future server-side checks assemble dated evidence."
     >
+      <div className="mt-5 flex items-center gap-2 rounded-md border border-border bg-card px-4 py-3 text-sm font-bold">
+        <Globe2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
+        <span className="truncate">{domain}</span>
+      </div>
       <div className="mt-7 overflow-hidden rounded-md border border-border bg-card">
         <div className="relative h-2 overflow-hidden bg-leaf-soft">
           <div className="scan-line absolute inset-y-0 w-1/3 bg-leaf" />

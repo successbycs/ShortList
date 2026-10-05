@@ -34,6 +34,9 @@ authorities.
 - [x] (2026-10-05 07:12Z) Added a bounded, fixture-tested HTML evidence
   extractor. It is non-networking and requires explicit caller-supplied content
   and byte limits; it cannot bypass the pending safe-fetch configuration.
+- [x] (2026-10-05 07:15Z) Connected the existing public prototype to the
+  tested domain-admission gate. It stops invalid/local/private input before the
+  checking state and displays the normalised submitted domain during checking.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -100,6 +103,11 @@ The third preparatory slice is complete:
 does not execute page content, strips inactive script/style/noscript content,
 and returns only bounded title, description and text evidence or an honest
 limited reason. It is not a DNS resolver or HTTP fetcher.
+
+The prototype now demonstrates the first part of the intended single-page
+journey without pretending to fetch a real customer site: input is validated,
+then the normalised domain remains visible above the checking steps. A later
+server action replaces the prototype's manual completion control.
 
 ## Context and Orientation
 
@@ -217,6 +225,16 @@ npm run lint                      # 0 errors; 8 existing warnings
 git diff --check                  # passed
 ```
 
+Observed on 2026-10-05 for the visible-domain journey slice:
+
+```text
+npx tsc --noEmit                  # passed
+npm test -- prototype-journey.test.tsx domain-admission.test.ts website-evidence.test.ts
+# Test Files  3 passed (3); Tests  27 passed (27)
+npm run lint                      # 0 errors; 8 existing warnings
+git diff --check                  # passed
+```
+
 ## Validation and Acceptance
 
 | Capability | Required proof | Current status |
@@ -224,7 +242,7 @@ git diff --check                  # passed
 | Domain admission | Tests cover malformed, private/local, scheme, credential and port outcomes before network access | Passed (offline boundary only) |
 | Bounded website evidence | Fixtures cover content type, size ceiling, inert extraction and sparse page text | Passed (extractor only; safe fetch pending) |
 | Record isolation | Local D1 tests cover customer uniqueness and no domain-as-authorisation | Planned |
-| Honest teaser | UI/route tests cover checking, teaser, insufficient and safe failure states | Planned |
+| Honest teaser | UI tests prove malformed/private input is stopped and the normalised domain remains visible during checking | Partially passed (prototype; real route pending) |
 | Dated AI modes | Integration uses the #5 fixture provider and preserves labels/citations/warnings | Planned |
 | Abuse boundary | Repeated/concurrent tests stop before provider work | Awaiting owner limits |
 | Real Cloudflare/OpenAI | Separately authorised remote test with redacted evidence | Unobserved |

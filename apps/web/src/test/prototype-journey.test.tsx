@@ -42,4 +42,27 @@ describe("static prototype reveal journey", () => {
     fireEvent.click(screen.getByRole("button", { name: /Change email/i }));
     expect(screen.getByLabelText("Email address")).toBeInTheDocument();
   });
+
+  it("uses the shared admission gate before entering the checking view", () => {
+    render(<Index />);
+
+    fireEvent.change(screen.getByLabelText("Your business website"), {
+      target: { value: "127.0.0.1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(/public business website/i);
+    expect(screen.queryByText("Following the public trail.")).not.toBeInTheDocument();
+  });
+
+  it("normalises the submitted domain and keeps it visible during checking", () => {
+    render(<Index />);
+
+    fireEvent.change(screen.getByLabelText("Your business website"), {
+      target: { value: "HTTPS://Harbour-Handyman.CO.NZ/path" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+    expect(screen.getByText("harbour-handyman.co.nz")).toBeInTheDocument();
+  });
 });
