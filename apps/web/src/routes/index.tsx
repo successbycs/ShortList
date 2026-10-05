@@ -62,19 +62,6 @@ type Screen =
   | "exhausted"
   | "failure";
 
-const screenLabels: Array<{ id: Screen; label: string }> = [
-  { id: "entry", label: "Start" },
-  { id: "refusal", label: "Invalid" },
-  { id: "progress", label: "Checking" },
-  { id: "teaser", label: "Teaser" },
-  { id: "consent", label: "Email" },
-  { id: "confirmation", label: "Confirm" },
-  { id: "result", label: "Full result" },
-  { id: "rateLimit", label: "Rate limited" },
-  { id: "exhausted", label: "Limit reached" },
-  { id: "failure", label: "No evidence" },
-];
-
 export function Index() {
   const [screen, setScreen] = useState<Screen>("entry");
   const [domain, setDomain] = useState("harbourhandyman.co.nz");
@@ -136,26 +123,6 @@ export function Index() {
           </div>
         </div>
       </header>
-
-      <div className="border-b border-border bg-paper">
-        <nav
-          aria-label="Prototype screens"
-          className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2 sm:px-6"
-        >
-          {screenLabels.map((item) => (
-            <Button
-              key={item.id}
-              variant={screen === item.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setScreen(item.id)}
-              aria-current={screen === item.id ? "page" : undefined}
-              className="shrink-0"
-            >
-              {item.label}
-            </Button>
-          ))}
-        </nav>
-      </div>
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-14">
         {screen === "entry" && (
