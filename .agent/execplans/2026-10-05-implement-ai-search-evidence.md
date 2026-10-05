@@ -21,10 +21,12 @@ record, calling an email/PDF provider, or exposing a public API route.
 - [x] (2026-10-05 02:05Z) Confirmed native GitHub prerequisites #7, #8, and
   #9 are closed and the adopted Cloudflare frontend is in `apps/web/`.
 - [x] (2026-10-05 02:05Z) Created this implementation plan and identified the
-  four owner decisions that must be recorded before provider-specific code.
+  owner decisions that must be recorded before provider-specific code.
 - [x] (2026-10-05 03:10Z) Recorded Chris's requirement for two distinct
   result modes in the canonical product documents: current-web and no-web
   model knowledge. The exact GPT-6 Luna configuration/limits remain open.
+- [x] (2026-10-05 03:12Z) Recorded the product decision and its implementation
+  boundary in GitHub #5 for human review.
 - [ ] Record Chris's exact GPT-6 Luna reasoning/tool/location/limit decisions
   for both modes in the canonical product documents and #5.
 - [ ] Implement provider-independent evidence types, limits, normalisation,
