@@ -27,14 +27,19 @@ record, calling an email/PDF provider, or exposing a public API route.
   model knowledge. The exact GPT-6 Luna configuration/limits remain open.
 - [x] (2026-10-05 03:12Z) Recorded the product decision and its implementation
   boundary in GitHub #5 for human review.
+- [x] (2026-10-05 06:02Z) Chris resumed #5. Corrected the GitHub Project item
+  from Done to In Progress and recorded the bounded implementation scope in
+  Issue #5.
 - [ ] Record Chris's exact GPT-6 Luna reasoning/tool/location/limit decisions
   for both modes in the canonical product documents and #5.
-- [ ] Implement provider-independent evidence types, limits, normalisation,
-  and fixture-driven tests under `apps/web/src/`.
+- [x] (2026-10-05 06:11Z) Implemented provider-independent evidence types,
+  limits, normalisation, and fixture-driven tests under
+  `apps/web/src/server/ai-search/`.
 - [ ] Add the selected OpenAI adapter behind a configuration interface with no
   credential value or live request in tests.
-- [ ] Run the code, lint, test, build, and local Worker evidence; record the
-  results in this plan and #5 for human review.
+- [x] (2026-10-05 06:11Z) Ran test, generated binding types, lint, build, and
+  whitespace verification. Local Worker HTTP proof remains pending until an
+  adapter/route exists; it is not implied by this pure-contract milestone.
 
 ## Surprises & Discoveries
 
@@ -47,6 +52,12 @@ record, calling an email/PDF provider, or exposing a public API route.
   and safety outcomes, but not concrete OpenAI invocation values.
   Evidence: `docs/product/CONTRACTS.md`, section “Dated AI-search evidence
   v1”; `docs/product/DELIVERY_PLAN.md`, section 5.
+
+- Observation: the app has no existing provider adapter or assessment route;
+  the new contract can be proved with fixture providers without exposing a
+  runtime credential or beginning a network request.
+  Evidence: `apps/web/src/server/ai-search/collect.test.ts` covers the bounded
+  contract; source inspection found no OpenAI SDK import.
 
 ## Decision Log
 
@@ -88,10 +99,13 @@ record, calling an email/PDF provider, or exposing a public API route.
 
 ## Outcomes & Retrospective
 
-Pending implementation. The plan will be complete when fixture tests prove the
-versioned evidence contract and every external boundary is explicitly either
-passed under authority or recorded unobserved. It does not make a customer
-claim, production deployment, or provider-readiness claim.
+The first bounded milestone is complete. A server-only, provider-independent
+contract now emits dated evidence for either the cited current-web mode or the
+explicitly non-current model-knowledge mode. It blocks over-limit work before
+calling a provider and turns malformed, uncited, timed-out, failed, and
+over-limit responses into safe records. The OpenAI adapter, exact configuration
+values, route integration, persistence, credentials, live response, deployment,
+and customer use remain outside this milestone.
 
 ## Context and Orientation
 
@@ -150,7 +164,7 @@ until Chris supplies credentials and explicitly authorises a bounded call.
 
 ## Concrete Steps
 
-From `/home/chris/ShortList/apps/web` after the decision is recorded:
+From `/home/chris/ShortList/apps/web`:
 
 ```sh
 npm run lint
@@ -160,9 +174,11 @@ npm run build
 npm run dev:worker -- --local --port 8787
 ```
 
-Expected evidence: lint has no errors; new tests cover normalisation and safe
-reason codes; the Cloudflare-module build succeeds; the local Worker responds
-on loopback. These commands must not initiate an OpenAI request.
+Observed evidence: `npm test` passed 3 files / 10 tests; `npm run types`
+generated bindings; `npm run lint` passed with 0 errors and 8 pre-existing
+warnings; `npm run build` passed with existing Vite/Nitro/Wrangler warnings;
+and `git diff --check` passed. These commands did not initiate an OpenAI
+request. Local Worker HTTP evidence is deferred until an adapter/route exists.
 
 Before any real-boundary test, Chris must separately approve the account,
 credential storage path, exact request, maximum spend, and redacted evidence
@@ -172,12 +188,12 @@ record. That check is not a prerequisite for fixture-based completion.
 
 | Requirement | Proof | Current status |
 | --- | --- | --- |
-| Both modes carry exact question, UTC and configuration | Fixture tests against the v1 contract | Pending |
-| Current-web result carries order/citations; model knowledge carries its warning | Fixture tests for mode-specific normalisation and render data | Pending |
-| Bad provider data is safe | Tests for malformed, uncited, error and timeout outcomes | Pending |
-| Token and spend guard acts before unbounded processing | Tests using synthetic usage/estimate values | Pending |
-| Key cannot reach browser code or logs | Static scan plus configuration tests with synthetic values | Pending |
-| App stays buildable as a Cloudflare Worker | Existing local commands plus HTTP loopback proof | Pending |
+| Both modes carry exact question, UTC and configuration | Fixture tests against the v1 contract | Passed (fixture) |
+| Current-web result carries order/citations; model knowledge carries its warning | Fixture tests for mode-specific normalisation and render data | Passed (fixture) |
+| Bad provider data is safe | Tests for malformed, uncited, error and timeout outcomes | Passed (fixture) |
+| Token and spend guard acts before unbounded processing | Tests using synthetic usage/estimate values | Passed (fixture) |
+| Key cannot reach browser code or logs | Static scan plus configuration tests with synthetic values | Partially passed: no key/configuration code exists yet |
+| App stays buildable as a Cloudflare Worker | Existing local commands plus HTTP loopback proof | Build passed; HTTP proof not applicable before a route exists |
 | Actual OpenAI response | Explicitly authorised bounded request and redacted record | Unobserved |
 
 ## Idempotence and Recovery
@@ -201,10 +217,10 @@ reason-coded outcome; do not silently retry beyond the approved limit.
 
 ## Interfaces and Dependencies
 
-Expected new internal interfaces are server-only and named during Milestone 2:
-an `AiSearchEvidenceV1` value, `AiSearchProvider` adapter interface, a typed
-`AiSearchRunRequest`, and typed safe reason codes. They must conform to the
-field meanings in `docs/product/CONTRACTS.md` and expose no provider secret to
-the route bundle. OpenAI-specific request/response types remain isolated from
-the stable evidence contract so later provider changes do not alter report or
-teaser inputs.
+Implemented internal interfaces are server-only: `AiSearchEvidence`,
+`AiSearchProvider`, `AiSearchRunRequest`, `AiSearchLimits`, and typed safe
+reason codes. They conform to the field meanings in `docs/product/CONTRACTS.md`
+and expose no provider secret to the route bundle. OpenAI-specific
+request/response types remain unimplemented and will stay isolated from this
+stable evidence contract so later provider changes do not alter report or teaser
+inputs.
