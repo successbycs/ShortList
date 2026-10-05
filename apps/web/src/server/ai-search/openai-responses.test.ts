@@ -80,7 +80,7 @@ describe("OpenAI Responses provider", () => {
 
     expect(result).toMatchObject({ kind: "success", mode: "web_grounded" });
     expect(body).toMatchObject({ model: "gpt-6-luna", store: false, tool_choice: "required" });
-    expect(body.tools).toEqual([
+    expect(body["tools"]).toEqual([
       expect.objectContaining({
         type: "web_search",
         search_context_size: "low",

@@ -65,7 +65,7 @@ export type ProviderSuccess = {
   citations?: Citation[];
   usage: AiSearchUsage;
 };
-export type ProviderFailure = { kind: "timeout" | "failure" };
+export type ProviderFailure = { kind: "timeout" } | { kind: "failure" };
 export type AiSearchProviderResponse = ProviderSuccess | ProviderFailure;
 
 /** Boundary for a later provider adapter. Tests use this with fixture fakes. */

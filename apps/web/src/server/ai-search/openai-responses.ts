@@ -89,7 +89,7 @@ function createResponseRequest(
     },
   };
   if (request.mode === "web_grounded") {
-    body.tools = [
+    body["tools"] = [
       {
         type: "web_search",
         search_context_size: config.webSearch.searchContextSize,
@@ -115,7 +115,7 @@ function createResponseRequest(
         },
       },
     ];
-    body.tool_choice = config.webSearch.toolChoice;
+    body["tool_choice"] = config.webSearch.toolChoice;
   }
   return body;
 }
@@ -145,9 +145,9 @@ function parseResponsesPayload(
   request: AiSearchRunRequest,
 ): AiSearchProviderResponse {
   if (!isRecord(payload)) return { kind: "failure" };
-  const content = outputTextContent(payload.output);
+  const content = outputTextContent(payload["output"]);
   const parsedResults = parseResults(content?.text);
-  const usage = parseUsage(payload.usage, request.estimatedSpendUsd);
+  const usage = parseUsage(payload["usage"], request.estimatedSpendUsd);
   if (!parsedResults || !usage) return { kind: "failure" };
   return {
     kind: "success",
@@ -161,10 +161,16 @@ function parseResponsesPayload(
 function outputTextContent(value: unknown): { text: string; annotations: unknown } | undefined {
   if (!Array.isArray(value)) return undefined;
   for (const item of value) {
-    if (!isRecord(item) || item.type !== "message" || !Array.isArray(item.content)) continue;
-    for (const content of item.content) {
-      if (isRecord(content) && content.type === "output_text" && typeof content.text === "string") {
-        return { text: content.text, annotations: content.annotations };
+    if (!isRecord(item) || item["type"] !== "message" || !Array.isArray(item["content"])) {
+      continue;
+    }
+    for (const content of item["content"]) {
+      if (
+        isRecord(content) &&
+        content["type"] === "output_text" &&
+        typeof content["text"] === "string"
+      ) {
+        return { text: content["text"], annotations: content["annotations"] };
       }
     }
   }
@@ -175,16 +181,16 @@ function parseResults(text: string | undefined): ObservedResult[] | undefined {
   if (!text) return undefined;
   try {
     const value: unknown = JSON.parse(text);
-    if (!isRecord(value) || !Array.isArray(value.observed_results)) return undefined;
-    const results = value.observed_results.map((result, index) => {
+    if (!isRecord(value) || !Array.isArray(value["observed_results"])) return undefined;
+    const results = value["observed_results"].map((result, index) => {
       if (
         !isRecord(result) ||
-        typeof result.name !== "string" ||
-        typeof result.summary !== "string"
+        typeof result["name"] !== "string" ||
+        typeof result["summary"] !== "string"
       ) {
         return undefined;
       }
-      return { position: index + 1, name: result.name, summary: result.summary };
+      return { position: index + 1, name: result["name"], summary: result["summary"] };
     });
     return results.every((result): result is ObservedResult => result !== undefined)
       ? results
@@ -200,11 +206,11 @@ function parseCitations(value: unknown): Citation[] {
   for (const annotation of value) {
     if (
       !isRecord(annotation) ||
-      annotation.type !== "url_citation" ||
-      !isRecord(annotation.url_citation)
+      annotation["type"] !== "url_citation" ||
+      !isRecord(annotation["url_citation"])
     )
       continue;
-    const { url, title } = annotation.url_citation;
+    const { url, title } = annotation["url_citation"];
     if (typeof url === "string" && typeof title === "string") citations.push({ url, title });
   }
   return citations;
@@ -212,7 +218,8 @@ function parseCitations(value: unknown): Citation[] {
 
 function parseUsage(value: unknown, estimatedSpendUsd: number): AiSearchUsage | undefined {
   if (!isRecord(value)) return undefined;
-  const { input_tokens: inputTokens, output_tokens: outputTokens } = value;
+  const inputTokens = value["input_tokens"];
+  const outputTokens = value["output_tokens"];
   if (typeof inputTokens !== "number" || typeof outputTokens !== "number") return undefined;
   // The preflight estimate is retained until the later billing policy provides
   // an actual provider-cost field. It is not a fabricated post-run price.

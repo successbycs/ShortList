@@ -27,7 +27,9 @@ export async function collectAiSearchEvidence(
   }
 }
 
-function validateRequest(request: AiSearchRunRequest): AiSearchReasonCode | undefined {
+type PreflightReasonCode = Exclude<AiSearchReasonCode, "completed" | "missing_citations">;
+
+function validateRequest(request: AiSearchRunRequest): PreflightReasonCode | undefined {
   if (
     !request.assessmentId ||
     !request.normalisedDomain ||
