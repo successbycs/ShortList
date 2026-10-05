@@ -58,6 +58,10 @@ authorities.
   rejects in the browser bundle. The offline, non-secret input validator now
   lives in `src/lib/` and remains shared with the server fetch boundary. Focused
   tests, typecheck, lint (0 errors), whitespace check and production build pass.
+- [x] (2026-10-05 08:10Z) Applied and queried `0001_assessment_core.sql` in
+  Wrangler's local D1 emulator only. The `customers`, `assessment_runs` and
+  `website_evidence` tables and both application indexes were observed. The
+  remote database remains empty and unmigrated.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -173,7 +177,8 @@ The D1 persistence boundary is now implemented in
 only, reuses an existing customer by normalised domain, creates a fresh dated
 assessment run, and stores bounded website evidence separately. Tests supply a
 fake D1 implementation. The empty `shortlist-mvp1` D1 resource is now bound in
-the Worker configuration but has not been migrated or mutated.
+the Worker configuration. The migration is proven locally but has not been
+applied to, or otherwise mutated, the remote database.
 
 ## Context and Orientation
 
