@@ -41,8 +41,8 @@ link is useful but never replaces an exported artefact in this repository.
 
 | Artefact | Source | Journey states covered | Status | Decision / notes |
 | --- | --- | --- | --- | --- |
-| [Loveable build brief](LOVEABLE_BUILD_BRIEF.md) | Repository prompt | All required prototype states | Review | Generate/export desktop and mobile artefacts before #28 approval. |
-| [Adopted interactive frontend](../../../apps/web/README.md) | Loveable export, adopted as source code | Domain entry, safe refusal, progress, teaser, dated result, email consent, rate limit, exhausted entitlement, and insufficient-evidence states | In implementation | #9 moves the source into `apps/web/` and packages it as local Cloudflare Workers + Static Assets. It remains frontend-only until later approved service packets. |
+| [Loveable build brief](LOVEABLE_BUILD_BRIEF.md) | Repository prompt | All required prototype states | Approved | The build brief led to the exported interactive prototype now adopted in `apps/web/`. #28 is closed following Chris's design review. |
+| [Adopted interactive frontend](../../../apps/web/README.md) | Loveable export, adopted as source code | Domain entry, safe refusal, progress, teaser, dated result, email consent, rate limit, exhausted entitlement, and insufficient-evidence states | Approved | #9 adopted the source into `apps/web/` and packaged it as a local Cloudflare Workers + Static Assets foundation. It remains frontend-only until later approved service packets. |
 | [PDF visual acceptance](PDF_VISUAL_ACCEPTANCE.md) | Repository standard | Minimum Assessment PDF, normal and limited outcomes | Review | Review the standard now; generated sample PDFs are required before #25 acceptance. |
 | [Illustrative successful report](mockups/2026-10-05-minimum-assessment-success-v1.pdf) · [source HTML](mockups/2026-10-05-minimum-assessment-success-v1.html) | Fictional local example | Successful evidence, inference, limitation, and dated-result layout | Review | No real website or AI-search result. Review the visual hierarchy and customer wording. |
 | [Illustrative limited-evidence report](mockups/2026-10-05-minimum-assessment-limited-v1.pdf) · [source HTML](mockups/2026-10-05-minimum-assessment-limited-v1.html) | Fictional local example | Honest insufficient-evidence/failure outcome | Review | No real website or AI-search result. Review whether the limitation feels useful and respectful. |
@@ -56,10 +56,12 @@ Use one of these statuses:
   supporting GitHub Issue comment.
 - **Superseded:** retained as history, with a link to the replacement.
 
-## Minimum coverage for #28
+## Accepted coverage for #28
 
-Before #28 can be accepted, the review register needs representative desktop
-and mobile evidence for:
+Chris accepted #28 on 2026-10-05 after the Loveable export was added to the
+repository and adopted as the interactive frontend source in `apps/web/`.
+The live local prototype is the review artefact in place of separate static
+desktop/mobile screenshots. Its required journey coverage is:
 
 1. domain entry and invalid/unsafe/rate-limited input;
 2. evidence-based teaser and dated AI-search result;
@@ -67,7 +69,7 @@ and mobile evidence for:
 4. exhausted entitlement and resend/support states; and
 5. insufficient-evidence and other honest failure outcomes.
 
-Every mockup must keep the journey mobile-first, keyboard-operable, readable,
-and clear without relying on animation or humour. Loveable.dev is an allowed
-design exploration tool; it is not the selected production frontend, host, or
-application architecture.
+Future visual changes must keep the journey mobile-first, keyboard-operable,
+readable, and clear without relying on animation or humour. Loveable.dev was
+the design exploration tool; the adopted `apps/web/` source is now the selected
+frontend foundation, not a deployed production service.
