@@ -72,6 +72,13 @@ authorities.
   migrations to remote `shortlist-mvp1` D1 and queried the schema. The three
   application tables are present in the Cloudflare Oceania/Auckland-serving
   database and all customer, assessment and evidence counts are zero.
+- [ ] (2026-10-05 08:31Z) Blocked before the approved Turnstile widget can be
+  created. The current session has no `CLOUDFLARE_API_TOKEN` carrying
+  `Account.Turnstile:Edit`; the existing D1-capable login is not assumed to
+  have that separate account permission. Chris must supply that token to a new
+  local session without pasting it into chat, then the governed Turnstile
+  setup can resume for `localhost`, `127.0.0.1` and
+  `shortlist.successbycs.com`.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -196,6 +203,17 @@ captured evidence produces `preview_ready`; and a failed fetch or insufficient
 evidence produces a stored, public-safe limited outcome. Its dependencies are
 injected for deterministic tests. It is not yet a public server route, which
 prevents bypassing the pending Turnstile, rate and concurrency gates.
+
+## Stop point: Turnstile account permission
+
+The confirmed next integration is a managed Cloudflare Turnstile widget for
+`localhost`, `127.0.0.1`, and `shortlist.successbycs.com`. Creation and
+server-side Siteverify wiring require a Cloudflare API token whose scope is
+`Account.Turnstile:Edit` for the account holding `successbycs.com`. The token
+must be supplied through a user-controlled local environment, never committed,
+printed, or pasted into chat. After a new session with that token starts, run
+the Turnstile skill's scope probe first; only then create the widget and store
+its secret through the confirmed Worker secret destination.
 
 ## Context and Orientation
 
