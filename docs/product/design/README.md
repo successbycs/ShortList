@@ -41,7 +41,7 @@ link is useful but never replaces an exported artefact in this repository.
 
 | Artefact | Source | Journey states covered | Status | Decision / notes |
 | --- | --- | --- | --- | --- |
-| None yet | — | — | Planned | Add the first Loveable export here for #28 review. |
+| [Loveable build brief](LOVEABLE_BUILD_BRIEF.md) | Repository prompt | All required prototype states | Review | Generate/export desktop and mobile artefacts before #28 approval. |
 
 Use one of these statuses:
 

@@ -15,6 +15,8 @@ Loveable mockups and later implementation without creating a website or account.
   approved UX/journey requirements plus the design-evidence workspace.
 - [x] (2026-10-05 01:30Z) Added the website experience, visual direction,
   journey-state, accessibility, mockup-rubric, and input/requirement brief.
+- [x] (2026-10-05 02:10Z) Added a complete Loveable build brief and registered
+  it as review evidence.
 - [ ] Validate, push, and record review evidence; exported mockups remain a
   separate human/Loveable input before #28 can be accepted.
 
