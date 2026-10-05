@@ -68,6 +68,10 @@ authorities.
   safely fetches and extracts bounded evidence, and stores either a
   `preview_ready` or honest limited outcome. It remains unexposed to public
   traffic until the route's abuse controls are implemented.
+- [x] (2026-10-05 08:23Z) With Chris' explicit approval, applied both reviewed
+  migrations to remote `shortlist-mvp1` D1 and queried the schema. The three
+  application tables are present in the Cloudflare Oceania/Auckland-serving
+  database and all customer, assessment and evidence counts are zero.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -183,8 +187,8 @@ The D1 persistence boundary is now implemented in
 only, reuses an existing customer by normalised domain, creates a fresh dated
 assessment run, and stores bounded website evidence separately. Tests supply a
 fake D1 implementation. The empty `shortlist-mvp1` D1 resource is now bound in
-the Worker configuration. The migration is proven locally but has not been
-applied to, or otherwise mutated, the remote database.
+the Worker configuration. Both reviewed migrations are proven locally and now
+applied remotely; the remote database currently has its empty schema only.
 
 The coordinator in `apps/web/src/server/website-assessment.ts` now joins these
 boundaries without invoking AI: invalid input makes no database or fetch call;
