@@ -1,0 +1,19 @@
+{
+  // Local-only foundation. This file deliberately contains no account, route,
+  // secret, database, object storage, queue, or environment binding.
+  "name": "shortlist-web",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2026-10-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".output/public"
+  },
+  "no_bundle": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": ["**/*.mjs", "**/*.js"]
+    }
+  ]
+}
