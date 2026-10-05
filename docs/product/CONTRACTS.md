@@ -44,22 +44,26 @@ situations. Every material field has `kind` (`observed`, `inference`, or
 `insufficient`) and non-empty supporting evidence IDs. A renderer rejects an
 unsupported field rather than inventing copy.
 
-### Dated AI-search evidence v1
+### Dated AI-model evidence v1
 
 | Required field | Rule |
 | --- | --- |
-| `search_evidence_id`, `assessment_id` | Opaque IDs; one defined test per successful free assessment. |
+| `search_evidence_id`, `assessment_id` | Opaque IDs; one current-web record and one model-knowledge record per successful free assessment. |
+| `mode` | Exactly `web_grounded` or `model_knowledge`; report renderers must display the corresponding plain-language label. |
 | `question` | Exact Auckland-wide business-type question used for this run. |
 | `executed_at_utc`, `displayed_at_auckland` | Preserve both; display follows Pacific/Auckland. |
-| `model_id`, `search_configuration_ref`, `location_context` | Record actual configuration without credentials. GPT-6 Luna is selected; exact configuration remains owner-approved input. |
-| `observed_results` | Ordered list as returned, including actual count; never manufacture three results. |
-| `citations` | Available source URL/title/reference plus association to an observed result where possible. |
+| `model_id`, `search_configuration_ref`, `location_context` | Record actual configuration without credentials. GPT-6 Luna is selected; exact configuration remains owner-approved input. `location_context` applies to `web_grounded`; a no-web run records that no external location/search tool was available. |
+| `observed_results` | For `web_grounded`, ordered list as returned, including actual count; never manufacture three results. For `model_knowledge`, an unverified response representation, never a current ranking claim. |
+| `citations` | For `web_grounded`, retain available source URL/title/reference and its association to an observed result where possible. It is absent/empty for `model_knowledge` rather than fabricated. |
+| `freshness_notice` | Required for `model_knowledge`: it states that the response did not use a live web search and may be incomplete or out of date. |
 | `outcome`, `reason_code`, `usage` | `completed`, `limited`, or `failed`; usage/limit evidence contains no secret or raw credential. |
 
-The customer-facing result must say it is the order from one specific dated
-test, not an official, objective, or permanent ranking. Missing citations,
-malformed output, timeout, budget exhaustion, or fewer results produces a
-limited/failure outcome and never an unsupported claim.
+The customer-facing current-web result must say it is the order from one
+specific dated test, not an official, objective, or permanent ranking. The
+model-knowledge result must instead say that it did not use live web search and
+is not a verified current result. Missing citations, malformed output, timeout,
+budget exhaustion, or fewer results produces a limited/failure outcome and
+never an unsupported claim.
 
 ## 4. Claim ledger and report contract
 

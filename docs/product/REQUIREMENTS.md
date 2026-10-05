@@ -30,7 +30,7 @@ region. It states honestly when Auckland context cannot be determined.
 | MVP1-PR-001 | The active product name is ShortList. Historical GEO Check and AI Shortlist names remain source-record terminology only. | Must | Product owner | Current product documents and public-copy drafts use ShortList consistently. |
 | MVP1-JNY-001 | A visitor submits one public domain/website and sees useful assessment value before email capture. | Must | Product owner | A valid public-domain scenario produces the teaser before any email field is required. |
 | MVP1-JNY-002 | The teaser and report use only evidence or clearly marked inference; they do not guarantee enquiries, revenue, a stable rank, or an official provider result. | Must | Product owner | Review of a representative output finds page-level evidence/provenance or an explicit inference label for each material finding. |
-| MVP1-JNY-003 | Each successful assessment runs one defined, dated AI-search test based on the evidenced business type and may show the observed returned order. | Must | Product owner | Stored record contains question, response, ordering, available citations, timestamp, model/search context, and product-owner-approved customer terminology. |
+| MVP1-JNY-003 | Each successful assessment runs two separately identified, dated AI-model results based on the evidenced business type: one current-web result and one model-knowledge result without web access. The current-web result may show the observed returned order; the model-knowledge result must never be presented as current or verified. | Must | Product owner | Stored records identify the mode, question, response, timestamp, model/configuration and customer terminology. The current-web record includes ordering and available citations; the model-knowledge record carries the required freshness disclaimer and no invented citations. |
 | MVP1-JNY-004 | The teaser and report display Pacific/Auckland date/time while all stored machine times are UTC ISO 8601. | Must | Product owner | A test record shows UTC storage and correct Auckland display across daylight-saving boundaries. |
 | MVP1-DOM-001 | Incorrectly formatted domains are rejected before fetch, search, or customer-record creation. Private/internal targets and unsafe redirects/DNS changes are refused safely. | Must | Technical design owner | Valid, malformed, private-target, redirect, and DNS-change cases have specified safe outcomes. |
 | MVP1-DOM-002 | The service captures the business name, apparent services, available service-area evidence, page-based buyer hypotheses, trust evidence, strengths, and opportunities without inventing facts. | Must | Product owner | Representative output contains required fields and cites supporting page evidence or says evidence is insufficient. |
@@ -68,10 +68,11 @@ generation, delivery/retry/escalation, and consent-gated outreach.
 The following are intentionally unresolved and must not be silently chosen by
 implementation work:
 
-1. **OpenAI GPT-6 Luna is the selected MVP 1 model.** Its search configuration,
-   location method, cost ceiling, timeout, failure threshold, and
-   product-owner-approved public terminology remain implementation decisions
-   (#23 decision record).
+1. **OpenAI GPT-6 Luna is the selected MVP 1 model.** MVP 1 has a
+   current-web mode and a separate no-web model-knowledge mode. Their exact
+   reasoning/tool configuration, location method, cost ceiling, timeout,
+   failure threshold, and product-owner-approved public terminology remain
+   implementation decisions (#23 decision record).
 2. Evidence threshold for a buyer question versus an insufficient-evidence
    outcome.
 3. Authoritative Auckland-suburb reference source, update owner, aliases, and

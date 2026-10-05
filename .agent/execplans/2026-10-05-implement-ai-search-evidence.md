@@ -4,12 +4,13 @@ This ExecPlan is a living document and must be maintained under `.agent/PLANS.md
 
 ## Purpose / Big Picture
 
-Issue #5 will give ShortList a server-side, testable way to turn one approved
-AI-search response into a dated evidence record that the later teaser and
-Minimum Assessment can consume. A developer will be able to run fixture-driven
-tests without an OpenAI key or a network request, see a normalised result with
-ordered citations and UTC time, and see safe reason-coded outcomes for every
-provider or limit failure.
+Issue #5 will give ShortList a server-side, testable way to turn two approved
+AI-model response modes into dated evidence records that the later teaser and
+Minimum Assessment can consume. One mode is current-web and preserves its
+citations/order; the other is model knowledge with no web tool and an explicit
+not-current/not-verified notice. A developer will be able to run fixture-driven
+tests without an OpenAI key or a network request and see safe reason-coded
+outcomes for every provider or limit failure.
 
 This is not a launch or a live provider integration. It deliberately stops
 short of adding a credential, making a billable request, storing a customer
@@ -21,8 +22,11 @@ record, calling an email/PDF provider, or exposing a public API route.
   #9 are closed and the adopted Cloudflare frontend is in `apps/web/`.
 - [x] (2026-10-05 02:05Z) Created this implementation plan and identified the
   four owner decisions that must be recorded before provider-specific code.
+- [x] (2026-10-05 03:10Z) Recorded Chris's requirement for two distinct
+  result modes in the canonical product documents: current-web and no-web
+  model knowledge. The exact GPT-6 Luna configuration/limits remain open.
 - [ ] Record Chris's exact GPT-6 Luna reasoning/tool/location/limit decisions
-  in the canonical product documents and #5.
+  for both modes in the canonical product documents and #5.
 - [ ] Implement provider-independent evidence types, limits, normalisation,
   and fixture-driven tests under `apps/web/src/`.
 - [ ] Add the selected OpenAI adapter behind a configuration interface with no
@@ -61,6 +65,25 @@ record, calling an email/PDF provider, or exposing a public API route.
   the repository must not invent them.
   Date/Author: pending / Chris.
 
+- Recommendation: use `gpt-6-luna` with no reasoning, the Responses API
+  `web_search` tool forced as required, low search context, approximate
+  Auckland/New Zealand location (`Pacific/Auckland`), a 45-second timeout, and
+  a US$0.03 per-assessment cap.
+  Rationale: the MVP needs one bounded dated observation with citations, not
+  an open-ended research loop. The selected model and current OpenAI API
+  documentation support this route. This is not approved configuration until
+  Chris accepts it.
+  Date/Author: 2026-10-05 / Codex.
+
+- Decision: MVP 1 will retain two separately labelled AI-model result modes:
+  `web_grounded`, which runs with a web-search tool, and `model_knowledge`,
+  which runs with no web-search tool. The latter must say it is not current-web
+  verified and may be incomplete or out of date.
+  Rationale: Chris wants to compare current web-grounded output with an answer
+  based on the model's learned knowledge without representing them as the same
+  type of evidence.
+  Date/Author: 2026-10-05 / Chris.
+
 ## Outcomes & Retrospective
 
 Pending implementation. The plan will be complete when fixture tests prove the
@@ -71,11 +94,12 @@ claim, production deployment, or provider-readiness claim.
 ## Context and Orientation
 
 The canonical product requirements are in `docs/product/REQUIREMENTS.md`.
-`MVP1-JNY-003` requires one dated AI-search test after the business type is
-evidenced. `MVP1-ABUSE-001` requires server-side token and spend controls.
-`docs/product/CONTRACTS.md` defines “Dated AI-search evidence v1”: exact
-question, UTC timestamp, model/search configuration, location context,
-observed order, citations, outcome, reason code, and safe usage data.
+`MVP1-JNY-003` requires two dated AI-model result modes after the business type
+is evidenced. `MVP1-ABUSE-001` requires server-side token and spend controls.
+`docs/product/CONTRACTS.md` defines “Dated AI-model evidence v1”: mode, exact
+question, UTC timestamp, model/configuration, current-web location context,
+observed order/citations where available, model-knowledge freshness notice,
+outcome, reason code, and safe usage data.
 
 The frontend foundation lives in `apps/web/`. Its `src/routes/index.tsx` is
 currently a local-state prototype; it must not be presented as a live search.
@@ -87,10 +111,10 @@ key can never be sent to a visitor.
 ### Milestone 1: Freeze the invocation boundary
 
 Update `docs/product/SDD.md`, `docs/product/DELIVERY_PLAN.md`, and Issue #5
-only after Chris records the five exact choices. Add a small typed configuration
-shape that has names and validation only; it must reject absent/invalid values
-without printing any value. Do not create `.env` values or configure Cloudflare
-secrets in this Issue.
+after Chris records the exact configuration choices for both modes. Add a small
+typed configuration shape that has names and validation only; it must reject
+absent/invalid values without printing any value. Do not create `.env` values
+or configure Cloudflare secrets in this Issue.
 
 ### Milestone 2: Add provider-independent evidence logic
 
@@ -98,8 +122,9 @@ Under `apps/web/src/server/ai-search/`, add types and pure functions for:
 
 - request input: evidenced business type, normalised public domain, question,
   UTC timestamp, and approved Auckland context;
-- response normalisation: ordered result positions, citation URL/title, source
-  association, model/tool configuration, and safe usage;
+- response normalisation: a current-web mode with ordered result positions,
+  citation URL/title and source association, plus a model-knowledge mode with
+  its mandatory freshness notice; model/tool configuration and safe usage;
 - reason-coded outcomes for malformed output, missing citations, timeout,
   provider failure, and token/spend limit rejection; and
 - a provider interface so a fixture fake can produce deterministic outcomes.
@@ -145,7 +170,8 @@ record. That check is not a prerequisite for fixture-based completion.
 
 | Requirement | Proof | Current status |
 | --- | --- | --- |
-| Dated result carries exact question, UTC, context, order and citations | Fixture test against the v1 contract | Pending |
+| Both modes carry exact question, UTC and configuration | Fixture tests against the v1 contract | Pending |
+| Current-web result carries order/citations; model knowledge carries its warning | Fixture tests for mode-specific normalisation and render data | Pending |
 | Bad provider data is safe | Tests for malformed, uncited, error and timeout outcomes | Pending |
 | Token and spend guard acts before unbounded processing | Tests using synthetic usage/estimate values | Pending |
 | Key cannot reach browser code or logs | Static scan plus configuration tests with synthetic values | Pending |

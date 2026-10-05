@@ -211,36 +211,47 @@ a verified fact about the business's customers.
 
 ### 3.4 Dated AI-search teaser
 
-Each successful free assessment runs **one** live, defined AI-search test: an
-Auckland-wide question based on the evidence-supported business type. For
-example: “What are the top three lawn-mowing companies in Auckland today?”
-Lawn mowing is illustrative only; the question changes with business type.
-Suburb-level, buyer-situation, and other segmented comparisons belong to the
-future paid Basic Assessment, not the free MVP 1 result. **OpenAI GPT-6 Luna is
-the selected MVP 1 model.** Its search configuration remains an implementation
-decision; the product owner decides the public name and terminology for the
-test.
+Each successful free assessment runs **two separately labelled AI-model
+results** using an Auckland-wide question based on the evidence-supported
+business type. The first is a current-web result: it uses a web-search tool and
+records the observed response at that time. The second is a model-knowledge
+result: the model has no web-search tool, so it answers only from its learned
+knowledge. For example, the current-web question may be “What are the top
+three lawn-mowing companies in Auckland today?” Lawn mowing is illustrative
+only; the question changes with business type. Suburb-level, buyer-situation,
+and other segmented comparisons belong to the future paid Basic Assessment,
+not the free MVP 1 result. **OpenAI GPT-6 Luna is the selected MVP 1 model.**
+Its exact configuration remains an implementation decision; the product owner
+decides the public name and terminology for each result.
 
 The immediate teaser and free email show:
 
 - the exact Auckland-wide business-type question tested;
 - the date and time in Pacific/Auckland;
-- the model/search context and terminology approved by the product owner;
-- the first three businesses surfaced in the returned response, in the observed
-  order; and
+- the clearly labelled current-web result, including the first three businesses
+  surfaced in its returned response in the observed order when available;
+- the separately labelled model-knowledge result, marked as not current-web
+  verified; and
 - whether the submitted business was surfaced, how it was described, and
   whether the available evidence is insufficient to determine this reliably.
 
 The customer-facing qualifier is:
 
-> This is the order returned in this specific dated AI-search test. Results may
-> vary with question wording, time, location, provider behaviour, and future
-> search behaviour.
+> This is the order returned in this specific dated current-web test. Results
+> may vary with question wording, time, location, provider behaviour, and
+> future search behaviour.
 
-The system records the full tested question, response, returned ordering,
-available citations/source URLs, model/search context, run timestamp, and
-extraction result. If fewer than three businesses are returned, it reports the
-actual number rather than inventing results.
+The model-knowledge result must carry an equally clear qualifier:
+
+> This is a model-knowledge response without a live web search. It may be
+> incomplete or out of date and is not a verified current result.
+
+The system records both full tested questions, responses, modes, model/configuration,
+run timestamps, and extraction results. The current-web result also records
+returned ordering and available citations/source URLs. The model-knowledge
+result has no invented citation or freshness claim. If fewer than three
+businesses are returned in the current-web result, it reports the actual number
+rather than inventing results.
 
 ### 3.5 Immediate preview
 

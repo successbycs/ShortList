@@ -18,7 +18,7 @@ it does not make unresolved scope safe.
 | MVP feature | Delivery packets | Completion evidence |
 | --- | --- | --- |
 | Safe domain entry, site evidence, teaser | #9 foundation -> #10 safe assessment/preview | Valid/unsafe/redirect/DNS/limit tests; evidence-linked teaser before email. |
-| Dated AI-search evidence | #9 foundation -> #5 AI-search adapter -> #10 preview | Stored question/context/order/citations/date; bounded failure/limit tests. |
+| Dated AI-model evidence | #9 foundation -> #5 AI-model adapter -> #10 preview | Separate stored current-web and model-knowledge records; current-web question/context/order/citations/date; no-web freshness notice; bounded failure/limit tests. |
 | Email, consent, entitlement, private records | #9 -> #11 | Separate consents, three-lifetime rule, duplicate/resend and cross-recipient isolation tests. |
 | Professional PDF | #25 visual contract -> #27 report generation/delivery | Versioned accessible PDF passes rubric and private-storage tests. |
 | Delivery/retry/escalation | #27 | Provider-acceptance boundary, 5/20/60 retry, terminal and two-hour escalation tests. |
@@ -51,7 +51,7 @@ approval is an input to #9/#10, not a reason to build unsafe fetching early.
 | Issue | Code boundary once technology is approved | Required verification | Not authorised by the packet |
 | --- | --- | --- | --- |
 | #9 Foundation | Adopted `apps/web/` TanStack Start frontend packaged as Cloudflare Workers + Static Assets, local configuration validation, test/preview environment, and an explicit no-service boundary. | Automated config/secret-boundary tests; reproducible local Worker preview; no external credentials required. | A Cloudflare account/project, production deployment, provider account, customer data, AI, database, email, PDF, Discord, or credentials. |
-| #5 AI-search evidence | Server-side adapter, normalisation into `AI-search evidence v1`, usage/limit guard, test-double route. | Fixture tests for ordered results/citations/malformed/timeout/limit outcomes; separately authorised real-boundary proof only. | A provider credential, charge, or public result wording not approved by Chris. |
+| #5 AI-model evidence | Server-side adapters, normalisation into the two-mode AI-model evidence contract, usage/limit guard, and test-double routes. | Fixture tests for current-web ordered results/citations, model-knowledge freshness notices, malformed/timeout/limit outcomes; separately authorised real-boundary proof only. | A provider credential, charge, or public result wording not approved by Chris. |
 | #10 Assessment/preview | Admission gate, safe fetch/extraction, evidence/claim assembly, Auckland-context adapter, teaser UI route. | Safe target/DNS/redirect/untrusted-content/limit tests and pre-email teaser evidence tests. | Email/PDF/payment/customer outreach. |
 | #11 Email/entitlement | Recipient/consent/entitlement/re-send service and private request flow. | Consent separation, lifetime count, duplicate and cross-recipient isolation tests. | PDF rendering/delivery provider or marketing send. |
 | #27 PDF/delivery | Report renderer, private object boundary, delivery state/retry/escalation adapters. | Template/rubric, private object, temporary/permanent failure, retry and escalation tests; authorised provider test separately. | Stripe, customer login, manual fulfilment, launch. |
@@ -71,7 +71,7 @@ They must not be guessed in this plan.
 | Safe-fetch and abuse thresholds; retention/deletion; suburb source | #9/#10 | Chris, using #24 design |
 | Interactive Loveable export and visual approval | #10/#11 | Approved by Chris in closed #28 |
 | PDF examples/rubric | #27 | Chris, using #25 |
-| GPT-6 Luna endpoint/tool/location, token/timeout/spend cap, public terminology | #5 | Chris |
+| GPT-6 Luna web/no-web endpoint configuration, web location, token/timeout/spend cap, public terminology | #5 | Chris |
 | Sender/support domain, email provider, alert configuration, real-boundary tests | #27/#13 | Chris |
 
 ## 6. Symphony admission
@@ -83,7 +83,7 @@ section 5.
 
 #5 is currently **not** Symphony-admitted: it has no `symphony:ready` label.
 Its native dependencies are now closed and its implementation plan exists, but
-the exact GPT-6 Luna tool/location, timeout, spend cap, and public terminology
+the exact GPT-6 Luna web/no-web configuration, web location, timeout, spend cap, and public terminology
 remain owner decisions. Do not start Symphony while the separate #29
 continuation/handoff defect remains unresolved.
 
