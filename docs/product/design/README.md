@@ -2,7 +2,7 @@
 
 **Status:** design workspace; no public website or production design is implied  
 **Owner:** Chris / SuccessByCS  
-**Design Issue:** [#28](https://github.com/successbycs/ShortList/issues/28)
+**Design Issues:** [#28](https://github.com/successbycs/ShortList/issues/28) website experience and [#25](https://github.com/successbycs/ShortList/issues/25) PDF acceptance
 
 This directory is the durable, reviewable home for ShortList website-design
 evidence. It keeps current design work separate from historical discovery
@@ -42,6 +42,9 @@ link is useful but never replaces an exported artefact in this repository.
 | Artefact | Source | Journey states covered | Status | Decision / notes |
 | --- | --- | --- | --- | --- |
 | [Loveable build brief](LOVEABLE_BUILD_BRIEF.md) | Repository prompt | All required prototype states | Review | Generate/export desktop and mobile artefacts before #28 approval. |
+| [PDF visual acceptance](PDF_VISUAL_ACCEPTANCE.md) | Repository standard | Minimum Assessment PDF, normal and limited outcomes | Review | Review the standard now; generated sample PDFs are required before #25 acceptance. |
+| [Illustrative successful report](mockups/2026-10-05-minimum-assessment-success-v1.pdf) · [source HTML](mockups/2026-10-05-minimum-assessment-success-v1.html) | Fictional local example | Successful evidence, inference, limitation, and dated-result layout | Review | No real website or AI-search result. Review the visual hierarchy and customer wording. |
+| [Illustrative limited-evidence report](mockups/2026-10-05-minimum-assessment-limited-v1.pdf) · [source HTML](mockups/2026-10-05-minimum-assessment-limited-v1.html) | Fictional local example | Honest insufficient-evidence/failure outcome | Review | No real website or AI-search result. Review whether the limitation feels useful and respectful. |
 
 Use one of these statuses:
 

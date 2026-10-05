@@ -17,13 +17,17 @@ Loveable mockups and later implementation without creating a website or account.
   journey-state, accessibility, mockup-rubric, and input/requirement brief.
 - [x] (2026-10-05 02:10Z) Added a complete Loveable build brief and registered
   it as review evidence.
-- [ ] Validate, push, and record review evidence; exported mockups remain a
-  separate human/Loveable input before #28 can be accepted.
+- [x] (2026-10-05 00:13Z) Replaced lawn-care-specific prototype language with
+  a broad Auckland small-business example while preserving the dated-result
+  truthfulness and accessibility boundaries.
+- [ ] Commit, push, and record the revised review evidence; exported mockups
+  remain a separate human/Loveable input before #28 can be accepted.
 
 ## Surprises & Discoveries
 
 - Observation: No desktop/mobile mockup or Loveable export exists yet.
-  Evidence: `docs/product/design/README.md` review register is `None yet`.
+  Evidence: `docs/product/design/README.md` registers the build brief but no
+  exported mockup artefacts.
 
 ## Decision Log
 
