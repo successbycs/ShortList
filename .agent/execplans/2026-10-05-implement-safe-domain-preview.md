@@ -108,6 +108,19 @@ Workflows, dashboards, and other advanced automation.
 - [x] (2026-10-05 11:14Z) Confirmed ignored local configuration contains the
   OpenAI key, public Turnstile site key and server-only Turnstile secret without
   printing any value. Full test, lint and production build validation passed.
+- [x] (2026-10-05 11:35Z) Re-read the user-authorised #10 scope, configured
+  GitHub target, current Issue, baseline and existing implementation. The
+  request narrows this session to Packet A/B: no deployment, live assessment,
+  secret inspection, Project mutation or real provider call.
+- [x] (2026-10-05 11:35Z) Added `0004_assessment_admission_limits.sql` and
+  deterministic D1-fake tests for a domain lease, two global slots and a
+  five-start Auckland-day HMAC-IP limit. The live coordinator checks cache
+  first, reserves all three controls before website/AI work, and releases
+  leases in `finally`.
+- [x] (2026-10-05 11:35Z) Ran focused tests, the complete suite, lint,
+  Wrangler type generation, TypeScript, production build and whitespace check.
+  Record the commit and GitHub review handoff next; no migration or live
+  external boundary was invoked.
 - [ ] (2026-10-05 11:14Z) Commit the reviewed #10 implementation before any
   Symphony admission. Symphony clones committed history and must not receive an
   older baseline than the active local implementation.
@@ -215,6 +228,17 @@ Workflows, dashboards, and other advanced automation.
   bounded live assessment proof.
   Rationale: Chris explicitly approved reuse; the key remains server-only.
   Date/Author: 2026-10-05 / Chris.
+
+- Decision: This Packet A implementation uses a server-side HMAC digest of the
+  connecting IP and its Pacific/Auckland calendar-day key. Raw IP addresses are
+  never persisted; the digest can count starts for one day without becoming a
+  customer identifier. Two fixed D1 lease rows enforce the global limit and a
+  unique normalised-domain lease enforces the duplicate-active limit.
+  Rationale: the Issue explicitly requires a privacy-minimised IP count,
+  Auckland-day calculation, two global concurrent runs and no costly work for
+  a rejected admission. Conditional D1 mutations make the allowed reservation
+  observable and safely releasable without a live external test.
+  Date/Author: 2026-10-05 / Codex.
 
 ## Outcomes & Retrospective
 
@@ -370,6 +394,15 @@ daylight-saving fixture.
 Observable result: repeated/concurrent fixtures stop before AI processing and
 the local Worker path passes without secret exposure.
 
+**Packet A implementation detail:** `assessment_admission_leases` holds an
+active normalised-domain claim and `assessment_concurrency_slots` has exactly
+two seeded slot identifiers. An allowed request claims its domain, atomically
+claims one empty slot, then atomically increments a per-Auckland-day HMAC-IP
+counter only if it remains below five. Every claim is released by the
+server-side coordinator in a `finally` block. The normal assessment row is
+created only after all three claims succeed. Tests use a deterministic fake D1
+and injected clock/digest; they do not fetch a website or contact OpenAI.
+
 ## Concrete Steps
 
 From `/home/chris/ShortList`:
@@ -482,6 +515,28 @@ discarding only isolated test data; never reset an uninspected working tree.
 The central risk is turning a simple URL field into an unrestricted server-side
 fetch facility. The safety envelope and fixtures are therefore prerequisites,
 not later polish.
+
+Observed on 2026-10-05 for Packet A admission controls:
+
+```text
+npm test -- assessment-admission.test.ts ip-privacy.test.ts live-assessment.test.ts assessment-repository.test.ts
+# Test Files  4 passed (4); Tests  16 passed (16)
+npm test
+# Test Files  13 passed (13); Tests  72 passed (72)
+npm run lint
+# 0 errors; 8 existing react-refresh/generated-types warnings
+npm run types && npx tsc --noEmit
+# passed; Worker type declarations regenerated
+npm run build && git diff --check
+# production build and whitespace check passed
+```
+
+The proof is deterministic and local. It exercises the server-side gate with a
+fake D1 and injected network function, showing invalid/private, duplicate,
+global-concurrency and rate-limit cases return before any assessment-run write
+or website/AI fetch. It does not apply the additive migration, contact
+Turnstile/OpenAI/a website, or prove a deployed Worker because this Issue
+explicitly prohibits those operations.
 
 Observed on 2026-10-05 for the live-assessment implementation:
 

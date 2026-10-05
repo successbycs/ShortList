@@ -13,6 +13,7 @@ import {
 } from "./ai-evidence-repository";
 import { completeAssessmentRun, type D1DatabaseLike } from "./assessment-repository";
 import { runWebsiteAssessment } from "./website-assessment";
+import { admitAssessmentStart } from "./assessment-admission";
 
 const MODEL_ID = "gpt-6-luna";
 const REQUEST_TIMEOUT_MS = 45_000;
@@ -24,6 +25,10 @@ export type LiveAssessmentResult =
   | { kind: "completed"; result: StoredAiEvidence }
   | { kind: "invalid_input"; reasonCode: string }
   | {
+      kind: "admission_rejected";
+      reasonCode: "duplicate_active" | "concurrency_limited" | "rate_limited";
+    }
+  | {
       kind: "limited";
       assessment: { assessmentId: string; normalisedDomain: string; triggeredAtUtc: string };
       reasonCode: string;
@@ -32,6 +37,7 @@ export type LiveAssessmentResult =
 type LiveAssessmentDependencies = {
   database: D1DatabaseLike;
   apiKey: string;
+  ipDayHmac: string;
   fetchImplementation?: typeof fetch;
   now?: () => Date;
   createId?: () => string;
@@ -54,62 +60,75 @@ export async function runLiveAssessment(
   const existing = await findStoredAssessment(dependencies.database, admission.normalisedDomain);
   if (existing) return { kind: "cached", result: existing };
 
-  const now = dependencies.now ?? (() => new Date());
-  const createId = dependencies.createId ?? crypto.randomUUID;
-  const website = await runWebsiteAssessment(originalSubmission, {
+  const start = await admitAssessmentStart({
     database: dependencies.database,
-    fetchImplementation: dependencies.fetchImplementation ?? fetch,
-    now,
-    createId,
+    normalisedDomain: admission.normalisedDomain,
+    ipDayHmac: dependencies.ipDayHmac,
+    ...(dependencies.now ? { now: dependencies.now } : {}),
   });
-  if (website.kind !== "preview_ready") return website;
+  if (start.kind === "rejected")
+    return { kind: "admission_rejected", reasonCode: start.reasonCode };
 
-  const requests = createAiRequests(website.assessment, website.evidence.excerpt, now());
-  const provider = createOpenAiResponsesProvider({
-    apiKey: dependencies.apiKey,
-    modelId: MODEL_ID,
-    timeoutMs: REQUEST_TIMEOUT_MS,
-    storeResponses: false,
-    webSearch: { toolChoice: "required", searchContextSize: "low", externalWebAccess: true },
-    currentWebInstructions:
-      "Return only the required JSON. Give up to three businesses matching the requested service in the observed order. Do not call the result an objective ranking.",
-    modelKnowledgeInstructions:
-      "Return only the required JSON. Give up to three businesses from learned knowledge only. Do not imply that the result is current or verified.",
-    ...(dependencies.fetchImplementation
-      ? { fetchImplementation: dependencies.fetchImplementation }
-      : {}),
-  });
-  const [currentWeb, modelKnowledge] = await Promise.all([
-    collectAiSearchEvidence(requests[0], provider),
-    collectAiSearchEvidence(requests[1], provider),
-  ]);
-  await Promise.all([
-    recordAiEvidence(dependencies.database, createId(), currentWeb),
-    recordAiEvidence(dependencies.database, createId(), modelKnowledge),
-  ]);
-
-  if (currentWeb.outcome !== "completed" || modelKnowledge.outcome !== "completed") {
-    const reasonCode =
-      currentWeb.reasonCode !== "completed" ? currentWeb.reasonCode : modelKnowledge.reasonCode;
-    await completeAssessmentRun(dependencies.database, {
-      assessmentId: website.assessment.assessmentId,
-      status: "failed",
-      reasonCode,
+  try {
+    const now = dependencies.now ?? (() => new Date());
+    const createId = dependencies.createId ?? crypto.randomUUID;
+    const website = await runWebsiteAssessment(originalSubmission, {
+      database: dependencies.database,
+      fetchImplementation: dependencies.fetchImplementation ?? fetch,
+      now,
+      createId,
     });
-    return { kind: "limited", assessment: website.assessment, reasonCode };
-  }
+    if (website.kind !== "preview_ready") return website;
 
-  return {
-    kind: "completed",
-    result: {
-      assessmentId: website.assessment.assessmentId,
-      normalisedDomain: website.assessment.normalisedDomain,
-      triggeredAtUtc: website.assessment.triggeredAtUtc,
-      excerpt: website.evidence.excerpt,
-      currentWeb,
-      modelKnowledge,
-    },
-  };
+    const requests = createAiRequests(website.assessment, website.evidence.excerpt, now());
+    const provider = createOpenAiResponsesProvider({
+      apiKey: dependencies.apiKey,
+      modelId: MODEL_ID,
+      timeoutMs: REQUEST_TIMEOUT_MS,
+      storeResponses: false,
+      webSearch: { toolChoice: "required", searchContextSize: "low", externalWebAccess: true },
+      currentWebInstructions:
+        "Return only the required JSON. Give up to three businesses matching the requested service in the observed order. Do not call the result an objective ranking.",
+      modelKnowledgeInstructions:
+        "Return only the required JSON. Give up to three businesses from learned knowledge only. Do not imply that the result is current or verified.",
+      ...(dependencies.fetchImplementation
+        ? { fetchImplementation: dependencies.fetchImplementation }
+        : {}),
+    });
+    const [currentWeb, modelKnowledge] = await Promise.all([
+      collectAiSearchEvidence(requests[0], provider),
+      collectAiSearchEvidence(requests[1], provider),
+    ]);
+    await Promise.all([
+      recordAiEvidence(dependencies.database, createId(), currentWeb),
+      recordAiEvidence(dependencies.database, createId(), modelKnowledge),
+    ]);
+
+    if (currentWeb.outcome !== "completed" || modelKnowledge.outcome !== "completed") {
+      const reasonCode =
+        currentWeb.reasonCode !== "completed" ? currentWeb.reasonCode : modelKnowledge.reasonCode;
+      await completeAssessmentRun(dependencies.database, {
+        assessmentId: website.assessment.assessmentId,
+        status: "failed",
+        reasonCode,
+      });
+      return { kind: "limited", assessment: website.assessment, reasonCode };
+    }
+
+    return {
+      kind: "completed",
+      result: {
+        assessmentId: website.assessment.assessmentId,
+        normalisedDomain: website.assessment.normalisedDomain,
+        triggeredAtUtc: website.assessment.triggeredAtUtc,
+        excerpt: website.evidence.excerpt,
+        currentWeb,
+        modelKnowledge,
+      },
+    };
+  } finally {
+    await start.release();
+  }
 }
 
 export function createAiRequests(
