@@ -44,6 +44,10 @@ authorities.
   fetch boundary with injected fake transport tests: manual redirects, target
   validation at every hop, abort timeout, allowed-content enforcement and
   byte-bounded streamed reads.
+- [x] (2026-10-05 07:52Z) Implemented a D1-compatible customer, assessment-run
+  and website-evidence repository with a fake-D1 contract test. The binding and
+  migration application remain unobserved until a named local/test D1 target is
+  configured.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -133,6 +137,12 @@ uses an abort signal, and cancels streamed reads above the byte limit. The
 Cloudflare Worker platform, not application code, supplies public-outbound DNS
 resolution; a platform-boundary test remains unobserved until a later approved
 local/remote Worker invocation.
+
+The D1 persistence boundary is now implemented in
+`apps/web/src/server/assessment-repository.ts`. It uses parameter-bound queries
+only, reuses an existing customer by normalised domain, creates a fresh dated
+assessment run, and stores bounded website evidence separately. Tests supply a
+fake D1 implementation; no actual database is yet bound or mutated.
 
 ## Context and Orientation
 
@@ -250,6 +260,16 @@ npm run lint                      # 0 errors; 8 existing warnings
 git diff --check                  # passed
 ```
 
+Observed on 2026-10-05 for the D1-compatible repository slice:
+
+```text
+npx tsc --noEmit                  # passed
+npm test -- assessment-repository.test.ts safe-website-fetch.test.ts domain-admission.test.ts website-evidence.test.ts prototype-journey.test.tsx
+# Test Files  5 passed (5); Tests  43 passed (43)
+npm run lint                      # 0 errors; 8 existing warnings
+git diff --check                  # passed
+```
+
 Observed on 2026-10-05 for the safe-fetch boundary:
 
 ```text
@@ -277,7 +297,7 @@ git diff --check                  # passed
 | Domain admission | Tests cover malformed, private/local, scheme, credential and port outcomes before network access | Passed (offline boundary only) |
 | Safe public fetch | Fake-transport tests cover manual redirect, unsafe redirect, content and streamed byte limits | Passed (local/fake); Cloudflare boundary unobserved |
 | Bounded website evidence | Fixtures cover content type, size ceiling, inert extraction and sparse page text | Passed (extractor only; safe fetch pending integration) |
-| Record isolation | Local D1 tests cover customer uniqueness and no domain-as-authorisation | Planned |
+| Record isolation | Fake-D1 tests cover unique customer reuse, new dated runs and bound evidence parameters | Passed (fake D1); real D1 binding unobserved |
 | Honest teaser | UI tests prove malformed/private input is stopped and the normalised domain remains visible during checking | Partially passed (prototype; real route pending) |
 | Dated AI modes | Integration uses the #5 fixture provider and preserves labels/citations/warnings | Planned |
 | Abuse boundary | Repeated/concurrent tests stop before provider work | Awaiting owner limits |
