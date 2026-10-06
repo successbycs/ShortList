@@ -203,7 +203,9 @@ export function Index() {
         {screen === "entitlement" && <Entitlement onStartOver={() => setScreen("entry")} />}
         {screen === "rateLimit" && <RateLimit onStartOver={() => setScreen("entry")} />}
         {screen === "exhausted" && <ExhaustedEntitlement onStartOver={() => setScreen("entry")} />}
-        {screen === "failure" && <Failure onRetry={() => setScreen("entry")} />}
+        {screen === "failure" && submissionResult && (
+          <Failure result={submissionResult} onRetry={() => setScreen("entry")} />
+        )}
       </section>
 
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 border-t border-border px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -883,45 +885,125 @@ function ExhaustedEntitlement({ onStartOver }: { onStartOver: () => void }) {
   );
 }
 
-function Failure({ onRetry }: { onRetry: () => void }) {
+function Failure({
+  result,
+  onRetry,
+}: {
+  result: DomainAssessmentSubmissionResult;
+  onRetry: () => void;
+}) {
+  const content = failureContent(result);
+
   return (
     <StateShell
-      icon={<XCircle />}
-      kicker="Not enough evidence"
-      title="We couldn’t make a fair assessment."
-      body="The automated check didn’t find enough public website evidence to produce a useful result. That can happen when a site blocks access, is very new, or has little indexable text."
+      icon={content.kind === "limited" ? <XCircle /> : <AlertTriangle />}
+      kicker={content.kicker}
+      title={content.title}
+      body={content.body}
     >
       <div className="mt-6 space-y-3 rounded-md border border-border bg-card p-5">
-        <h2 className="font-bold">What you can do</h2>
+        <h2 className="font-bold">{content.nextStepsTitle}</h2>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex gap-2">
-            <Check className="size-4 shrink-0 text-primary" />
-            Confirm the website address is correct.
-          </li>
-          <li className="flex gap-2">
-            <Check className="size-4 shrink-0 text-primary" />
-            Try again after your public pages are available.
-          </li>
-          <li className="flex gap-2">
-            <Wrench className="size-4 shrink-0 text-primary" />
-            Contact support if the same public site keeps failing.
-          </li>
+          {content.nextSteps.map((step, index) => (
+            <li key={step} className="flex gap-2">
+              {index === content.nextSteps.length - 1 && content.kind === "limited" ? (
+                <Wrench className="size-4 shrink-0 text-primary" />
+              ) : (
+                <Check className="size-4 shrink-0 text-primary" />
+              )}
+              {step}
+            </li>
+          ))}
         </ul>
       </div>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <Button onClick={onRetry} className="h-11">
-          <RefreshCw /> Try another website
+          <RefreshCw /> {content.retryLabel}
         </Button>
-        <Button variant="outline" className="h-11 bg-card">
-          <Mail /> Contact support
-        </Button>
+        {content.kind === "limited" ? (
+          <Button variant="outline" className="h-11 bg-card">
+            <Mail /> Contact support
+          </Button>
+        ) : null}
       </div>
-      <p className="mt-4 text-xs text-muted-foreground">
-        Support can investigate technical access issues, but cannot manually create or promise an
-        assessment.
-      </p>
+      {content.kind === "limited" ? (
+        <p className="mt-4 text-xs text-muted-foreground">
+          Support can investigate technical access issues, but cannot manually create or promise an
+          assessment.
+        </p>
+      ) : null}
     </StateShell>
   );
+}
+
+function failureContent(result: DomainAssessmentSubmissionResult) {
+  switch (result.kind) {
+    case "verification_failed":
+      return {
+        kind: result.kind,
+        kicker: "Security check needed",
+        title: "We couldn’t verify the security check.",
+        body: "Refresh the page and try the security check again before submitting your website.",
+        nextStepsTitle: "What you can do",
+        nextSteps: ["Refresh this page.", "Complete the security check and try again."],
+        retryLabel: "Try again",
+      };
+    case "assessment_unavailable":
+      return {
+        kind: result.kind,
+        kicker: "Assessment unavailable",
+        title: "The assessment service is temporarily unavailable.",
+        body: "No assessment was made for this website. Please try again shortly.",
+        nextStepsTitle: "What you can do",
+        nextSteps: ["Try again shortly."],
+        retryLabel: "Try again",
+      };
+    case "admission_rejected":
+      return {
+        kind: result.kind,
+        kicker: "Request temporarily limited",
+        title: "Please try again later.",
+        body: "This request is temporarily limited. No assessment was made for this website.",
+        nextStepsTitle: "What you can do",
+        nextSteps: ["Try again later."],
+        retryLabel: "Try another website",
+      };
+    case "limited":
+      return {
+        kind: result.kind,
+        kicker: "Not enough evidence",
+        title: "We couldn’t make a fair assessment.",
+        body: "The automated check didn’t find enough public website evidence to produce a useful result. That can happen when a site blocks access, is very new, or has little indexable text.",
+        nextStepsTitle: "What you can do",
+        nextSteps: [
+          "Confirm the website address is correct.",
+          "Try again after your public pages are available.",
+          "Contact support if the same public site keeps failing.",
+        ],
+        retryLabel: "Try another website",
+      };
+    case "invalid_input":
+      return {
+        kind: result.kind,
+        kicker: "Website address needed",
+        title: "Enter a public website address.",
+        body: "Use an address like yourbusiness.co.nz and try again.",
+        nextStepsTitle: "What you can do",
+        nextSteps: ["Enter a public website address."],
+        retryLabel: "Try again",
+      };
+    case "completed":
+    case "cached":
+      return {
+        kind: result.kind,
+        kicker: "Assessment ready",
+        title: "Your assessment is ready.",
+        body: "Return to the website entry to start another assessment.",
+        nextStepsTitle: "What you can do",
+        nextSteps: ["Enter another website."],
+        retryLabel: "Try another website",
+      };
+  }
 }
 
 function StateShell({

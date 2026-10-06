@@ -144,4 +144,70 @@ describe("protected prototype reveal journey", () => {
     expect(await screen.findByText("harbour-handyman.co.nz")).toBeInTheDocument();
     completeAssessment?.(savedResult);
   });
+
+  it.each([
+    [
+      "verification_failed",
+      { kind: "verification_failed", reasonCode: "unavailable" },
+      "We couldn’t verify the security check.",
+      "Refresh the page and try the security check again before submitting your website.",
+    ],
+    [
+      "assessment_unavailable",
+      { kind: "assessment_unavailable" },
+      "The assessment service is temporarily unavailable.",
+      "No assessment was made for this website. Please try again shortly.",
+    ],
+    [
+      "admission_rejected",
+      { kind: "admission_rejected", reasonCode: "rate_limited" },
+      "Please try again later.",
+      "This request is temporarily limited. No assessment was made for this website.",
+    ],
+    [
+      "limited",
+      {
+        kind: "limited",
+        assessment: {
+          assessmentId: "assessment-1",
+          normalisedDomain: "greengeckogardens.co.nz",
+          triggeredAtUtc: "2026-10-05T10:00:00.000Z",
+        },
+        reasonCode: "evidence_insufficient",
+      },
+      "We couldn’t make a fair assessment.",
+      "The automated check didn’t find enough public website evidence to produce a useful result. That can happen when a site blocks access, is very new, or has little indexable text.",
+    ],
+  ] as const)(
+    "shows the public-safe %s outcome without collapsing it into limited evidence",
+    async (_kind, result, title, body) => {
+      serverFunction.invoke.mockResolvedValueOnce(result);
+      render(<Index />);
+
+      fireEvent.click(screen.getByRole("button", { name: /Complete security check/i }));
+      fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+      expect(await screen.findByRole("heading", { name: title })).toBeInTheDocument();
+      expect(screen.getByText(body)).toBeInTheDocument();
+      if (result.kind !== "limited") {
+        expect(
+          screen.queryByText(
+            /didn’t find enough public website evidence to produce a useful result/i,
+          ),
+        ).not.toBeInTheDocument();
+      }
+    },
+  );
+
+  it("shows a cached assessment exactly like a completed assessment without another submission", async () => {
+    serverFunction.invoke.mockResolvedValueOnce({ ...savedResult, kind: "cached" });
+    render(<Index />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Complete security check/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+    expect(await screen.findByLabelText("Locked fuller result preview")).toBeInTheDocument();
+    expect(screen.getByText(savedResult.result.excerpt)).toBeInTheDocument();
+    expect(serverFunction.invoke).toHaveBeenCalledTimes(1);
+  });
 });
