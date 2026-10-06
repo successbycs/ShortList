@@ -121,9 +121,16 @@ Workflows, dashboards, and other advanced automation.
   Wrangler type generation, TypeScript, production build and whitespace check.
   Record the commit and GitHub review handoff next; no migration or live
   external boundary was invoked.
-- [ ] (2026-10-05 11:14Z) Commit the reviewed #10 implementation before any
-  Symphony admission. Symphony clones committed history and must not receive an
-  older baseline than the active local implementation.
+- [x] (2026-10-05 11:14Z) Committed the reviewed #10 implementation before
+  Symphony admission as `0acf9cb`. Symphony received that committed baseline.
+- [x] (2026-10-06 02:xxZ) Promoted the reviewed Symphony correction to the
+  local `main` baseline as `a44a1bd`. The original handoff also changed this
+  live plan, so its documentation hunk was deliberately retained here and only
+  the two reviewed admission code files were applied.
+- [x] (2026-10-06 02:xxZ) Confirmed the correction makes the admission lease
+  70 seconds, protecting the documented maximum 65-second run. Its isolated
+  worker evidence records 74 passing tests, 0 lint errors and a passing build;
+  local revalidation remains required before external deployment.
 - [ ] (2026-10-05 11:14Z) Deploy the V1 Worker, set only server-side secrets
   in Cloudflare, attach `shortlist.successbycs.com`, and run the one approved
   real assessment for `www.greengeckogardens.co.nz` with a fresh Turnstile
@@ -239,6 +246,14 @@ Workflows, dashboards, and other advanced automation.
   a rejected admission. Conditional D1 mutations make the allowed reservation
   observable and safely releasable without a live external test.
   Date/Author: 2026-10-05 / Codex.
+
+- Decision: Preserve the full 70-second assessment-admission lease across the
+  20-second website budget and the two parallel 45-second AI requests.
+  Rationale: the previous 30-second lease could expire during a legitimate
+  bounded assessment, allowing an overlapping run to bypass the duplicate and
+  global-capacity controls. The correction has deterministic fake-D1 tests for
+  maximum-duration protection and stale-lease recovery.
+  Date/Author: 2026-10-06 / Codex, following Chris's correction re-admission.
 
 ## Outcomes & Retrospective
 
