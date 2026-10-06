@@ -139,10 +139,15 @@ Workflows, dashboards, and other advanced automation.
   Wrangler access and the remote D1 core/AI-evidence schema. The local OpenAI
   and Turnstile values are present without being displayed. The required
   `ASSESSMENT_IP_HASH_SECRET` is not yet configured.
-- [ ] (2026-10-05 11:14Z) Deploy the V1 Worker, set only server-side secrets
-  in Cloudflare, attach `shortlist.successbycs.com`, and run the one approved
-  real assessment for `www.greengeckogardens.co.nz` with a fresh Turnstile
-  response.
+- [x] (2026-10-06) Pushed the reviewed #10 commits; set the three Worker-only
+  secrets; repaired the migration ledger for already-applied `0003`; applied
+  `0004`; deployed `shortlist-web`; and attached
+  `shortlist.successbycs.com`. Public HTTPS returned HTTP 200.
+- [ ] (2026-10-06) Run the approved Green Gecko assessment with a fresh
+  Turnstile response and prove cached replay. Blocked: the existing widget
+  returns documented error `110200` because its hostname list lacks
+  `shortlist.successbycs.com`; the available API token lacks
+  `Account.Turnstile:Edit` to repair that configuration.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
@@ -201,6 +206,14 @@ Workflows, dashboards, and other advanced automation.
   day-scoped HMAC of the Cloudflare request IP and returns the public-safe
   unavailable state when the secret is absent; a 2026-10-06 presence check
   found it absent from ignored local configuration.
+
+- Observation: the existing Turnstile widget does not yet authorise the
+  deployed hostname. A real browser receives error `110200` before it can
+  produce a token. The available Cloudflare API token has no
+  `Account.Turnstile:Edit` scope, so it cannot repair the widget configuration.
+  Evidence: public browser console and the Turnstile skill's authenticated
+  scope probe on 2026-10-06. Cloudflare documents `110200` as “Domain not
+  authorized”.
 
 ## Decision Log
 
