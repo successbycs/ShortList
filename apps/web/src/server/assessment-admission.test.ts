@@ -1,13 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import type { D1DatabaseLike, D1StatementLike } from "./assessment-repository";
-import { admitAssessmentStart, getAucklandDay } from "./assessment-admission";
+import {
+  ASSESSMENT_ADMISSION_LEASE_MS,
+  admitAssessmentStart,
+  getAucklandDay,
+} from "./assessment-admission";
 import { runLiveAssessment } from "./live-assessment";
 
 type State = {
   domains: Set<string>;
   slots: Array<string | null>;
   rates: Map<string, number>;
+  domainAcquiredAt: Map<string, string>;
+  slotAcquiredAt: Array<string | null>;
   queries: string[];
 };
 
@@ -29,18 +35,38 @@ function database(state: State): D1DatabaseLike {
         async run() {
           state.queries.push(query);
           if (query.startsWith("DELETE FROM assessment_admission_leases WHERE acquired")) {
-            return { success: true, meta: { changes: 0 } };
+            const expiryUtc = values[0] as string;
+            let removed = 0;
+            for (const [domain, acquiredAtUtc] of state.domainAcquiredAt) {
+              if (acquiredAtUtc < expiryUtc) {
+                state.domainAcquiredAt.delete(domain);
+                state.domains.delete(domain);
+                removed += 1;
+              }
+            }
+            return { success: true, meta: { changes: removed } };
           }
           if (
             query.startsWith("UPDATE assessment_concurrency_slots SET normalised_domain = NULL") &&
             query.includes("acquired_at_utc <")
           ) {
-            return { success: true, meta: { changes: 0 } };
+            const expiryUtc = values[0] as string;
+            let removed = 0;
+            state.slots = state.slots.map((domain, slot) => {
+              if (state.slotAcquiredAt[slot] && state.slotAcquiredAt[slot] < expiryUtc) {
+                state.slotAcquiredAt[slot] = null;
+                removed += 1;
+                return null;
+              }
+              return domain;
+            });
+            return { success: true, meta: { changes: removed } };
           }
           if (query.startsWith("INSERT OR IGNORE INTO assessment_admission_leases")) {
             const domain = values[0] as string;
             if (state.domains.has(domain)) return { success: true, meta: { changes: 0 } };
             state.domains.add(domain);
+            state.domainAcquiredAt.set(domain, values[1] as string);
             return { success: true, meta: { changes: 1 } };
           }
           if (
@@ -50,6 +76,7 @@ function database(state: State): D1DatabaseLike {
             const slot = state.slots.findIndex((value) => value === null);
             if (slot === -1) return { success: true, meta: { changes: 0 } };
             state.slots[slot] = domain;
+            state.slotAcquiredAt[slot] = values[1] as string;
             return { success: true, meta: { changes: 1 } };
           }
           if (query.startsWith("INSERT INTO assessment_ip_day_limits")) {
@@ -60,14 +87,19 @@ function database(state: State): D1DatabaseLike {
             return { success: true, meta: { changes: 1 } };
           }
           if (query.startsWith("DELETE FROM assessment_admission_leases WHERE normalised_domain")) {
-            state.domains.delete(values[0] as string);
+            const domain = values[0] as string;
+            state.domains.delete(domain);
+            state.domainAcquiredAt.delete(domain);
             return { success: true, meta: { changes: 1 } };
           }
           if (
             query.startsWith("UPDATE assessment_concurrency_slots SET normalised_domain = NULL")
           ) {
             const domain = values[0] as string;
-            state.slots = state.slots.map((value) => (value === domain ? null : value));
+            state.slots = state.slots.map((value, slot) => {
+              if (value === domain) state.slotAcquiredAt[slot] = null;
+              return value === domain ? null : value;
+            });
             return { success: true, meta: { changes: 1 } };
           }
           throw new Error(`Unexpected query: ${query}`);
@@ -79,7 +111,15 @@ function database(state: State): D1DatabaseLike {
 }
 
 function state(overrides: Partial<State> = {}): State {
-  return { domains: new Set(), slots: [null, null], rates: new Map(), queries: [], ...overrides };
+  return {
+    domains: new Set(),
+    slots: [null, null],
+    rates: new Map(),
+    domainAcquiredAt: new Map(),
+    slotAcquiredAt: [null, null],
+    queries: [],
+    ...overrides,
+  };
 }
 
 const clock = () => new Date("2026-10-04T11:30:00.000Z");
@@ -143,6 +183,67 @@ describe("assessment admission boundary", () => {
     expect(current.domains.size).toBe(0);
     expect(current.slots).toEqual([null, null]);
     expect(current.rates.get("ip:2026-10-05")).toBe(1);
+  });
+
+  it("keeps domain and global claims through the maximum supported assessment duration", async () => {
+    const current = state();
+    const first = await admitAssessmentStart({
+      database: database(current),
+      normalisedDomain: "first.co.nz",
+      ipDayHmac: "first-ip",
+      now: clock,
+    });
+    const second = await admitAssessmentStart({
+      database: database(current),
+      normalisedDomain: "second.co.nz",
+      ipDayHmac: "second-ip",
+      now: clock,
+    });
+    expect(first.kind).toBe("admitted");
+    expect(second.kind).toBe("admitted");
+
+    const maximumRunClock = () => new Date(clock().getTime() + 65_000);
+    await expect(
+      admitAssessmentStart({
+        database: database(current),
+        normalisedDomain: "first.co.nz",
+        ipDayHmac: "third-ip",
+        now: maximumRunClock,
+      }),
+    ).resolves.toEqual({ kind: "rejected", reasonCode: "duplicate_active" });
+    await expect(
+      admitAssessmentStart({
+        database: database(current),
+        normalisedDomain: "third.co.nz",
+        ipDayHmac: "third-ip",
+        now: maximumRunClock,
+      }),
+    ).resolves.toEqual({ kind: "rejected", reasonCode: "concurrency_limited" });
+
+    if (first.kind === "admitted") await first.release();
+    if (second.kind === "admitted") await second.release();
+  });
+
+  it("recovers an abandoned reservation only after the full conservative lease", async () => {
+    const current = state();
+    const first = await admitAssessmentStart({
+      database: database(current),
+      normalisedDomain: "example.co.nz",
+      ipDayHmac: "ip",
+      now: clock,
+    });
+    expect(first.kind).toBe("admitted");
+
+    const staleClock = () => new Date(clock().getTime() + ASSESSMENT_ADMISSION_LEASE_MS + 1);
+    const recovered = await admitAssessmentStart({
+      database: database(current),
+      normalisedDomain: "example.co.nz",
+      ipDayHmac: "ip",
+      now: staleClock,
+    });
+    expect(recovered.kind).toBe("admitted");
+    expect(current.rates.get("ip:2026-10-05")).toBe(2);
+    if (recovered.kind === "admitted") await recovered.release();
   });
 
   it.each([

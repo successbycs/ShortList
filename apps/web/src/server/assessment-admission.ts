@@ -1,7 +1,10 @@
 import type { D1DatabaseLike } from "./assessment-repository";
 
 const MAX_STARTS_PER_AUCKLAND_DAY = 5;
-const ADMISSION_LEASE_MS = 30_000;
+// A bounded run can spend 20 seconds retrieving website evidence, then make
+// two 45-second AI requests in parallel. Keep the capacity claims for that
+// 65-second maximum plus a small completion margin before stale recovery.
+export const ASSESSMENT_ADMISSION_LEASE_MS = 70_000;
 
 export type AssessmentAdmissionRejection =
   "duplicate_active" | "concurrency_limited" | "rate_limited";
@@ -26,7 +29,7 @@ export async function admitAssessmentStart(
 ): Promise<AssessmentAdmission> {
   const now = (dependencies.now ?? (() => new Date()))();
   const nowUtc = now.toISOString();
-  const expiryUtc = new Date(now.getTime() - ADMISSION_LEASE_MS).toISOString();
+  const expiryUtc = new Date(now.getTime() - ASSESSMENT_ADMISSION_LEASE_MS).toISOString();
   const aucklandDay = getAucklandDay(now);
 
   await releaseExpiredLeases(dependencies.database, expiryUtc);
