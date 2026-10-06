@@ -131,6 +131,14 @@ Workflows, dashboards, and other advanced automation.
   70 seconds, protecting the documented maximum 65-second run. Its isolated
   worker evidence records 74 passing tests, 0 lint errors and a passing build;
   local revalidation remains required before external deployment.
+- [x] (2026-10-06) Revalidated the correction locally: the focused admission
+  suite passed 11 tests; the full suite passed 13 files / 74 tests; Wrangler
+  types, strict TypeScript, production build and whitespace check passed. Lint
+  retained 0 errors and the existing 8 warnings.
+- [x] (2026-10-06) Read-only Cloudflare preflight confirmed authenticated
+  Wrangler access and the remote D1 core/AI-evidence schema. The local OpenAI
+  and Turnstile values are present without being displayed. The required
+  `ASSESSMENT_IP_HASH_SECRET` is not yet configured.
 - [ ] (2026-10-05 11:14Z) Deploy the V1 Worker, set only server-side secrets
   in Cloudflare, attach `shortlist.successbycs.com`, and run the one approved
   real assessment for `www.greengeckogardens.co.nz` with a fresh Turnstile
@@ -186,6 +194,13 @@ Workflows, dashboards, and other advanced automation.
   baseline and could duplicate or conflict with the active implementation.
   Evidence: `WORKFLOW.md` uses `git clone` in `after_create`; `git status
   --short` on 2026-10-05 lists the active #10 changes.
+
+- Observation: the current Worker request path requires a private
+  `ASSESSMENT_IP_HASH_SECRET` in addition to OpenAI and Turnstile secrets.
+  Evidence: `apps/web/src/functions/submit-domain-assessment.ts` calculates a
+  day-scoped HMAC of the Cloudflare request IP and returns the public-safe
+  unavailable state when the secret is absent; a 2026-10-06 presence check
+  found it absent from ignored local configuration.
 
 ## Decision Log
 
