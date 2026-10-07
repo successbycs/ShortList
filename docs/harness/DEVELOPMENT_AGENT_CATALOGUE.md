@@ -9,6 +9,7 @@ project skills below. Skills are advisory instructions, not permission controls.
 | --- | --- | --- |
 | `execplan-maintenance` | planning | Material multi-file work; creates or maintains an evidence-backed ExecPlan. |
 | `github-issue-session` | implementation and review | User-directed GitHub task selection without label prerequisites; follows the session workflow and never runs unattended. |
+| Marketing and website-design skills | product positioning, offer, customer research, site architecture, conversion design, copy, AI SEO and schema design | Read `docs/marketing/MARKETING_BRAIN.md` first; select only the applicable skill in `.codex/skills/`. The source/revision/licence notice is in `.codex/skills/MARKETINGSKILLS_NOTICE.md`. Skills are advisory and never authorise publishing, outreach, tracking, provider changes or deployment. |
 | review-only development role | review, autonomous-system design, lightweight web development | Inspect and advise on changes in those areas; it must not modify files or external state unless separately authorized. |
 
 The review-only role is a documented behavior, not a separate native Codex

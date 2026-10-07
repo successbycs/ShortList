@@ -23,6 +23,12 @@ An ExecPlan does not grant permission for destructive actions, production access
 - Prefer small, additive, testable changes and record observable evidence.
 - Treat configuration, Docker, deployment, and agent-runtime setup as absent until they are implemented and verified; documentation is not proof of enforcement.
 - Keep build-time coding-agent instructions separate from runtime application-agent prompts and behavior.
+- For work that changes ShortList positioning, offers, customer-facing website
+  design or copy, SEO/GEO content, schema markup, marketing measurement,
+  outreach, or sales material: read
+  `docs/marketing/MARKETING_BRAIN.md` first, then use an applicable project
+  skill in `.codex/skills/`. Product requirements, approved architecture,
+  privacy/security controls, and explicit user decisions take priority.
 
 ## Disruptive host restart handoff
 
