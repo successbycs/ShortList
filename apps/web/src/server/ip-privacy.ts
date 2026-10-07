@@ -1,3 +1,5 @@
+import { getUtcDay } from "./assessment-admission";
+
 const encoder = new TextEncoder();
 
 /**
@@ -21,10 +23,9 @@ export async function createIpDayHmac(
   const signature = await crypto.subtle.sign(
     "HMAC",
     key,
-    encoder.encode(`${getAucklandDay(now)}:${ip}`),
+    encoder.encode(`${getUtcDay(now)}:${ip}`),
   );
   return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join(
     "",
   );
 }
-import { getAucklandDay } from "./assessment-admission";

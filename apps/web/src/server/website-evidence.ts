@@ -9,7 +9,19 @@ export type WebsiteEvidenceLimits = {
   allowedContentTypes: readonly string[];
   maxHtmlBytes: number;
   maxExcerptCharacters: number;
+  maxJsonLdBlocks: number;
+  maxJsonLdCharacters: number;
 };
+
+export type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | {
+      [key: string]: JsonValue;
+    };
 
 export type WebsiteResponseFixture = {
   sourceUrl: string;
@@ -28,6 +40,7 @@ export type WebsiteEvidenceResult =
       title?: string;
       description?: string;
       excerpt: string;
+      jsonLd: readonly JsonValue[];
     }
   | { kind: "limited"; reasonCode: WebsiteEvidenceReasonCode };
 
@@ -47,7 +60,12 @@ export function extractBoundedWebsiteEvidence(
     return limited("content_rejected");
   }
 
-  if (!isPositiveInteger(limits.maxHtmlBytes) || !isPositiveInteger(limits.maxExcerptCharacters)) {
+  if (
+    !isPositiveInteger(limits.maxHtmlBytes) ||
+    !isPositiveInteger(limits.maxExcerptCharacters) ||
+    !isPositiveInteger(limits.maxJsonLdBlocks) ||
+    !isPositiveInteger(limits.maxJsonLdCharacters)
+  ) {
     return limited("content_rejected");
   }
 
@@ -57,6 +75,11 @@ export function extractBoundedWebsiteEvidence(
 
   const title = readTitle(response.html);
   const description = readMetaDescription(response.html);
+  const jsonLd = readBoundedJsonLd(
+    response.html,
+    limits.maxJsonLdBlocks,
+    limits.maxJsonLdCharacters,
+  );
   const text = visibleText(response.html);
   if (text.length === 0) {
     return limited("evidence_insufficient");
@@ -70,6 +93,7 @@ export function extractBoundedWebsiteEvidence(
     ...(title === undefined ? {} : { title }),
     ...(description === undefined ? {} : { description }),
     excerpt: text.slice(0, limits.maxExcerptCharacters),
+    jsonLd,
   };
 }
 
@@ -110,6 +134,62 @@ function visibleText(html: string): string {
     .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, " ")
     .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript\s*>/gi, " ");
   return normaliseText(withoutInactiveContent.replace(/<[^>]*>/g, " ")) ?? "";
+}
+
+/**
+ * JSON-LD is valuable structured evidence but it remains untrusted page data.
+ * Invalid, oversized and non-object/array blocks are discarded rather than
+ * being repaired or treated as facts.
+ */
+function readBoundedJsonLd(
+  html: string,
+  maxBlocks: number,
+  maxCharacters: number,
+): readonly JsonValue[] {
+  const values: JsonValue[] = [];
+  let retainedCharacters = 0;
+  const scripts = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+
+  for (const match of html.matchAll(scripts)) {
+    if (
+      values.length >= maxBlocks ||
+      readAttribute(match[1] ?? "", "type")?.toLowerCase() !== "application/ld+json"
+    ) {
+      continue;
+    }
+
+    const raw = (match[2] ?? "").trim();
+    if (raw.length === 0 || raw.length > maxCharacters - retainedCharacters) {
+      continue;
+    }
+
+    const parsed = parseJsonLd(raw);
+    if (parsed === undefined) {
+      continue;
+    }
+
+    const serialised = JSON.stringify(parsed);
+    if (retainedCharacters + serialised.length > maxCharacters) {
+      continue;
+    }
+    retainedCharacters += serialised.length;
+    values.push(parsed);
+  }
+
+  return values;
+}
+
+function parseJsonLd(value: string): JsonValue | undefined {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (parsed === null || Array.isArray(parsed) || typeof parsed === "object") {
+      return parsed as JsonValue;
+    }
+  } catch {
+    // Page-provided structured data is optional. An invalid block is not a
+    // reason to fail an otherwise usable site.
+  }
+  return undefined;
 }
 
 function normaliseText(value: string): string | undefined {

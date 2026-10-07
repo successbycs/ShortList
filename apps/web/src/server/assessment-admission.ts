@@ -1,10 +1,11 @@
 import type { D1DatabaseLike } from "./assessment-repository";
 
-const MAX_STARTS_PER_AUCKLAND_DAY = 5;
-// A bounded run can spend 20 seconds retrieving website evidence, then make
-// two 45-second AI requests in parallel. Keep the capacity claims for that
-// 65-second maximum plus a small completion margin before stale recovery.
-export const ASSESSMENT_ADMISSION_LEASE_MS = 70_000;
+export const MAX_STARTS_PER_UTC_DAY = 100;
+// A bounded GEO run can spend 20 seconds retrieving website evidence, then
+// make three 45-second model stages in sequence and two 45-second evaluations
+// in parallel. Keep capacity claims through that 200-second maximum plus a
+// small completion margin before stale recovery.
+export const ASSESSMENT_ADMISSION_LEASE_MS = 220_000;
 
 export type AssessmentAdmissionRejection =
   "duplicate_active" | "concurrency_limited" | "rate_limited";
@@ -30,7 +31,7 @@ export async function admitAssessmentStart(
   const now = (dependencies.now ?? (() => new Date()))();
   const nowUtc = now.toISOString();
   const expiryUtc = new Date(now.getTime() - ASSESSMENT_ADMISSION_LEASE_MS).toISOString();
-  const aucklandDay = getAucklandDay(now);
+  const utcDay = getUtcDay(now);
 
   await releaseExpiredLeases(dependencies.database, expiryUtc);
 
@@ -61,14 +62,14 @@ export async function admitAssessmentStart(
   const rate = await dependencies.database
     .prepare(
       `INSERT INTO assessment_ip_day_limits (
-        ip_day_hmac, auckland_day, start_count, first_started_at_utc, last_started_at_utc
+        ip_day_hmac, utc_day, start_count, first_started_at_utc, last_started_at_utc
       ) VALUES (?, ?, 1, ?, ?)
-      ON CONFLICT(ip_day_hmac, auckland_day) DO UPDATE SET
+      ON CONFLICT(ip_day_hmac, utc_day) DO UPDATE SET
         start_count = assessment_ip_day_limits.start_count + 1,
         last_started_at_utc = excluded.last_started_at_utc
       WHERE assessment_ip_day_limits.start_count < ?`,
     )
-    .bind(dependencies.ipDayHmac, aucklandDay, nowUtc, nowUtc, MAX_STARTS_PER_AUCKLAND_DAY)
+    .bind(dependencies.ipDayHmac, utcDay, nowUtc, nowUtc, MAX_STARTS_PER_UTC_DAY)
     .run();
   if (changes(rate) !== 1) {
     await releaseLeases(dependencies.database, dependencies.normalisedDomain);
@@ -82,15 +83,8 @@ export async function admitAssessmentStart(
 }
 
 /** Calendar key only; persisted timestamps remain UTC. */
-export function getAucklandDay(value: Date): string {
-  const fields = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Pacific/Auckland",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(value);
-  const part = (type: string) => fields.find((field) => field.type === type)?.value;
-  return `${part("year")}-${part("month")}-${part("day")}`;
+export function getUtcDay(value: Date): string {
+  return value.toISOString().slice(0, 10);
 }
 
 function changes(result: { success: boolean; meta?: { changes?: number } }): number {

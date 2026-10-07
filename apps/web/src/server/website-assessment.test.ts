@@ -68,13 +68,17 @@ describe("runWebsiteAssessment", () => {
         }),
       ),
       now,
-      createId: ids("customer-1", "assessment-1", "evidence-1"),
+      createId: ids("customer-1", "assessment-1", "evidence-1", "source-1"),
     });
 
     expect(result).toMatchObject({
       kind: "preview_ready",
       assessment: { assessmentId: "assessment-1", normalisedDomain: "harbourhandyman.co.nz" },
-      evidence: { evidenceId: "evidence-1", excerpt: "Harbour Local home repairs" },
+      evidence: {
+        evidenceId: "evidence-1",
+        websiteSourceId: "source-1",
+        excerpt: "Harbour Local home repairs",
+      },
     });
     expect(calls.at(-1)).toEqual({
       query: "UPDATE assessment_runs SET status = ?, reason_code = ? WHERE assessment_id = ?",

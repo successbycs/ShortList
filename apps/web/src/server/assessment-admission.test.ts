@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import type { D1DatabaseLike, D1StatementLike } from "./assessment-repository";
 import {
   ASSESSMENT_ADMISSION_LEASE_MS,
+  MAX_STARTS_PER_UTC_DAY,
   admitAssessmentStart,
-  getAucklandDay,
+  getUtcDay,
 } from "./assessment-admission";
 import { runLiveAssessment } from "./live-assessment";
 
@@ -82,7 +83,9 @@ function database(state: State): D1DatabaseLike {
           if (query.startsWith("INSERT INTO assessment_ip_day_limits")) {
             const key = `${values[0]}:${values[1]}`;
             const count = state.rates.get(key) ?? 0;
-            if (count >= 5) return { success: true, meta: { changes: 0 } };
+            if (count >= MAX_STARTS_PER_UTC_DAY) {
+              return { success: true, meta: { changes: 0 } };
+            }
             state.rates.set(key, count + 1);
             return { success: true, meta: { changes: 1 } };
           }
@@ -125,9 +128,9 @@ function state(overrides: Partial<State> = {}): State {
 const clock = () => new Date("2026-10-04T11:30:00.000Z");
 
 describe("assessment admission boundary", () => {
-  it("uses the Auckland calendar day across the daylight-saving transition", () => {
-    expect(getAucklandDay(new Date("2026-04-04T10:30:00.000Z"))).toBe("2026-04-04");
-    expect(getAucklandDay(new Date("2026-04-04T14:30:00.000Z"))).toBe("2026-04-05");
+  it("uses the unambiguous UTC calendar day", () => {
+    expect(getUtcDay(new Date("2026-04-04T10:30:00.000Z"))).toBe("2026-04-04");
+    expect(getUtcDay(new Date("2026-04-04T14:30:00.000Z"))).toBe("2026-04-04");
   });
 
   it("rejects an already-active normalised domain without an assessment write", async () => {
@@ -155,9 +158,9 @@ describe("assessment admission boundary", () => {
     expect(current.queries.join("\n")).not.toContain("assessment_runs");
   });
 
-  it("rejects a sixth start for the privacy-minimised IP/day and releases all leases", async () => {
-    const key = "ip:2026-10-05";
-    const current = state({ rates: new Map([[key, 5]]) });
+  it("rejects the 101st start for the privacy-minimised IP/day and releases all leases", async () => {
+    const key = "ip:2026-10-04";
+    const current = state({ rates: new Map([[key, MAX_STARTS_PER_UTC_DAY]]) });
     const result = await admitAssessmentStart({
       database: database(current),
       normalisedDomain: "example.co.nz",
@@ -182,7 +185,7 @@ describe("assessment admission boundary", () => {
     if (result.kind === "admitted") await result.release();
     expect(current.domains.size).toBe(0);
     expect(current.slots).toEqual([null, null]);
-    expect(current.rates.get("ip:2026-10-05")).toBe(1);
+    expect(current.rates.get("ip:2026-10-04")).toBe(1);
   });
 
   it("keeps domain and global claims through the maximum supported assessment duration", async () => {
@@ -202,7 +205,7 @@ describe("assessment admission boundary", () => {
     expect(first.kind).toBe("admitted");
     expect(second.kind).toBe("admitted");
 
-    const maximumRunClock = () => new Date(clock().getTime() + 65_000);
+    const maximumRunClock = () => new Date(clock().getTime() + 215_000);
     await expect(
       admitAssessmentStart({
         database: database(current),
@@ -242,14 +245,18 @@ describe("assessment admission boundary", () => {
       now: staleClock,
     });
     expect(recovered.kind).toBe("admitted");
-    expect(current.rates.get("ip:2026-10-05")).toBe(2);
+    expect(current.rates.get("ip:2026-10-04")).toBe(2);
     if (recovered.kind === "admitted") await recovered.release();
   });
 
   it.each([
     ["duplicate-active", state({ domains: new Set(["example.co.nz"]) }), "duplicate_active"],
     ["global-concurrency", state({ slots: ["one.co.nz", "two.co.nz"] }), "concurrency_limited"],
-    ["daily-rate", state({ rates: new Map([["ip:2026-10-05", 5]]) }), "rate_limited"],
+    [
+      "daily-rate",
+      state({ rates: new Map([["ip:2026-10-04", MAX_STARTS_PER_UTC_DAY]]) }),
+      "rate_limited",
+    ],
   ] as const)("stops %s work before website or AI fetches", async (_case, current, reasonCode) => {
     const network = async () => {
       throw new Error("website or AI fetch must not run");
