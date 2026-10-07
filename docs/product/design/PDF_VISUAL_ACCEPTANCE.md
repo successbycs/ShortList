@@ -29,7 +29,7 @@ Every material statement must visibly be one of these three types, in both text 
 | **Inference** | `Working hypothesis` label with a short explanation | State what evidence supports it; never present it as customer, market, or revenue fact. |
 | **Limitation** | `What we could not confirm` label and plain reason | Do not fill the gap with generic or invented recommendations. |
 
-The dated AI-search result must name the question, show Auckland date/time, the returned order and actual count, citations when available, and explain it is one observed test whose results can vary. It must not describe the result as official, objective, permanent, or universal.
+The dated GEO result must name the question, show labelled UTC observation time, findings and available citations, and explain it is one observed test whose results can vary. It must not describe the result as official, objective, permanent, or universal.
 
 ## Page flow and visual hierarchy
 
@@ -37,7 +37,7 @@ Use a calm editorial reading experience. The suggested sequence is:
 
 | Section | Reader question | Required visual outcome |
 | --- | --- | --- |
-| Cover and report facts | What is this, for whom, and when? | Business/domain, report date in Pacific/Auckland, report/template version, and a clear `Minimum Assessment` title. No recipient email in a filename, URL, or visible header/footer. |
+| Cover and report facts | What is this, for whom, and when? | Business/domain, labelled UTC observation time, report/template version, and a clear `Minimum Assessment` title. No recipient email in a filename, URL, or visible header/footer. |
 | Snapshot | What did ShortList learn first? | A short, scannable summary with confidence/type labels; avoid a dashboard of unsupported scores. |
 | Website evidence | What was actually found? | Source-aware evidence cards or annotated excerpts with readable URLs/titles and observation context. |
 | Buyer hypotheses | What might matter next? | Separate panels for hypotheses, each labelled as an inference and paired with support. |

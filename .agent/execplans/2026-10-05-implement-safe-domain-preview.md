@@ -12,11 +12,39 @@ failures will show clear public-safe states rather than causing uncontrolled
 fetches or invented claims.
 
 This V1 slice includes the live Cloudflare deployment, `shortlist.successbycs.com`,
-the existing D1 record store, server-side secrets, Turnstile verification, and
-real, bounded OpenAI evidence calls. It excludes PDF/R2 delivery, Discord,
-Workflows, dashboards, and other advanced automation.
+the existing D1 record store, server-side secrets, rate/concurrency controls,
+and real, bounded OpenAI evidence calls. Turnstile is deferred until MVP 3+.
+It excludes PDF/R2 delivery, Discord, Workflows, dashboards, and other
+advanced automation.
 
 ## Progress
+
+- [ ] (2026-10-06 04:35Z) Apply the approved temporary increase from five to
+  100 privacy-minimised IP assessment starts per Auckland calendar day. This
+  requires both the server constant and a D1-compatible ordered schema migration,
+  because the existing database CHECK constraint disallows a sixth start.
+
+- [x] (2026-10-06 03:35Z) Chris withdrew Turnstile from MVP 1 after both the
+  automated live browser and normal-browser path proved it blocked assessment
+  completion. Removed the widget, browser token state, server Siteverify
+  boundary, and related runtime contract; retained domain, safe-fetch, domain
+  lease, concurrency and privacy-minimised IP/day controls. The Cloudflare
+  widget and secret are intentionally left untouched but unused for possible
+  MVP 3+ work.
+- [ ] (2026-10-06 04:04Z) Run the approved real public Green Gecko assessment
+  without Turnstile, record its D1 evidence, then repeat the domain to prove
+  cache reuse without a second costly assessment. The first actual rebuilt
+  Worker request reached D1 admission within the 30-second browser limit, but
+  the five earlier diagnostic attempts consumed the test browser IP's daily
+  five-start allowance. The only remaining production blocker is explicit
+  owner approval to remove that single test-only rate-limit row.
+- [x] (2026-10-06 04:07Z) With Chris's explicit approval, removed only the
+  single confirmed test-only rate-limit row, then ran Green Gecko through the
+  rebuilt public Worker. The browser reached the truthful limited-evidence
+  outcome in under 13 seconds. Remote D1 contains one `limited` run and one
+  website-evidence record with reason `size_limit_exceeded`; it contains no AI
+  evidence. This proves the real domain, safe fetch, D1 persistence and public
+  failure journey, but not the full-result or cache-replay path.
 
 - [x] (2026-10-05 05:55Z) Inspected the frontend, Worker configuration,
   contracts, delivery plan and private-record architecture.
@@ -144,16 +172,75 @@ Workflows, dashboards, and other advanced automation.
   `0004`; deployed `shortlist-web`; and attached
   `shortlist.successbycs.com`. Public HTTPS returned HTTP 200.
 - [ ] (2026-10-06) Run the approved Green Gecko assessment with a fresh
-  Turnstile response and prove cached replay. Blocked: the existing widget
-  returns documented error `110200` because its hostname list lacks
-  `shortlist.successbycs.com`; the available API token lacks
-  `Account.Turnstile:Edit` to repair that configuration.
+  Turnstile response and prove cached replay. The initial `110200` hostname
+  block was repaired by Chris in Cloudflare Dashboard. A later real-browser
+  submission displayed the limited-evidence page, but remote D1 had no related
+  row; therefore the request stopped before website retrieval and has not
+  proved the assessment or cache boundary. Deploy the reviewed #48 truthful UI
+  correction, then repeat the bounded real-browser proof.
+- [x] (2026-10-06) Promoted the reviewed Symphony child packet #48 as local
+  commit `26e80f7`. It maps early server results to truthful visitor messages
+  instead of collapsing them into the limited-evidence screen. Focused journey
+  tests passed 9 tests; the complete suite passed 13 files / 79 tests; strict
+  TypeScript, Wrangler types and the production build passed. Lint retained 0
+  errors and the existing 8 warnings. Deployment and real-browser proof remain
+  separately unperformed.
+- [x] (2026-10-06) With Chris's explicit deployment approval, rebuilt and
+  deployed the #48 correction as Worker version
+  `f94b4b4d-2100-491c-b8c3-74763cb57f99`. The existing custom domain remains
+  attached, public HTTPS returned 200, and read-only metadata confirms the D1
+  binding plus `OPENAI_API_KEY`, `TURNSTILE_SECRET`, and
+  `ASSESSMENT_IP_HASH_SECRET` by name only. A real Green Gecko assessment and
+  cached replay are still required; deployment does not prove them.
 - [ ] Record the remaining owner safety choices: fetch/redirect/DNS budget,
   abuse limits, suburb-reference source/version and limited-state wording.
 - [ ] Implement the admission, evidence, teaser and local tests below.
 - [ ] Record verification and leave #10 open for Chris's review.
 
 ## Surprises & Discoveries
+
+- Observation: Cloudflare D1 rejected `BEGIN TRANSACTION` before executing the
+  limit migration; the table and all counters remained unchanged.
+  Evidence: Read-only remote schema inspection at 04:36Z still reported the
+  original `CHECK (start_count BETWEEN 1 AND 5)`, a count of five, and no
+  replacement table. The migration therefore uses D1's supported ordered
+  statement sequence, copying all rows before dropping the original table.
+
+- Observation: `wrangler deploy` deploys the generated `.output` artifact; it
+  does not build source files first. Earlier source-only deployments left the
+  live Worker running the old server-function bundle. A fresh `npm run build`
+  changed the server chunks, and Worker version
+  `a0a523a4-3daa-4b6b-96b1-7a539f010c54` was the first rebuilt deployment.
+  Evidence: the public server-function response omitted newly added diagnostic
+  fields before the build, then the deploy output showed new generated module
+  hashes after the build.
+
+- Observation: Cloudflare's `crypto.randomUUID` must retain the `crypto`
+  receiver. Detached callbacks caused the initial Worker failure. All three
+  assessment-path defaults now use closures that invoke `crypto.randomUUID()`.
+  Evidence: public browser error and source correction verified by focused
+  assessment tests and strict TypeScript on 2026-10-06.
+
+- Observation: remote D1 contains the complete assessment schema and no
+  Green Gecko customer, run or evidence records. It does contain exactly one
+  Auckland-day HMAC-IP row with `start_count = 5`, created by this session's
+  diagnostic requests; no active domain lease or concurrency slot remains.
+  Evidence: read-only scoped remote D1 queries on 2026-10-06.
+
+- Observation: Green Gecko's origin advertises a 77 KB compressed HTML
+  response, while the Worker sees 1.36 MiB after decoding. It therefore hit
+  the former 1 MiB ceiling, rather than being unreachable or malformed. Chris
+  revised the approved per-page limit to 5 MiB on 2026-10-06; this remains a
+  firm decoded-body boundary and covers the measured page with headroom.
+  Evidence: read-only `curl -I` response headers and the persisted D1 outcome
+  from the 2026-10-06 public browser run.
+
+- Decision: Chris approved a 16,000-input-token and 600-output-token boundary
+  for each MVP 1 AI view, with a US$0.01 estimated per-view budget. The two
+  views can therefore have a combined estimated budget of US$0.02. The limit
+  was raised after the genuine current-web request used 13,189 input tokens;
+  its 428-token output was already within the existing output boundary.
+  Date/Author: 2026-10-06 / Chris.
 
 - Observation: `apps/web/wrangler.jsonc` only contains the Static Assets
   binding, not D1, R2, secrets, Turnstile, Workflows or deployment settings.
@@ -217,6 +304,15 @@ Workflows, dashboards, and other advanced automation.
 
 ## Decision Log
 
+- Decision: Temporarily raise the per-IP Auckland-day assessment-start limit
+  from five to 100 while Green Gecko and the real browser journey are tested.
+  Rationale: Five earlier diagnostic starts exhausted the test browser's
+  allowance before a successful current-web plus model-knowledge proof was
+  possible. The limit continues to use only a daily HMAC of the visitor IP;
+  it does not store raw IP addresses. The two global slots and one-active-
+  domain controls remain unchanged.
+  Date/Author: 2026-10-06 / Chris
+
 - Decision: Use Cloudflare Workers + Static Assets with D1 as the later record
   source of truth; the normalised domain identifies a customer but is never an
   authorisation key.
@@ -236,7 +332,7 @@ Workflows, dashboards, and other advanced automation.
   Date/Author: pending / Chris.
 
 - Decision: Approve the conservative MVP safe-fetch policy: entry page plus two
-  same-origin pages, HTML/XHTML only, 1 MiB per page, 8 seconds per page,
+  same-origin pages, HTML/XHTML only, 5 MiB per page, 8 seconds per page,
   20 seconds per assessment, three validated redirects, two global runs, one
   active run per domain, five starts per privacy-minimised IP/day, server-side
   Turnstile before costly work, and versioned curated Auckland-suburb data.
@@ -258,6 +354,16 @@ Workflows, dashboards, and other advanced automation.
   Workflows, dashboards and advanced automation.
   Rationale: a website is not V1-complete until Chris can use the public URL.
   Date/Author: 2026-10-05 / Chris.
+
+- Decision: Remove Turnstile from the MVP 1 request path and defer it until
+  MVP 3+. Keep the existing server-side input, safe-fetch, domain-concurrency
+  and privacy-minimised IP/day controls; do not delete the dashboard widget or
+  its Worker secret during this change.
+  Rationale: real normal-browser verification was rejected server-side and
+  automated Chromium is deliberately classified as non-human. The gate blocks
+  the MVP's primary assessment proof without providing an MVP-proportionate
+  benefit.
+  Date/Author: 2026-10-06 / Chris.
 
 - Decision: Reuse the existing project-specific OpenAI API key for the first
   bounded live assessment proof.

@@ -10,7 +10,10 @@
 ShortList accepts a visitor-supplied public domain, so safety must be decided
 before fetching a site, creating a customer record, calling an AI provider, or
 generating a report. A normalised domain identifies one customer record but
-never authorises access. A recipient may access only their own delivery path.
+never authorises access. The masked-email confirmation is an intentional-address
+check, not authentication or mailbox verification. It may reveal the fuller
+result only in the active journey and may start delivery; it must never become
+a reusable report-access credential.
 
 The design uses **fail closed**: when a target, evidence, request, limit, or
 access check cannot be verified as safe, stop the affected automated path,
@@ -38,7 +41,7 @@ as framework defaults.
 | --- | --- | --- |
 | Customer and assessment run | Customer is keyed by normalised domain; a run is a dated attempt. | Neither record authenticates a visitor or reveals a recipient. |
 | Website/AI-search evidence and claim ledger | Owned by one assessment run. | Available to the server-side assessment/report flow; never exposed as another recipient's report. |
-| Recipient, consent, entitlement, attribution | Owned by one normalised recipient relationship. | Require a private, non-guessable server-side delivery/request flow; never return existence, count, consent, or status for another recipient. |
+| Recipient, consent, confirmation, entitlement, attribution | Owned by one normalised recipient relationship. | Record the masked-address confirmation/change outcome. Require a private, non-guessable server-side delivery/request flow; never return existence, count, consent, or status for another recipient. |
 | Report object and delivery attempt | Owned by a report version plus one recipient-specific attempt. | Object reference is never public/guessable; access is server-authorised for the intended recipient action only. |
 | Operator/support evidence | Private operational access only. | Use minimised data and reason codes; no credentials, full report content, or unnecessary recipient information in alerts. |
 
@@ -111,6 +114,7 @@ defaults/rejection, and #10/#5 must prove each limit before costly work.
 | Untrusted content | Captured hostile text cannot alter instructions, execute active content, access local resources, or produce unsafe PDF markup. |
 | Recipient isolation | Same-domain/different-recipient and guessed-object-reference tests reveal no recipient/report/consent/attribution/delivery data. |
 | Duplicate/resend | Same recipient/domain makes no new run/allowance; allowed resend is a new private delivery attempt. |
+| Masked-email confirmation | The visitor can change the address before confirmation; confirmation reveals the current on-page result and triggers PDF delivery, but does not prove mailbox ownership or create a reusable access link. |
 | Limits | Repeated IP/domain, concurrent domain, token/timeout/search/spend cases stop at their named stage with a safe reason. |
 | Attribution/privacy | Recognised UTM/referrer persist; unknown parameters and raw IP do not become product attribution. |
 | Failure honesty | Each matrix event maps to a reason code, no unsupported claim, and permitted retry/escalation state. A final `evidence_insufficient` event emits at most one private, minimised operator alert. |
@@ -123,7 +127,9 @@ defaults/rejection, and #10/#5 must prove each limit before costly work.
    timeout/spend caps, and customer wording for each limit state.
 3. Data retention, deletion/backup treatment, privacy copy, support route, and
    who can access private operational records.
-4. Deterministic Auckland suburb source, aliases, update owner, and boundary
-   change policy.
-5. Chosen edge, record, object-storage, email, and alert implementations after
-   technology recommendation; no candidate is selected by this document.
+4. Approved global market-profile defaults, service-area evidence rules, and
+   country/locale reference-data maintenance.
+5. Exact edge/bot control, email, and alert implementations. D1 for records,
+   R2 for private report objects, and Workflows for durable delivery recovery
+   are selected architecture decisions, but no service is configured; see
+   [ARCHITECTURE_DECISION.md](ARCHITECTURE_DECISION.md).

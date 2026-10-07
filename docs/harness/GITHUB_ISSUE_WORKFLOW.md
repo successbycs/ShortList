@@ -42,6 +42,19 @@ Use this compact comment structure where it helps:
 **Implementation authority:** none / approved for <bounded scope>
 ```
 
+### Write for the human reader
+
+An Issue comment is a review record for a product owner, future contributor,
+or auditor who may not know the current chat or codebase. Write it as clear
+Markdown prose: a short opening sentence, useful headings, ordinary paragraphs,
+and short lists only where they make the decision or evidence easier to scan.
+
+Never paste terminal output, JSON, escaped text such as literal `\\n`, raw
+API payloads, hidden reasoning, or internal shorthand as the comment itself.
+Summarise the observable result in plain language and link to the canonical
+document or evidence. Keep technical names only where they help a reader find
+the relevant file, service, decision, or verification command.
+
 Parent Issues contain concise phase-level summaries and links. Child Issues
 contain detailed requirement decisions, review feedback, acceptance evidence,
 and implementation history. Avoid duplicating a detailed review in both unless

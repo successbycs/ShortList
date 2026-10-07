@@ -8,8 +8,9 @@
 | AI-search test | One defined, dated question run through the capability qualified by #23. It is not automatically a ChatGPT or official ranking. |
 | Assessment run | One dated attempt to assess a normalised domain. |
 | Customer record | The single record identified by a normalised primary domain; it is not an access identity. |
+| Address confirmation | The visitor checks the masked email address and may change it before the fuller result is revealed and PDF delivery starts. It is not mailbox ownership verification. |
 | Delivery attempt | One recipient-specific PDF generation/storage/attachment/provider-handoff cycle. A resend is a new attempt. |
-| Minimum Assessment | The free MVP 1 ShortList report delivered as a PDF attachment after the teaser. |
+| Minimum Assessment | The free MVP 1 ShortList assessment: after masked-email confirmation it is rendered in the same responsive web journey and also sent as a private PDF attachment. |
 | Normalised domain | The canonical domain format used to ensure one customer record per domain. |
 | Normalised email | Email with surrounding whitespace removed and case normalised; no provider-specific dot or plus rewriting. |
 | Provider acceptance | The email provider accepted an attachment handoff. It does not prove inbox receipt or reading. |

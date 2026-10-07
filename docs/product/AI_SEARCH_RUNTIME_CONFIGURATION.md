@@ -1,14 +1,16 @@
-# MVP 1 AI evidence runtime configuration
+# MVP 1 AI evidence runtime configuration — search-prototype baseline
 
-**Status:** approved product decision for MVP 1 implementation
+**Status:** superseded for the customer-facing assessment method by the draft
+[GEO prompt and assessment contract](GEO_PROMPT_CONTRACT.md); retained as the
+historical generic-search prototype baseline.
 **Decision owner:** Chris
 **Recorded:** 5 October 2026
 **Implementation Issue:** [#5](https://github.com/successbycs/ShortList/issues/5)
 
-This is the small, explicit operating envelope for the server-side AI evidence
-step. It makes the product behaviour and its cost boundary reviewable. It is
-not a credential file, a deployment guide, or proof that a live call has been
-made.
+This document records the operating envelope used by the first generic
+comparable-business prototype. It is not the target ShortList GEO method. The
+future configurable prompt package will select approved model and market
+profiles, subject to code-enforced maximum safety limits.
 
 ## Approved configuration
 
@@ -18,7 +20,7 @@ made.
 | Current-web result | Use the Responses API `web_search` tool and require the tool for this mode. Preserve source citations where supplied. |
 | Model-knowledge result | Do not attach a web-search tool. Label the output as model knowledge: it is not current-web verified and may be incomplete or out of date. |
 | Search context | Low. The product needs one bounded dated observation, not an open-ended research exercise. |
-| Location context | Approximate Auckland, New Zealand context using `Pacific/Auckland` for the current-web request. It is context, not a claim that a result is an objective local ranking. |
+| Location context | Historical prototype used approximate Auckland, New Zealand context. This is retained only to explain prior records; `geo-assessment-v1` uses the approved global market profile and evidence-supported service area. |
 | Request timeout | 45 seconds. A timeout becomes a clear, safe outcome rather than a silent retry loop. |
 | Token boundary | At most 12,000 input tokens and 2,000 output tokens per assessment request. |
 | Estimated spend boundary | At most US$0.03 per assessment request before processing continues. |

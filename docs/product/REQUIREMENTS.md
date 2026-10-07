@@ -2,26 +2,27 @@
 
 **Status:** approved MVP 1 baseline (product-owner approval recorded in #1 and #2 on 2026-10-04)
 **Owner:** Chris / SuccessByCS
-**Last reconciled:** 2026-10-04
+**Last reconciled:** 2026-10-05
 **Detailed decision record:** [MVP 1 requirements candidate](MVP_1_REQUIREMENTS_CANDIDATE.md)
 
 ## 1. Purpose and scope
 
-ShortList helps a small-business owner understand how their public website
-appears to customers and in one dated, defined AI-search test. The MVP 1
+ShortList helps a small-business owner understand how selected AI modes
+understand and recommend their public website for plausible buyers. The MVP 1
 journey is automated: domain entry, evidence-based teaser, email capture after
-value, and a free Minimum ShortList Assessment PDF attachment.
+value, a clear masked-email confirmation with a change-email option, an
+on-page full result, and a free Minimum ShortList Assessment PDF attachment.
 
 MVP 1 validates the free inbound journey. It does not implement payment,
 Stripe, a paid Basic Assessment, consulting, recurring monitoring, customer
 accounts, a complex dashboard, manual report fulfilment, or production launch.
 Those are later decisions, not implied commitments.
 
-Auckland is the initial validation focus. The first learning cohort is ten
-Auckland lawn-mowing businesses; further landscaping/garden maintenance,
-exterior cleaning, and residential painting are later cohorts. The live
-inbound service does not reject a business solely because it serves another
-region. It states honestly when Auckland context cannot be determined.
+ShortList is a global self-service assessment. It does not restrict a valid
+public business domain to Auckland, New Zealand, a predetermined vertical, or
+an operator-selected city. An assessment may use the business's evidenced
+service area or an approved global market context; where neither is supported,
+it states that geographic context is uncertain.
 
 ## 2. Requirement baseline
 
@@ -30,19 +31,24 @@ region. It states honestly when Auckland context cannot be determined.
 | MVP1-PR-001 | The active product name is ShortList. Historical GEO Check and AI Shortlist names remain source-record terminology only. | Must | Product owner | Current product documents and public-copy drafts use ShortList consistently. |
 | MVP1-JNY-001 | A visitor submits one public domain/website and sees useful assessment value before email capture. | Must | Product owner | A valid public-domain scenario produces the teaser before any email field is required. |
 | MVP1-JNY-002 | The teaser and report use only evidence or clearly marked inference; they do not guarantee enquiries, revenue, a stable rank, or an official provider result. | Must | Product owner | Review of a representative output finds page-level evidence/provenance or an explicit inference label for each material finding. |
-| MVP1-JNY-003 | Each successful assessment runs two separately identified, dated AI-model results based on the evidenced business type: one current-web result and one model-knowledge result without web access. The current-web result may show the observed returned order; the model-knowledge result must never be presented as current or verified. | Must | Product owner | Stored records identify the mode, question, response, timestamp, model/configuration and customer terminology. The current-web record includes ordering and available citations; the model-knowledge record carries the required freshness disclaimer and no invented citations. |
-| MVP1-JNY-004 | The teaser and report display Pacific/Auckland date/time while all stored machine times are UTC ISO 8601. | Must | Product owner | A test record shows UTC storage and correct Auckland display across daylight-saving boundaries. |
+| MVP1-JNY-003 | Each successful assessment creates an evidence-linked business profile, three labelled ICP hypotheses and three buyer questions per ICP. It tests the same nine questions in two separately identified, dated AI modes: current-web and no-web model knowledge. A list of alternatives may be supporting context only; it is not the customer outcome. | Must | Product owner | Stored records identify the profile, ICPs, questions, mode, response/finding, timestamp, approved configuration and customer terminology. The current-web record retains available citations; the no-web record carries the required freshness disclaimer and no invented citations. |
+| MVP1-JNY-004 | The teaser and report show a clearly labelled UTC observation time while all stored machine times are UTC ISO 8601. A visitor-local display conversion is deferred. | Must | Product owner | A test record shows UTC storage and the same clearly labelled UTC observation time in the rendered result. |
+| MVP1-JNY-005 | Before the full on-page Minimum Assessment is revealed or its PDF is sent, the visitor sees the submitted email in masked form and can confirm or change it. This is an intentional-address confirmation, not proof of mailbox ownership. Desktop and mobile use the same journey and state sequence; only the responsive layout changes. | Must | Product owner | The full result remains blurred before confirmation; the visitor can correct the address; confirmation records the selected address and then reveals the result while starting the private PDF-delivery path on both supported viewport classes. |
 | MVP1-DOM-001 | Incorrectly formatted domains are rejected before fetch, search, or customer-record creation. Private/internal targets and unsafe redirects/DNS changes are refused safely. | Must | Technical design owner | Valid, malformed, private-target, redirect, and DNS-change cases have specified safe outcomes. |
-| MVP1-DOM-002 | The service captures the business name, apparent services, available service-area evidence, page-based buyer hypotheses, trust evidence, strengths, and opportunities without inventing facts. | Must | Product owner | Representative output contains required fields and cites supporting page evidence or says evidence is insufficient. |
-| MVP1-DOM-003 | Auckland context uses a deterministic, versioned suburb reference set where available; it is not inferred solely from free text or an AI guess. | Must | Product owner | An assessment records matched suburb/outcome and dataset version, or an honest unable-to-determine result. |
+| MVP1-DOM-002 | The service captures bounded public text and JSON-LD, then creates evidence-linked business facts, profile fields, ICP hypotheses, trust signals and opportunities without inventing facts. | Must | Product owner | Representative output contains required fields, source evidence IDs and confidence/uncertainty labels, or says evidence is insufficient. |
+| MVP1-GEO-001 | The assessment method is a reviewable, versioned GEO prompt package. Approved templates, market/model profiles, rendered prompts and buyer questions are retained with each assessment; no customer request can choose an arbitrary template. | Must | Product owner | A stored assessment reconstructs the approved prompt/version, safe typed inputs, nine questions and two-mode configuration without exposing a secret or raw visitor data. |
+| MVP1-GEO-002 | Geographic context is selected from an approved global market profile and/or evidence-supported service area; it is not inferred solely from free text or an AI guess. | Must | Product owner | An assessment records the market-profile version and evidenced service-area context, or an honest unable-to-determine result. |
 | MVP1-ABUSE-001 | Before and after email capture, server-side bot, IP, normalised-domain, concurrency, bounded-fetch, token, and spend controls prevent excessive or unsafe processing. | Must | Technical design owner | Repeated/concurrent costly-submission tests return reason-coded safe outcomes before unbounded processing. |
 | MVP1-DATA-001 | A normalised domain uniquely identifies one customer record. Each assessment is a dated assessment run; domain identity never grants report or recipient access. | Must | Technical design owner | Duplicate-domain tests reuse the customer record but do not expose other recipients or prior private data. |
-| MVP1-DATA-002 | A recipient record is private to one normalised email address and stores its report-delivery consent, optional marketing consent, attribution, entitlement use, delivery attempts, and support events. | Must | Technical design owner | Cross-recipient tests demonstrate isolation of consent, attribution, delivery status, stored PDF, and identity. |
+| MVP1-DATA-002 | A recipient record is private to one normalised email address and stores report-delivery consent, optional marketing consent, attribution, entitlement use, delivery attempts, and support events. | Must | Technical design owner | Cross-recipient tests demonstrate isolation of consent, attribution, delivery status, stored PDF, and identity. |
+| MVP1-DATA-003 | Each completed assessment retains structured claim/evidence/render data, the masked-email confirmation/change outcome, and its PDF/report-delivery linkage against the customer and assessment records. | Must | Technical design owner | A stored assessment can reproduce the on-page result and its PDF from versioned data; the record preserves confirmation and delivery linkage without making a domain or report reference a public access key. |
 | MVP1-EMAIL-001 | Report-delivery consent is separate from optional marketing consent. Marketing consent is optional, unchecked by default, and separately retained. | Must | Product owner | A recipient can request delivery without marketing consent; the two purposes are separately recorded. |
 | MVP1-EMAIL-002 | A normalised email address has three Minimum Assessment report-delivery requests for the lifetime of MVP 1. It is not a daily allowance. | Must | Product owner | A fourth request is refused with the approved feedback route; the entitlement decision is stored. |
 | MVP1-EMAIL-003 | The same normalised email/domain does not create another assessment or consume another allowance. One retained attachment may be automatically resent within 30 days; after that, show support. | Must | Product owner | Repeat-request tests show no new assessment/allowance use and a distinct recipient-specific resend delivery attempt. |
 | MVP1-EMAIL-004 | A different email may request the same public domain under its own allowance without learning that another recipient exists or receiving their data/report. | Must | Technical design owner | Cross-recipient test shows no recipient, consent, attribution, report, or delivery-state leakage. |
 | MVP1-EMAIL-005 | Chris's internal test address bypasses only the email entitlement through secret server-side configuration. It remains subject to all safety, bot, rate, and spend controls. | Must | Technical design owner | Configuration review proves the address is absent from source/browser/public output and controls still apply. |
+| MVP1-RESULT-001 | Before confirmation, the fuller Minimum Assessment is visibly blurred/locked after a useful teaser. On confirmation of the masked email, it is rendered responsively in the same web journey and the equivalent PDF-delivery path begins. | Must | Product/design owner | Desktop and mobile flows show the blurred/full transition, a change-email option before confirmation, and a complete responsive result without exposing another recipient's data. |
+| MVP1-RESULT-002 | The completed Minimum Assessment reserves a clearly identifiable post-result CTA position for the future MVP 2 full/paid assessment. MVP 1 neither takes payment nor claims that the future offer is available. | Should | Product/design owner | The design identifies the post-result CTA location and labels it as a future MVP 2 decision; no checkout, price, active purchase promise, or lead-capture behaviour is implemented in MVP 1. |
 | MVP1-PDF-001 | The Minimum Assessment is retained as a polished, accessible, professionally reviewed PDF with versioned template metadata and a private attachment-delivery path. | Must | Product/design owner | Representative PDFs pass the approved visual rubric and are private to the requesting recipient. |
 | MVP1-PDF-002 | Customer-facing **sent** means the email provider accepted the attachment; it never claims inbox receipt or reading without provider evidence. | Must | Product owner | Delivery records distinguish provider acceptance from later/beyond-scope receipt signals. |
 | MVP1-PDF-003 | Make one delivery attempt and no more than three temporary-failure retries at approximately 5, 20, and 60 minutes after the UTC report trigger. Permanent failures are terminal and reason-coded. | Must | Product owner | Temporary and permanent failure tests show the bounded retry/no-retry rules. |
@@ -60,8 +66,9 @@ The detailed scenarios are maintained as `M1-AC-01` through `M1-AC-18c` in the
 [candidate](MVP_1_REQUIREMENTS_CANDIDATE.md#7-candidate-acceptance-scenarios).
 They are the required acceptance evidence for this baseline and cover valid and
 invalid domains, evidence limitations, AI-search results, duplicate/recipient
-isolation, abuse, timestamps, privacy, attribution, mobile experience, PDF
-generation, delivery/retry/escalation, and consent-gated outreach.
+isolation, abuse, timestamps, privacy, attribution, mobile experience,
+masked-email confirmation, on-page result reveal, PDF generation,
+delivery/retry/escalation, and consent-gated outreach.
 
 ## 4. Explicit deferrals and open decisions
 
@@ -75,8 +82,8 @@ implementation work:
    implementation decisions (#23 decision record).
 2. Evidence threshold for a buyer question versus an insufficient-evidence
    outcome.
-3. Authoritative Auckland-suburb reference source, update owner, aliases, and
-   boundary-change policy.
+3. Approved global market-profile defaults, service-area evidence rules, and
+   any future country/locale-specific reference-data policy.
 4. Support email, internal notification address, privacy notice, data
    retention/deletion/backup policy, and deletion path.
 5. Quantified success measures for each ten-business cohort.

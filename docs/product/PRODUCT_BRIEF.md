@@ -14,26 +14,28 @@ fixed or official ranking.
 ## Intended outcome
 
 ShortList gives an owner an automated, evidence-based website teaser after they
-submit a public domain. If they choose, it emails a free Minimum ShortList
-Assessment as a professional PDF attachment. It tests whether that value earns
+submit a public domain. If they choose, they confirm a masked email address,
+then see the full Minimum ShortList Assessment on the same responsive page and
+receive its professional PDF attachment. It tests whether that value earns
 email capture and useful feedback before any paid offer is introduced.
 
 ## Audience and learning focus
 
-The public journey is for small-business owners. Auckland is the initial
-learning focus, not a public exclusion. The first cohort is ten Auckland
-lawn-mowing businesses; later cohorts may cover landscaping/garden maintenance,
-exterior cleaning, and residential painting only after evidence review.
+The public journey is for small-business owners globally. It does not assume a
+city, country or vertical before it reads the submitted website. Any later
+outreach cohort is a separate commercial experiment; it does not define who may
+use the public assessment.
 
 ## MVP 1 journey
 
 1. Owner submits a safe, valid public domain.
-2. ShortList runs a bounded website assessment and one dated AI-search test.
+2. ShortList runs a bounded website assessment and two dated AI modes using
+   the same website-derived buyer questions.
 3. Owner sees a concise, evidence-based teaser before email capture.
-4. Owner requests the free PDF with separate delivery and optional marketing
-   consent.
-5. ShortList sends the attachment through the bounded delivery/escalation
-   policy.
+4. Owner enters an email with separate delivery and optional marketing consent,
+   then confirms or changes the masked address.
+5. ShortList reveals the full on-page assessment and sends the attachment
+   through the bounded delivery/escalation policy.
 
 ## Non-goals
 
@@ -45,7 +47,7 @@ production launch.
 ## Success measures to define before launch
 
 Each ten-business cohort needs agreed measures for completed assessments, email
-capture, report-provider acceptance, failure/abuse rate, cost, and qualitative
+capture, masked-email confirmation, report-provider acceptance, failure/abuse rate, cost, and qualitative
 value feedback. No numerical target is approved yet.
 
 ## Product boundaries

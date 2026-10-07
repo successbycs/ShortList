@@ -29,23 +29,16 @@ market by itself.
 
 ## 2. Customer and scope
 
-The intended audience is small businesses. **Auckland is the initial
-validation focus, not a public eligibility exclusion.** The initial cohort is
-**10 Auckland lawn-mowing
-businesses**. This is the first, narrow subcohort within landscaping and garden
-maintenance. After it has been reviewed, the planned validation sequence is:
+The intended audience is small businesses globally. A valid public business
+domain is not restricted by city, country, or vertical. The assessment derives
+the business context and any service area from the submitted website. When that
+evidence is absent or unclear, it says so rather than inventing local context.
 
-1. Further Auckland landscaping and garden-maintenance businesses if the
-   first lawn-mowing cohort supports it.
-2. Auckland exterior-cleaning businesses, including house washing, roof
-   washing, gutter cleaning, and pressure washing.
-3. Auckland residential painters, including interior and exterior painting.
-
-These are deliberate validation cohorts, not a claim that every Auckland
-business type is supported from day one. If the public website does not provide
-enough evidence that the business serves Auckland and belongs to the active
-cohort, the system must state that eligibility cannot be determined rather than
-presenting an Auckland-specific assessment as fact.
+Validation can still use small, deliberate cohorts of 10 businesses, but a
+cohort is a learning and outreach choice, not an eligibility rule or a product
+claim. Any later city- or vertical-specific experiment must be separately
+documented before it changes public copy, prompt configuration, or acceptance
+criteria.
 
 The product must not claim a permanent, universal, official ChatGPT/OpenAI, or
 provider rank. It may show the observed order returned by one precisely defined
@@ -96,7 +89,9 @@ Immediate teaser, including one dated AI-search test
     ↓
 Email capture after value is shown
     ↓
-Free Minimum ShortList Assessment by email
+Masked-email confirmation or change
+    ↓
+Full Minimum ShortList Assessment revealed on the same web page and sent as PDF
     ↓
 Future Basic Assessment offer; no payment in MVP 1
 ```
@@ -105,12 +100,11 @@ Future Basic Assessment offer; no payment in MVP 1
 
 The first page asks only for a public website/domain and provides a `Check my
 website` action. It does not request an email before showing value. The MVP
-initially reports Auckland context where the website evidence and a maintained,
-deterministic suburb reference dataset support it—not an AI guess, a postcode
-shortcut, or ad-hoc free text. Each assessment records the matched suburb
-(where evidenced), matching outcome, and dataset version. A site that serves
-another region is not rejected solely for that reason; the result must state
-honestly when Auckland context cannot be determined.
+records only website-supported service-area context, using a global market
+profile when no reliable local context is available. It does not use an AI
+guess, a postcode shortcut, or a city/suburb reference list as an eligibility
+rule. A site is never rejected simply because its service area is unknown or
+outside a particular region.
 
 The system must validate the input before any fetch, search, or customer-record
 creation. Incorrectly formatted domain names are rejected with a clear message.
@@ -177,7 +171,7 @@ advertising.
 
 All machine timestamps are stored in UTC using a standard unambiguous format
 (ISO 8601 with `Z`). Every customer-facing report, email, and operator view
-converts them to Pacific/Auckland time, including daylight-saving changes.
+shows the UTC observation time. Visitor-local conversion is a later decision.
 
 Every AI request has approved maximum input and output token limits, a timeout,
 and a per-assessment cost ceiling. The system records usage and a limit-exceeded
@@ -196,7 +190,8 @@ For an accessible public site, the system produces a structured assessment with:
 
 - business name;
 - apparent services/business type;
-- apparent Auckland service area or a statement that this cannot be determined;
+- apparent service area where the website supports it, or a statement that this
+  cannot be determined;
 - plain-language website summary;
 - up to three likely buyer situations/ICPs, each marked as an inference and
   supported by page-level website evidence;
@@ -212,22 +207,21 @@ a verified fact about the business's customers.
 ### 3.4 Dated AI-search teaser
 
 Each successful free assessment runs **two separately labelled AI-model
-results** using an Auckland-wide question based on the evidence-supported
-business type. The first is a current-web result: it uses a web-search tool and
-records the observed response at that time. The second is a model-knowledge
-result: the model has no web-search tool, so it answers only from its learned
-knowledge. For example, the current-web question may be “What are the top
-three lawn-mowing companies in Auckland today?” Lawn mowing is illustrative
-only; the question changes with business type. Suburb-level, buyer-situation,
-and other segmented comparisons belong to the future paid Basic Assessment,
-not the free MVP 1 result. **OpenAI GPT-6 Luna is the selected MVP 1 model.**
-Its exact configuration remains an implementation decision; the product owner
-decides the public name and terminology for each result.
+results** using the same website-derived buyer questions. The first is a
+current-web result: it uses a web-search tool and records the observed response
+at that time. The second is a model-knowledge result: the model has no
+web-search tool, so it answers only from its learned knowledge. The question
+uses the website-supported business and service-area context, if any; it never
+assumes a city, country, or vertical. More narrowly segmented comparisons
+belong to the future paid Basic Assessment, not the free MVP 1 result.
+**OpenAI GPT-6 Luna is the selected MVP 1 model.** Its exact configuration
+remains an implementation decision; the product owner decides the public name
+and terminology for each result.
 
-The immediate teaser and free email show:
+The immediate teaser, fuller on-page result, and free PDF email together show:
 
-- the exact Auckland-wide business-type question tested;
-- the date and time in Pacific/Auckland;
+- the exact website-derived buyer questions tested;
+- the date and time in UTC;
 - the clearly labelled current-web result, including the first three businesses
   surfaced in its returned response in the observed order when available;
 - the separately labelled model-knowledge result, marked as not current-web
@@ -259,7 +253,7 @@ Before email capture, the visitor sees a concise teaser containing:
 
 - how the website currently appears to describe the business;
 - likely buyer situations/ICPs and the evidence supporting them;
-- one Auckland-wide business-type question tested;
+- the website-derived buyer questions tested;
 - the dated AI-search result summary; and
 - a limited number of evidence-based strengths or opportunities.
 
@@ -275,6 +269,21 @@ Report-delivery consent and optional marketing consent must be separate:
 
 - the email address is required for requested report delivery;
 - marketing consent is optional, unchecked by default, and separately stored.
+
+Before the service reveals the fuller on-page assessment or starts PDF
+delivery, it shows the entered address in masked form and asks the visitor to
+confirm it is the right address for the report. A clear **Change email** action
+returns to the email field. This reduces accidental-address mistakes but is not
+an inbox-ownership verification: MVP 1 does not send a separate verification
+email or wait for a link click.
+
+On confirmation, the fuller Minimum Assessment unblurs and renders below the
+submitted domain in the same page, and the private PDF delivery path starts.
+Desktop and mobile use exactly this state sequence; responsive design changes
+only presentation, not the process or access rules. The completed on-page
+result also reserves a clearly identifiable location for a future MVP 2 full
+assessment CTA. In MVP 1 that position is a design placeholder only: it has no
+price, checkout, payment, lead capture, or claim that a paid offer is live.
 
 An email address may request up to three Minimum Assessment report deliveries
 for the lifetime of MVP 1. When that entitlement is exhausted, MVP 1 directs
@@ -293,9 +302,10 @@ requests, but only through secret server-side configuration. It still passes
 domain safety, bot, IP/domain rate, and overall spend controls, and it is never
 shown in browser code, source control, or public messages.
 
-The free email contains the domain, Auckland date/time, business summary, buyer
-hypotheses and evidence, the dated AI-search test/observed ordering, a few
-evidence-based opportunities, and a clear future Basic Assessment offer.
+The free PDF email contains the domain, UTC observation time, business summary,
+buyer hypotheses and evidence, the dated AI-search test/observed ordering, a
+few evidence-based opportunities, and the equivalent future Basic Assessment
+offer location. No MVP 1 wording may represent the paid offer as available.
 
 ### 3.7 Professional PDF report
 
@@ -303,8 +313,7 @@ The Minimum ShortList Assessment is also retained as a polished PDF report.
 The PDF must use an approved, professional visual template with readable
 typography, consistent branding, accessible contrast, sensible page breaks,
 and a clear distinction between observed evidence and inference. It must show
-the assessment's Auckland-local display time while retaining the source UTC
-timestamp in stored data. A representative set of reports must pass human
+the UTC observation time. A representative set of reports must pass human
 visual review before public release; a technically generated PDF alone is not
 acceptance evidence.
 
@@ -346,7 +355,7 @@ entitlement.
 
 The first website-design exploration will be created in Loveable.dev. It must
 not result in a generic AI/SaaS template. The approved experience should feel
-distinctive, quirky, warm, and credible to a small Auckland business owner,
+distinctive, quirky, warm, and credible to a small-business owner,
 with purposeful small-business iconography and light visual humour about the
 internet, AI, and search. Humour must support clarity rather than obscure the
 domain entry, assessment result, consent, price, or failure messages.
@@ -390,9 +399,9 @@ For each business and assessment run, retain only the data needed to provide,
 support, measure, and improve the requested assessment:
 
 - normalised domain and submitted URL;
-- UTC timestamps in ISO 8601 format and the Auckland-local display time used;
-- matched Auckland suburb, eligibility outcome, and suburb-reference-dataset
-  version used for the assessment;
+- UTC timestamps in ISO 8601 format and the displayed UTC observation time;
+- website-supported service-area context or an explicit unable-to-determine
+  outcome;
 - customer record, assessment-run, and privacy-minimised visitor/abuse-event
   records, including bot-check and rate-limit outcomes;
 - first-landing attribution: recognised UTM fields, landing path, and referrer
@@ -401,7 +410,8 @@ support, measure, and improve the requested assessment:
 - inferred buyer situations and their evidence;
 - tested AI-search question, complete response, ordered surfaced results,
   available citations/source URLs, model/search context, and outcome;
-- email address when provided;
+- email address when provided, plus the masked-email confirmation/change
+  outcome and UTC time;
 - free-entitlement counter, request timestamp, duplicate decision, resend
   decision, and allowlist decision for the normalised email address;
 - separate report-delivery and marketing-consent records;
@@ -443,33 +453,33 @@ MVP 1 does not include:
 
 ## 7. Candidate acceptance scenarios
 
-| ID | Scenario | Required outcome |
-| --- | --- | --- |
-| M1-AC-01 | Owner submits a valid public Auckland small-business domain. | The system creates or reuses the one customer record for the normalised domain, stores an assessment run, and shows an automated, evidence-based preview before email capture. |
-| M1-AC-02 | Website evidence supports a business type and Auckland context. | The system runs one dated Auckland-wide business-type AI-search test, records its complete provenance, and shows the actual surfaced order without claiming a universal rank. |
-| M1-AC-03 | The AI-search test returns fewer than three identifiable businesses. | The product states the actual result and does not manufacture a top three. |
-| M1-AC-04 | The submitted business is absent, mentioned, or described inaccurately. | The teaser states the observed outcome and cites/records the tested response. |
-| M1-AC-05 | A visitor chooses to receive the free assessment without marketing consent. | The email is delivered or receives the defined delivery-failure escalation; no optional marketing consent is stored. |
-| M1-AC-06 | Website analysis or search cannot complete. | The visitor receives an honest automated outcome, the run is stored with a reason, and a support route is offered without promising manual fulfilment. |
-| M1-AC-06a | A run reaches final `evidence_insufficient`. | The system records one private, privacy-minimised Discord alert for Chris; repeat/replay does not create another alert and the visitor outcome remains automated. |
-| M1-AC-07 | An email address has already used its three lifetime MVP 1 report requests. | The system does not run a fourth free assessment, records the entitlement decision, and shows the MVP 1 feedback route or the future MVP 2 Basic Assessment route when available. |
-| M1-AC-07a | The same normalised email requests the same normalised domain again within 30 days. | The system does not create a new assessment run or consume another allowance; it may resend the retained recipient-specific PDF attachment without exposing other recipients. |
-| M1-AC-07b | A different normalised email requests a domain already requested by someone else. | The request is evaluated against the new recipient's own allowance. The response, stored records, and delivered report do not disclose any earlier recipient, consent, attribution, report, or delivery state. |
-| M1-AC-07c | A visitor repeats pre-email submissions or concurrent costly attempts. | Server-side bot, IP, domain, concurrency, spend, and bounded-fetch controls limit the work before an email entitlement could apply; each refusal is safely reason-coded. |
-| M1-AC-08 | A site provides a service-area suburb. | The system determines eligibility from the versioned Auckland suburb dataset and records the match or an honest unable-to-determine outcome. |
-| M1-AC-09 | Visitor enters an incorrectly formatted domain name. | The system rejects it before external processing or customer-record creation and explains the required format. |
-| M1-AC-10 | One source IP repeatedly submits the form. | The bot check and server-side IP/domain limits prevent excessive processing, record the decision, and return a safe rate-limit response. |
-| M1-AC-11 | A completed assessment is viewed by a customer. | Its stored machine timestamp is UTC ISO 8601; the teaser, email, and PDF show the equivalent Pacific/Auckland date and time. |
-| M1-AC-12 | An AI request would exceed its approved token, timeout, or cost limit. | The system stops safely, records a machine-readable limit outcome, and does not expose credentials or internal detail. |
-| M1-AC-13 | A free assessment report is generated. | The PDF and its versioned metadata are retained with the assessment run and meet the approved professional visual-template standard. |
-| M1-AC-14 | A visitor arrives through a UTM-tagged link and completes an assessment. | The recognised first-landing UTM values, path, and referrer are retained with the resulting assessment/customer record; unknown query parameters are not stored as attribution data. |
-| M1-AC-15 | A representative mobile and desktop visitor completes the MVP journey. | The approved Loveable design is recognisably ShortList rather than a generic template, uses purposeful small-business/search/AI visual references, and remains clear and accessible through submission, result, consent, and failure states. |
-| M1-AC-16 | The 10-business lawn-mowing pilot recruits a company by email or sends it a report. | The recipient has recorded consent before the commercial email is sent; the sender is identified, a functional unsubscribe route is included, and the feedback outcome is retained. |
-| M1-AC-17 | A business owner arrives at the live site and requests their own assessment. | They can complete the self-service domain, teaser, and opt-in email journey without pilot outreach or manual intervention. |
-| M1-AC-18 | A triggered PDF report has not received provider acceptance within two hours. | The delivery attempt records its UTC trigger, transition/deadline timestamps, state, safe reason code, and retry count; it is marked `escalated`, one apology/update attempt is made, Chris receives the limited private Discord alert, retries stop, and the product does not falsely report inbox delivery. |
-| M1-AC-18a | A temporary generation, storage, or provider-handoff failure occurs. | The system makes no more than three retries at approximately 5, 20, and 60 minutes after the trigger, retaining a reason-coded, recipient-specific delivery-attempt history. |
-| M1-AC-18b | A malformed email, attachment-size limit, unsafe/invalid stored report, or permanent provider rejection occurs. | The system records an immediate terminal failure and does not retry indefinitely; any two-hour escalation/apology outcome is recorded honestly. |
-| M1-AC-18c | A retained report is resent within the allowed 30-day window. | The resend is a new delivery attempt with its own timer and bounded retries; it does not create an assessment run or consume a new entitlement. |
+| ID        | Scenario                                                                                                        | Required outcome                                                                                                                                                                                                                                                                                                                                              |
+| --------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M1-AC-01  | Owner submits a valid public small-business domain.                                                             | The system creates or reuses the one customer record for the normalised domain, stores an assessment run, and shows an automated, evidence-based preview before email capture.                                                                                                                                                                                |
+| M1-AC-02  | Website evidence supports a business description and any service-area context.                                  | The system runs the website-derived current-web and model-knowledge buyer-question tests, records complete provenance, and makes no universal ranking claim.                                                                                                                                                                                                  |
+| M1-AC-03  | The AI-search test returns fewer than three identifiable businesses.                                            | The product states the actual result and does not manufacture a top three.                                                                                                                                                                                                                                                                                    |
+| M1-AC-04  | The submitted business is absent, mentioned, or described inaccurately.                                         | The teaser states the observed outcome and cites/records the tested response.                                                                                                                                                                                                                                                                                 |
+| M1-AC-05  | A visitor chooses to receive the free assessment without marketing consent.                                     | They see the masked address, can change or confirm it, then see the fuller on-page result and the email is delivered or receives the defined delivery-failure escalation; no optional marketing consent is stored.                                                                                                                                            |
+| M1-AC-06  | Website analysis or search cannot complete.                                                                     | The visitor receives an honest automated outcome, the run is stored with a reason, and a support route is offered without promising manual fulfilment.                                                                                                                                                                                                        |
+| M1-AC-06a | A run reaches final `evidence_insufficient`.                                                                    | The system records one private, privacy-minimised Discord alert for Chris; repeat/replay does not create another alert and the visitor outcome remains automated.                                                                                                                                                                                             |
+| M1-AC-07  | An email address has already used its three lifetime MVP 1 report requests.                                     | The system does not run a fourth free assessment, records the entitlement decision, and shows the MVP 1 feedback route or the future MVP 2 Basic Assessment route when available.                                                                                                                                                                             |
+| M1-AC-07a | The same normalised email requests the same normalised domain again within 30 days.                             | The system does not create a new assessment run or consume another allowance; it may resend the retained recipient-specific PDF attachment without exposing other recipients.                                                                                                                                                                                 |
+| M1-AC-07b | A different normalised email requests a domain already requested by someone else.                               | The request is evaluated against the new recipient's own allowance. The response, stored records, and delivered report do not disclose any earlier recipient, consent, attribution, report, or delivery state.                                                                                                                                                |
+| M1-AC-07c | A visitor repeats pre-email submissions or concurrent costly attempts.                                          | Server-side bot, IP, domain, concurrency, spend, and bounded-fetch controls limit the work before an email entitlement could apply; each refusal is safely reason-coded.                                                                                                                                                                                      |
+| M1-AC-08  | A site provides service-area evidence.                                                                          | The system records only the evidence-supported service-area context or an honest unable-to-determine outcome; it does not use geography as an eligibility rule.                                                                                                                                                                                               |
+| M1-AC-09  | Visitor enters an incorrectly formatted domain name.                                                            | The system rejects it before external processing or customer-record creation and explains the required format.                                                                                                                                                                                                                                                |
+| M1-AC-10  | One source IP repeatedly submits the form.                                                                      | The bot check and server-side IP/domain limits prevent excessive processing, record the decision, and return a safe rate-limit response.                                                                                                                                                                                                                      |
+| M1-AC-11  | A completed assessment is viewed by a customer.                                                                 | Its stored machine timestamp is UTC ISO 8601; the teaser, fuller on-page result, email, and PDF show the clearly labelled UTC observation time.                                                                                                                                                                                                               |
+| M1-AC-12  | An AI request would exceed its approved token, timeout, or cost limit.                                          | The system stops safely, records a machine-readable limit outcome, and does not expose credentials or internal detail.                                                                                                                                                                                                                                        |
+| M1-AC-13  | A free assessment report is generated.                                                                          | The PDF and its versioned metadata are retained with the assessment run and meet the approved professional visual-template standard.                                                                                                                                                                                                                          |
+| M1-AC-14  | A visitor arrives through a UTM-tagged link and completes an assessment.                                        | The recognised first-landing UTM values, path, and referrer are retained with the resulting assessment/customer record; unknown query parameters are not stored as attribution data.                                                                                                                                                                          |
+| M1-AC-15  | A representative mobile and desktop visitor completes the MVP journey.                                          | Both viewports use the same state sequence; the approved Loveable design is recognisably ShortList rather than a generic template, uses purposeful small-business/search/AI visual references, reserves a clearly marked future-MVP-2 full-assessment CTA location, and remains clear and accessible through submission, result, consent, and failure states. |
+| M1-AC-16  | The 10-business lawn-mowing pilot recruits a company by email or sends it a report.                             | The recipient has recorded consent before the commercial email is sent; the sender is identified, a functional unsubscribe route is included, and the feedback outcome is retained.                                                                                                                                                                           |
+| M1-AC-17  | A business owner arrives at the live site and requests their own assessment.                                    | They can complete the self-service domain, teaser, and opt-in email journey without pilot outreach or manual intervention.                                                                                                                                                                                                                                    |
+| M1-AC-18  | A triggered PDF report has not received provider acceptance within two hours.                                   | The delivery attempt records its UTC trigger, transition/deadline timestamps, state, safe reason code, and retry count; it is marked `escalated`, one apology/update attempt is made, Chris receives the limited private Discord alert, retries stop, and the product does not falsely report inbox delivery.                                                 |
+| M1-AC-18a | A temporary generation, storage, or provider-handoff failure occurs.                                            | The system makes no more than three retries at approximately 5, 20, and 60 minutes after the trigger, retaining a reason-coded, recipient-specific delivery-attempt history.                                                                                                                                                                                  |
+| M1-AC-18b | A malformed email, attachment-size limit, unsafe/invalid stored report, or permanent provider rejection occurs. | The system records an immediate terminal failure and does not retry indefinitely; any two-hour escalation/apology outcome is recorded honestly.                                                                                                                                                                                                               |
+| M1-AC-18c | A retained report is resent within the allowed 30-day window.                                                   | The resend is a new delivery attempt with its own timer and bounded retries; it does not create an assessment run or consume a new entitlement.                                                                                                                                                                                                               |
 
 ## 8. Decisions still needed before requirements approval
 
@@ -477,27 +487,25 @@ MVP 1 does not include:
    location method, cost ceiling, timeout, and failure threshold are acceptable?
 2. What counts as enough website evidence to generate a buyer question rather
    than issue an insufficient-evidence result?
-3. What authoritative source and update owner define the versioned Auckland
-   suburb reference dataset, including locality aliases and boundary changes?
-4. What support email address, automated alert, privacy copy, retention period,
+3. What support email address, automated alert, privacy copy, retention period,
    and deletion path apply?
-5. What constitutes MVP 1 success for each 10-business cohort: completed
+4. What constitutes MVP 1 success for each 10-business cohort: completed
    checks, email capture rate,
    qualitative value feedback, or a defined combination?
-6. When MVP 2 begins, what pricing research must be complete before the Stripe
+5. When MVP 2 begins, what pricing research must be complete before the Stripe
    Basic Assessment is offered?
-7. What IP-rate limit and visitor-event retention period balance abuse control,
+6. What IP-rate limit and visitor-event retention period balance abuse control,
    conversion measurement, cost, and privacy?
-8. Which product domain should be purchased, and which sending/support email
-    address and mail domain should represent ShortList? These are separate
-    decisions: a product web domain identifies the public service; a sending
-    address is the authenticated origin for customer email.
-9. What approved token, timeout, and per-assessment cost limits apply to the
-    AI request?
-10. What brand assets and visual acceptance examples define “beautiful and
-    super-professional” for the PDF report?
-11. What visual references, tone boundaries, and examples should the Loveable
-    design use so that “quirky” remains credible for Auckland small-business
+7. Which product domain should be purchased, and which sending/support email
+   address and mail domain should represent ShortList? These are separate
+   decisions: a product web domain identifies the public service; a sending
+   address is the authenticated origin for customer email.
+8. What approved token, timeout, and per-assessment cost limits apply to the
+   AI request?
+9. What brand assets and visual acceptance examples define “beautiful and
+   super-professional” for the PDF report?
+10. What visual references, tone boundaries, and examples should the Loveable
+    design use so that “quirky” remains credible for small-business
     owners?
-12. Which consented recruitment channel and exact feedback question will be
+11. Which consented recruitment channel and exact feedback question will be
     used for the first 10 lawn-mowing businesses?

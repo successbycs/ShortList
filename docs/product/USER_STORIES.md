@@ -15,14 +15,16 @@ fuller assessment is useful.
 Acceptance examples: valid public domains progress; malformed/private/unsafe
 targets refuse safely; findings distinguish observed evidence from inference.
 
-### US-002 — Receive my requested assessment privately
+### US-002 — Confirm my email and receive my assessment privately
 
-As an owner who chooses to provide my email, I want my Minimum Assessment sent
-as a private PDF attachment, so that I can review it without creating an
-account.
+As an owner who chooses to provide my email, I want to confirm or correct the
+masked address before the fuller result is revealed and my Minimum Assessment
+is sent as a private PDF attachment, so that I can review it without creating
+an account.
 
-Acceptance examples: delivery and marketing consent are separate; another
-recipient cannot see my report, consent, attribution, or delivery state.
+Acceptance examples: delivery and marketing consent are separate; address
+confirmation is not mailbox verification; another recipient cannot see my
+report, consent, attribution, or delivery state.
 
 ### US-003 — Understand an uncertain or failed result
 
@@ -46,8 +48,8 @@ the support route is shown; no report portal is implied.
 
 ### US-005 — Diagnose an automated failure safely
 
-As the ShortList operator, I want reason-coded, recipient-private assessment
-and delivery states, so that I can understand system health without exposing
+As the ShortList operator, I want reason-coded, recipient-private assessment,
+address-confirmation, and delivery states, so that I can understand system health without exposing
 customer content or credentials.
 
 Acceptance examples: attempts have UTC state transitions and retry counts;
