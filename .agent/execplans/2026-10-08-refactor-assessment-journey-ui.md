@@ -36,6 +36,9 @@ entry, and receive the same safe outcomes.
 - [x] (2026-10-08 04:15Z) Obtained an independent Astra review of the rebuilt
   refactor, fixed the reset-domain regression and commit-boundary documentation,
   and recorded approval.
+- [x] (2026-10-08 04:20Z) Terra independently re-audited Option 1 without
+  changing history: baseline `7c92591` and refactor `06c6544` are independently
+  valid and the pair was retained.
 
 ## Surprises & Discoveries
 
@@ -75,6 +78,11 @@ entry, and receive the same safe outcomes.
   carries the submitted domain after entry, and the regression suite proves a
   retry keeps a non-default normalised domain.
   Evidence: independent review and test added on 2026-10-08.
+- Observation: Terra's fresh Option 1 audit found the baseline worktree clean
+  at `7c92591`; its full suite passed 109 tests. The refactor tip passed 14
+  focused journey tests and 113 full tests; lint had zero errors and eight
+  existing/generated warnings.
+  Evidence: Terra read-only audit on 2026-10-08.
 
 ## Decision Log
 
@@ -107,6 +115,12 @@ The final scoped refactor passes 14 focused journey tests, 113 full tests,
 lint with no errors, TypeScript, production build, and whitespace checks.
 Independent Astra review approved the code and commit boundary after the
 reset-domain regression was fixed.
+
+Terra subsequently re-verified the exact pair. It confirmed that `06c6544` is
+the direct child of `7c92591`, the baseline is independently buildable and
+tested, and the refactor changes exactly the six intended paths. No history
+reconstruction was warranted. The three untracked 2026-10-07 ExecPlans are
+unrelated historical files and remain deliberately uncommitted.
 
 ## Context and Orientation
 
