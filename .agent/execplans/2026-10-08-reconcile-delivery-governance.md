@@ -18,7 +18,8 @@ The owner authorised closure of GitHub Issues only when every task and acceptanc
 - [x] (2026-10-08T06:48:00Z) Recorded three high-severity development-chain npm advisories as a tracked Wrangler exception; no bulk upgrade was applied.
 - [x] Create a criterion-level Issue acceptance ledger and reconcile each open Issue.
 - [x] Reconcile repository/product documentation and dependency governance.
-- [ ] Implement and prove web CI, then establish an appropriate protected PR path (remote Actions/PR/ruleset proof remains).
+- [x] (2026-10-08T08:22:00Z) Proved `web-quality` remotely: PR #58 passed `verify` and `web-quality`; disposable PR #59 passed `verify` and failed `web-quality` on the deliberate non-zero test command; then closed/deleted the disposable branch without merge.
+- [x] (2026-10-08T08:22:00Z) Protected `main` with up-to-date pull requests and required `verify` plus `web-quality` status checks, including administrators; no human-review count is required for the current single-owner workflow.
 - [x] (2026-10-08T06:53:32Z) Posted criterion evidence and closed #56. Reconciled #49’s local-source wording and #53’s dependency order; production-bound Issues remain open.
 - [ ] Add bounded development-agent role contracts and perform independent handoff review.
 
@@ -140,6 +141,8 @@ Read operations are repeatable. Preserve Issue body content before edits and re-
 Initial local governance packet is complete but not remotely proven. The repository now has a web CI workflow that will emit `web-quality` for every pull request and a documented npm/Node policy, but no remote Actions run, disposable failing PR, protection/ruleset, or publication exists yet. Local verification used Node v22.22.0 and npm v11.13.0: `npm ci`; `wrangler types` with temporary XDG config; lint (zero errors, eight existing/generated warnings); 113/113 Vitest tests; `tsc --noEmit`; Vite/Nitro build; and `git diff --check`.
 
 PR #58 is now the scoped remote evidence boundary. Its final GitHub Actions run passed both `verify` (Ruff, 40 Python tests, and Markdown links) and `web-quality` (locked npm install, Worker types, lint, 113 web tests, typecheck, and build). The Python harness repairs were necessary because the product repository is bootstrapped while its tests were copying it as an unbootstrapped template, and because Markdown checking traversed generated/dependency/vendor trees. The next step is a disposable failing-PR proof before protection is configured.
+
+The disposable proof is complete: PR #59 used a one-commit replacement of the web test command with an unconditional non-zero exit. `verify` passed and `web-quality` failed. It was closed without merge and its local/remote branch was removed. GitHub branch protection on `main` now requires an up-to-date pull request with `verify` and `web-quality`; administrators are included, force pushes/deletions are disabled, and no unavailable reviewer approval was configured.
 
 Remaining safe work is to publish a scoped change for remote CI proof, prove the `web-quality` gate on both a passing and deliberately failing pull request, then configure an appropriate protection/ruleset. Live diagnostic/release work requires separately scoped authority and observable boundaries.
 
