@@ -60,9 +60,7 @@ repository = "successbycs/template"
         encoding="utf-8",
     )
     (package / "cli.py").write_text(
-        "import argparse\n\n"
-        "parser = argparse.ArgumentParser()\n"
-        "parser.parse_args()\n",
+        "import argparse\n\nparser = argparse.ArgumentParser()\nparser.parse_args()\n",
         encoding="utf-8",
     )
     return destination
