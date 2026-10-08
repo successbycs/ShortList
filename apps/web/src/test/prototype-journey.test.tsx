@@ -208,6 +208,82 @@ describe("protected prototype reveal journey", () => {
     completeAssessment?.(savedResult);
   });
 
+  it("ignores a late assessment result after the visitor starts over", async () => {
+    render(<Index />);
+    let completeAssessment: ((result: typeof savedResult) => void) | undefined;
+    serverFunction.invoke.mockImplementationOnce(
+      () =>
+        new Promise<typeof savedResult>((resolve) => {
+          completeAssessment = resolve;
+        }),
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+    await screen.findByText("Following the public trail.");
+    fireEvent.click(screen.getByRole("button", { name: /ShortList/i }));
+    expect(screen.getByLabelText("Your business website")).toBeInTheDocument();
+
+    await act(async () => completeAssessment?.(savedResult));
+    expect(screen.queryByRole("heading", { name: /See your free website report/i })).toBeNull();
+  });
+
+  it("keeps a newer assessment in progress when an earlier request finishes late", async () => {
+    render(<Index />);
+    let completeFirst: ((result: typeof savedResult) => void) | undefined;
+    let completeSecond: ((result: typeof savedResult) => void) | undefined;
+    serverFunction.invoke
+      .mockImplementationOnce(
+        () => new Promise<typeof savedResult>((resolve) => (completeFirst = resolve)),
+      )
+      .mockImplementationOnce(
+        () => new Promise<typeof savedResult>((resolve) => (completeSecond = resolve)),
+      );
+
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+    await screen.findByText("Following the public trail.");
+    fireEvent.click(screen.getByRole("button", { name: /ShortList/i }));
+    fireEvent.change(screen.getByLabelText("Your business website"), {
+      target: { value: "second.example" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+    await act(async () => completeFirst?.(savedResult));
+    expect(screen.getByText("second.example")).toBeInTheDocument();
+    await act(async () => completeSecond?.(savedResult));
+    expect(
+      await screen.findByRole("heading", { name: /See your free website report/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the safe unavailable outcome when the server function rejects", async () => {
+    serverFunction.invoke.mockRejectedValueOnce(new Error("network failure"));
+    render(<Index />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+    expect(
+      await screen.findByRole("heading", {
+        name: /assessment service is temporarily unavailable/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the submitted domain when a visitor retries an unavailable assessment", async () => {
+    serverFunction.invoke.mockResolvedValueOnce({ kind: "assessment_unavailable" });
+    render(<Index />);
+
+    fireEvent.change(screen.getByLabelText("Your business website"), {
+      target: { value: "Mara-Gardens.CO.NZ/path" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+    await screen.findByRole("heading", {
+      name: /assessment service is temporarily unavailable/i,
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^Try again$/i }));
+
+    expect(screen.getByLabelText("Your business website")).toHaveValue("mara-gardens.co.nz");
+  });
+
   it("animates the assessment sequence from yellow clocks to completed checks", () => {
     vi.useFakeTimers();
     try {
