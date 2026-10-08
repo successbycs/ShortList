@@ -30,7 +30,7 @@ The working loop is:
 For ShortList, product-discovery and commercial decisions stay human-led.
 Symphony becomes useful after the requirements are approved, for bounded
 engineering work such as the self-service website, secure assessment endpoint,
-data storage, report delivery, and verification. It should not be used to send
+data storage, report delivery, and email-address confirmation. It should not be used to send
 customer outreach or to decide product scope.
 
 See [docs/product/MVP_1_REQUIREMENTS_CANDIDATE.md](docs/product/MVP_1_REQUIREMENTS_CANDIDATE.md)

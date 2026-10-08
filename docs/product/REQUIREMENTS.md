@@ -2,8 +2,34 @@
 
 **Status:** approved MVP 1 baseline (product-owner approval recorded in #1 and #2 on 2026-10-04)
 **Owner:** Chris / SuccessByCS
-**Last reconciled:** 2026-10-05
+**Last reconciled:** 2026-10-07
 **Detailed decision record:** [MVP 1 requirements candidate](MVP_1_REQUIREMENTS_CANDIDATE.md)
+
+## Current release increment — 2026-10-07
+
+The approved broader MVP 1 baseline below remains the historical end-state
+requirement. The active, bounded release increment is smaller: safely assess a
+submitted public website; use retained website evidence and approved LLM stages
+to create a business overview, exactly three ICP hypotheses, three buyer
+questions per ICP, and structured findings; then render that assessment on the
+page after a local email-reveal interaction.
+
+The local email interaction is not recipient persistence, consent capture,
+mailbox verification, entitlement, PDF generation, or delivery. Those remain
+separate work under #11 and #27. The on-page increment must not claim that a
+PDF was created or an email was sent. GitHub #55 owns assessment-graph
+correctness; #57 owns this report journey; #14 verifies the approved release
+increment only after its relevant safety and E2E prerequisites are accepted.
+
+### Current-increment acceptance criteria
+
+| ID | Acceptance criterion | Required evidence | Status |
+| --- | --- | --- | --- |
+| INC-01 | A valid completed assessment shows the explanatory checking sequence, ending with **Compiling results for you**. | Focused component test proves the ordered stages and that they do not claim a live server trace. | Implemented locally; release proof pending. |
+| INC-02 | The report reveal accepts an email as local browser state and uses **See free report now**. | Focused journey test proves the transition and proves no recipient/delivery call is made. | Implemented locally; release proof pending. |
+| INC-03 | The revealed on-page report renders the submitted domain, an evidence-based business overview, exactly three ICP hypotheses, and exactly three persisted buyer questions per ICP. | Stored-graph fixture and renderer test. | Implemented locally; release proof pending. |
+| INC-04 | Each rendered finding is parsed/stored LLM output; website evidence, LLM interpretation, and uncertainty are visibly distinct. | Repository/renderer tests and copy review. | Implemented locally; release proof pending. |
+| INC-05 | The current increment does not claim that an email was sent, a PDF was created, consent was retained, or an address was verified. | UI regression test and content review. | Implemented locally; release proof pending. |
 
 ## 1. Purpose and scope
 
@@ -24,7 +50,7 @@ an operator-selected city. An assessment may use the business's evidenced
 service area or an approved global market context; where neither is supported,
 it states that geographic context is uncertain.
 
-## 2. Requirement baseline
+## 2. Broader MVP 1 requirement baseline
 
 | ID | Requirement | Priority | Owner | Observable acceptance evidence |
 | --- | --- | --- | --- |

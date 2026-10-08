@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const serverFunction = vi.hoisted(() => ({ invoke: vi.fn() }));
@@ -6,14 +6,6 @@ const serverFunction = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock("@tanstack/react-start", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@tanstack/react-start")>()),
   useServerFn: () => serverFunction.invoke,
-}));
-
-vi.mock("@/components/turnstile-widget", () => ({
-  TurnstileWidget: ({ onTokenChange }: { onTokenChange: (token: string | null) => void }) => (
-    <button type="button" onClick={() => onTokenChange("test-turnstile-token")}>
-      Complete security check
-    </button>
-  ),
 }));
 
 import { Index } from "@/routes/index";
@@ -64,52 +56,124 @@ const savedResult = {
   },
 } as const;
 
+const geoFindings = Array.from({ length: 9 }, (_, index) => ({
+  icpId: ["busy-homeowners", "property-managers", "garden-renovators"][Math.floor(index / 3)]!,
+  questionId: `question-${index + 1}`,
+  questionText: `How can a buyer solve need ${index + 1}?`,
+  buyerIntent: "Find a provider",
+  testedClaim: "The submitted business is relevant.",
+  answerSummary: `Assessment finding ${index + 1}.`,
+  submittedBusinessMention: "uncertain" as const,
+  descriptionAccuracy: "not_applicable" as const,
+  recommendationFit: "uncertain" as const,
+  sources: [],
+  websiteContentGaps: [],
+  limitations: ["Evidence is limited."],
+  confidence: "low" as const,
+}));
+
+const savedGeoResult = {
+  kind: "completed" as const,
+  result: {
+    assessmentId: "geo-assessment-1",
+    normalisedDomain: "example-gardens.test",
+    triggeredAtUtc: "2026-10-06T10:00:00.000Z",
+    excerpt: "Example Gardens provides garden care for busy homeowners.",
+    profile: {
+      businessName: { value: "Example Gardens", evidenceIds: ["source-1"], confidence: "high" },
+      websiteDomain: "example-gardens.test",
+      services: [{ value: "Garden care", evidenceIds: ["source-1"], confidence: "high" }],
+      serviceAreas: [],
+      audienceSignals: [],
+      valuePropositions: [],
+      proofPoints: [],
+      differentiators: [],
+      contentGaps: [],
+      limitations: ["The evidence is brief."],
+      confidence: "medium" as const,
+    },
+    icps: [
+      {
+        id: "busy-homeowners",
+        label: "Busy homeowners",
+        audienceDescription: "Homeowners seeking regular care.",
+        buyerSituation: "Needs a reliable provider.",
+        needs: ["Garden care"],
+        decisionCriteria: ["Reliability"],
+        evidenceIds: ["source-1"],
+        confidence: "medium" as const,
+        uncertainty: "The site is brief.",
+      },
+      {
+        id: "property-managers",
+        label: "Property managers",
+        audienceDescription: "Managers seeking maintenance.",
+        buyerSituation: "Needs a dependable provider.",
+        needs: ["Maintenance"],
+        decisionCriteria: ["Communication"],
+        evidenceIds: ["source-1"],
+        confidence: "medium" as const,
+        uncertainty: "The site is brief.",
+      },
+      {
+        id: "garden-renovators",
+        label: "Garden renovators",
+        audienceDescription: "Owners planning a change.",
+        buyerSituation: "Needs project help.",
+        needs: ["Advice"],
+        decisionCriteria: ["Relevant experience"],
+        evidenceIds: ["source-1"],
+        confidence: "medium" as const,
+        uncertainty: "The site is brief.",
+      },
+    ],
+    findings: { current_web: geoFindings, model_knowledge: geoFindings },
+  },
+};
+
 describe("protected prototype reveal journey", () => {
   beforeEach(() => {
     serverFunction.invoke.mockReset();
     serverFunction.invoke.mockResolvedValue(savedResult);
   });
 
-  async function startProtectedAssessment() {
-    fireEvent.click(screen.getByRole("button", { name: /Complete security check/i }));
+  async function startAssessment() {
     fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
-    await screen.findByLabelText("Locked fuller result preview");
+    await screen.findByRole("heading", { name: /See your free website report/i });
   }
 
-  async function moveToEmailStep() {
-    await startProtectedAssessment();
-    fireEvent.click(screen.getByRole("button", { name: /Send my free assessment/i }));
-  }
-
-  it("keeps the fuller result locked until separate delivery consent and confirmation", async () => {
-    render(<Index />);
-
-    await startProtectedAssessment();
-    expect(screen.getByLabelText("Locked fuller result preview")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Send my free assessment/i }));
-
+  async function revealReport() {
+    await startAssessment();
     fireEvent.change(screen.getByLabelText("Email address"), {
       target: { value: "mara@example.co.nz" },
     });
-    fireEvent.click(screen.getByRole("checkbox", { name: /Email me this assessment/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Send my assessment/i }));
+    fireEvent.click(screen.getByRole("button", { name: /See free report now/i }));
+  }
 
-    expect(screen.getByTestId("masked-email")).toHaveTextContent("m•••@example.co.nz");
-    fireEvent.click(screen.getByRole("button", { name: /Confirm and reveal result/i }));
-    expect(screen.getByRole("heading", { name: /Keep current-web evidence/i })).toBeInTheDocument();
-    expect(screen.getByText(/not a verified current result/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Future full assessment/i })).toBeDisabled();
+  it("reveals the stored report after a local email entry without claiming delivery", async () => {
+    render(<Index />);
+
+    await startAssessment();
+    expect(screen.getByText(/do not send email or create a delivery record/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Email address"), {
+      target: { value: "mara@example.co.nz" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /See free report now/i }));
+    expect(
+      screen.getByRole("heading", { name: /This earlier assessment needs a refresh/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/will not show an old external-search view/i)).toBeInTheDocument();
+    expect(serverFunction.invoke).toHaveBeenCalledTimes(1);
   });
 
-  it("lets a reviewer return to the editable email step", async () => {
+  it("keeps the report hidden until a valid email is entered", async () => {
     render(<Index />);
-    await moveToEmailStep();
+    await startAssessment();
     fireEvent.change(screen.getByLabelText("Email address"), {
-      target: { value: "mara@example.co.nz" },
+      target: { value: "not-an-email" },
     });
-    fireEvent.click(screen.getByRole("checkbox", { name: /Email me this assessment/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Send my assessment/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Change email/i }));
+    fireEvent.click(screen.getByRole("button", { name: /See free report now/i }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter a valid email address.");
     expect(screen.getByLabelText("Email address")).toBeInTheDocument();
   });
 
@@ -138,25 +202,44 @@ describe("protected prototype reveal journey", () => {
     fireEvent.change(screen.getByLabelText("Your business website"), {
       target: { value: "HTTPS://Harbour-Handyman.CO.NZ/path" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Complete security check/i }));
     fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
     expect(await screen.findByText("harbour-handyman.co.nz")).toBeInTheDocument();
     completeAssessment?.(savedResult);
   });
 
+  it("animates the assessment sequence from yellow clocks to completed checks", () => {
+    vi.useFakeTimers();
+    try {
+      serverFunction.invoke.mockImplementationOnce(() => new Promise(() => undefined));
+      render(<Index />);
+
+      fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
+
+      expect(screen.getByText("Buyer profile identified")).toBeInTheDocument();
+      expect(screen.getByText("Questions buyers ask AI")).toBeInTheDocument();
+      expect(screen.getByText("Local context checked")).toBeInTheDocument();
+      expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "active");
+      expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "pending");
+
+      act(() => vi.advanceTimersByTime(1_150));
+
+      expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "complete");
+      expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "active");
+      act(() => vi.advanceTimersByTime(4_600));
+      expect(screen.getByText("Compiling results for you")).toBeInTheDocument();
+      expect(screen.getByTestId("assessment-stage-5")).toHaveAttribute("data-state", "active");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it.each([
-    [
-      "verification_failed",
-      { kind: "verification_failed", reasonCode: "unavailable" },
-      "We couldn’t verify the security check.",
-      "Refresh the page and try the security check again before submitting your website.",
-    ],
     [
       "assessment_unavailable",
       { kind: "assessment_unavailable" },
       "The assessment service is temporarily unavailable.",
-      "No assessment was made for this website. Please try again shortly.",
+      "Your assessment could not be completed. Please try again shortly.",
     ],
     [
       "admission_rejected",
@@ -184,7 +267,6 @@ describe("protected prototype reveal journey", () => {
       serverFunction.invoke.mockResolvedValueOnce(result);
       render(<Index />);
 
-      fireEvent.click(screen.getByRole("button", { name: /Complete security check/i }));
       fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
       expect(await screen.findByRole("heading", { name: title })).toBeInTheDocument();
@@ -203,11 +285,32 @@ describe("protected prototype reveal journey", () => {
     serverFunction.invoke.mockResolvedValueOnce({ ...savedResult, kind: "cached" });
     render(<Index />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Complete security check/i }));
     fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
-    expect(await screen.findByLabelText("Locked fuller result preview")).toBeInTheDocument();
-    expect(screen.getByText(savedResult.result.excerpt)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /See your free website report/i }),
+    ).toBeInTheDocument();
     expect(serverFunction.invoke).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the persisted GEO graph instead of a generic comparable-business list", async () => {
+    serverFunction.invoke.mockResolvedValueOnce(savedGeoResult);
+    render(<Index />);
+
+    await revealReport();
+
+    expect(screen.getByText(/A practical first look at Example Gardens/i)).toBeInTheDocument();
+    expect(screen.getByText("Busy homeowners")).toBeInTheDocument();
+    expect(screen.getByText("What the model returned")).toBeInTheDocument();
+    expect(screen.getAllByText(/How can a buyer solve need 1/i)).toHaveLength(2);
+    for (const id of ["busy-homeowners", "property-managers", "garden-renovators"]) {
+      expect(within(screen.getByTestId(`icp-${id}`)).getAllByTestId("icp-question")).toHaveLength(
+        3,
+      );
+    }
+    expect(screen.getByText(/We read the public website/i)).toBeInTheDocument();
+    expect(screen.getByText(/LLM interpretation/i)).toBeInTheDocument();
+    expect(screen.getAllByText("The site is brief.")).toHaveLength(3);
+    expect(screen.queryByText(/Which Auckland garden businesses/i)).not.toBeInTheDocument();
   });
 });

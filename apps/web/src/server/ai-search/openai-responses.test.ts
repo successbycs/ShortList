@@ -21,7 +21,7 @@ const request: AiSearchRunRequest = {
       timezone: "Pacific/Auckland",
     },
   },
-  limits: { maxInputTokens: 12000, maxOutputTokens: 2000, maxEstimatedSpendUsd: 0.03 },
+  limits: { maxInputTokens: 16000, maxOutputTokens: 600, maxEstimatedSpendUsd: 0.01 },
   requestedInputTokens: 300,
   maximumOutputTokens: 500,
   estimatedSpendUsd: 0.01,
@@ -87,6 +87,7 @@ describe("OpenAI Responses provider", () => {
         external_web_access: true,
       }),
     ]);
+    expect(body["include"]).toEqual(["web_search_call.action.sources"]);
   });
 
   it("omits web-search tools for the no-web model-knowledge mode", async () => {
@@ -122,5 +123,41 @@ describe("OpenAI Responses provider", () => {
     ).run(request);
 
     expect(result).toEqual({ kind: "failure" });
+  });
+
+  it("uses returned web-search source metadata when structured output has no inline citations", async () => {
+    const payload = {
+      output: [
+        {
+          type: "web_search_call",
+          action: {
+            sources: [
+              { type: "url", url: "https://directory.example.nz/results" },
+              { type: "url", url: "https://directory.example.nz/results" },
+              { type: "url", url: "not a URL" },
+            ],
+          },
+        },
+        {
+          type: "message",
+          content: [
+            {
+              type: "output_text",
+              text: '{"observed_results":[{"name":"Harbour Handywork","summary":"Auckland handyman service"}]}',
+              annotations: [],
+            },
+          ],
+        },
+      ],
+      usage: { input_tokens: 120, output_tokens: 80 },
+    };
+    const result = await providerWith(
+      vi.fn().mockResolvedValue(new Response(JSON.stringify(payload))) as unknown as typeof fetch,
+    ).run(request);
+
+    expect(result).toMatchObject({
+      kind: "success",
+      citations: [{ url: "https://directory.example.nz/results", title: "directory.example.nz" }],
+    });
   });
 });

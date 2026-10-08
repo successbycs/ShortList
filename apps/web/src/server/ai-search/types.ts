@@ -19,6 +19,7 @@ export type AiSearchReasonCode =
 
 export type SearchLocationContext =
   | { kind: "web_search_location"; city: string; region: string; country: string; timezone: string }
+  | { kind: "global_no_default_location" }
   | { kind: "no_web_search" };
 
 export type AiSearchConfiguration = {

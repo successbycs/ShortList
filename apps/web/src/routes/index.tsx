@@ -1,54 +1,48 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Check,
-  CheckCircle2,
   Clock3,
-  ExternalLink,
   FileSearch,
   Globe2,
   Leaf,
   Mail,
-  MapPin,
   RefreshCw,
   Search,
   ShieldCheck,
-  Sparkles,
   Wrench,
   XCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { admitPublicDomain } from "@/lib/domain-admission";
-import { TurnstileWidget } from "@/components/turnstile-widget";
 import {
   submitDomainAssessment,
   type DomainAssessmentSubmissionResult,
 } from "@/functions/submit-domain-assessment";
-import type { StoredAiEvidence } from "@/server/ai-evidence-repository";
+import type { StoredGeoAssessment } from "@/server/geo-assessment-repository";
+import type { StoredAssessmentResult } from "@/server/live-assessment";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ShortList — See the web result and model view" },
+      { title: "ShortList — Your website assessment" },
       {
         name: "description",
         content:
-          "A dated, evidence-based look at how your Auckland business appears online, plus a clearly separate model-knowledge view.",
+          "A clear website assessment that turns your public website into buyer profiles, questions, and practical findings.",
       },
-      { property: "og:title", content: "ShortList — See the web result and model view" },
+      { property: "og:title", content: "ShortList — Your website assessment" },
       {
         property: "og:description",
         content:
-          "A dated, evidence-based look at how your Auckland business appears online, plus a clearly separate model-knowledge view.",
+          "A clear website assessment that turns your public website into buyer profiles, questions, and practical findings.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -57,28 +51,14 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Screen =
-  | "entry"
-  | "refusal"
-  | "progress"
-  | "teaser"
-  | "confirmation"
-  | "result"
-  | "consent"
-  | "entitlement"
-  | "rateLimit"
-  | "exhausted"
-  | "failure";
+type Screen = "entry" | "refusal" | "progress" | "reveal" | "result" | "failure";
 
 export function Index() {
   const [screen, setScreen] = useState<Screen>("entry");
-  const [domain, setDomain] = useState("harbourhandyman.co.nz");
+  const [domain, setDomain] = useState("lawnrite.co.nz");
   const [domainError, setDomainError] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [submissionResult, setSubmissionResult] = useState<DomainAssessmentSubmissionResult>();
   const [email, setEmail] = useState("");
-  const [deliveryConsent, setDeliveryConsent] = useState(false);
-  const [marketingConsent, setMarketingConsent] = useState(false);
   const [emailError, setEmailError] = useState("");
   const submitAssessment = useServerFn(submitDomainAssessment);
   const assessmentResult = getAssessmentResult(submissionResult);
@@ -101,21 +81,15 @@ export function Index() {
       return;
     }
 
-    if (!turnstileToken) {
-      setDomainError("Complete the security check before we assess your website.");
-      return;
-    }
-
     setDomain(admission.normalisedDomain);
     setDomainError("");
     setScreen("progress");
     const result = await submitAssessment({
-      data: { domain: admission.normalisedDomain, turnstileToken },
+      data: { domain: admission.normalisedDomain },
     });
     setSubmissionResult(result);
-    setTurnstileToken(null);
     if (result.kind === "completed" || result.kind === "cached") {
-      setScreen("teaser");
+      setScreen("reveal");
       return;
     }
     if (result.kind === "invalid_input") {
@@ -126,18 +100,14 @@ export function Index() {
     setScreen("failure");
   }
 
-  function submitEmail(event: FormEvent) {
+  function revealReport(event: FormEvent) {
     event.preventDefault();
     if (!email.includes("@") || !email.includes(".")) {
       setEmailError("Enter a valid email address.");
       return;
     }
-    if (!deliveryConsent) {
-      setEmailError("Please agree to receive this report by email.");
-      return;
-    }
     setEmailError("");
-    setScreen("confirmation");
+    setScreen("result");
   }
 
   return (
@@ -154,11 +124,11 @@ export function Index() {
             <span className="display-face truncate text-2xl font-bold">ShortList</span>
           </button>
           <div className="hidden items-center gap-2 text-sm font-medium text-muted-foreground sm:flex">
-            <MapPin className="size-4 text-coral" aria-hidden="true" /> Made for Auckland small
-            businesses
+            <Globe2 className="size-4 text-coral" aria-hidden="true" /> For small businesses,
+            wherever they are
           </div>
           <div className="flex items-center gap-1 text-xs font-semibold sm:hidden">
-            <MapPin className="size-4 text-coral" aria-hidden="true" /> Auckland
+            <Globe2 className="size-4 text-coral" aria-hidden="true" /> Global
           </div>
         </div>
       </header>
@@ -169,40 +139,22 @@ export function Index() {
             domain={domain}
             setDomain={setDomain}
             error={domainError}
-            onTurnstileTokenChange={setTurnstileToken}
             onSubmit={submitDomain}
           />
         )}
         {screen === "refusal" && <Refusal onBack={() => setScreen("entry")} />}
         {screen === "progress" && <AssessmentProgress domain={domain} result={submissionResult} />}
-        {screen === "teaser" && assessmentResult && (
-          <Teaser result={assessmentResult} onRequest={() => setScreen("consent")} />
-        )}
-        {screen === "confirmation" && (
-          <Confirmation
+        {screen === "reveal" && assessmentResult && (
+          <ReportReveal
             email={email}
-            onConfirm={() => setScreen("result")}
-            onChange={() => setScreen("consent")}
+            setEmail={setEmail}
+            error={emailError}
+            onSubmit={revealReport}
           />
         )}
         {screen === "result" && assessmentResult && (
           <SearchResult result={assessmentResult} onStartOver={() => setScreen("entry")} />
         )}
-        {screen === "consent" && (
-          <Consent
-            email={email}
-            setEmail={setEmail}
-            deliveryConsent={deliveryConsent}
-            setDeliveryConsent={setDeliveryConsent}
-            marketingConsent={marketingConsent}
-            setMarketingConsent={setMarketingConsent}
-            error={emailError}
-            onSubmit={submitEmail}
-          />
-        )}
-        {screen === "entitlement" && <Entitlement onStartOver={() => setScreen("entry")} />}
-        {screen === "rateLimit" && <RateLimit onStartOver={() => setScreen("entry")} />}
-        {screen === "exhausted" && <ExhaustedEntitlement onStartOver={() => setScreen("entry")} />}
         {screen === "failure" && submissionResult && (
           <Failure result={submissionResult} onRetry={() => setScreen("entry")} />
         )}
@@ -210,7 +162,7 @@ export function Index() {
 
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 border-t border-border px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p>Specific evidence, plainly explained. No account required.</p>
-        <p>ShortList prototype · Auckland, Aotearoa</p>
+        <p>ShortList prototype · global public-web assessment</p>
       </footer>
     </main>
   );
@@ -218,7 +170,7 @@ export function Index() {
 
 function getAssessmentResult(
   result: DomainAssessmentSubmissionResult | undefined,
-): StoredAiEvidence | undefined {
+): StoredAssessmentResult | undefined {
   return result?.kind === "completed" || result?.kind === "cached" ? result.result : undefined;
 }
 
@@ -232,28 +184,26 @@ function Entry({
   domain,
   setDomain,
   error,
-  onTurnstileTokenChange,
   onSubmit,
 }: {
   domain: string;
   setDomain: (value: string) => void;
   error: string;
-  onTurnstileTokenChange: (token: string | null) => void;
   onSubmit: (event: FormEvent) => void;
 }) {
   return (
     <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(340px,.75fr)] lg:gap-16">
       <div>
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-sun-soft px-3 py-1.5 text-xs font-bold uppercase">
-          <Leaf className="size-4" aria-hidden="true" /> A quick public-web check
+          <Leaf className="size-4" aria-hidden="true" /> Checking AI search on your behalf
         </div>
         <h1 className="display-face max-w-3xl text-5xl leading-[1.02] font-bold sm:text-7xl">
-          See what customers, the web, and AI knowledge can tell you.
+          See how your website speaks to the people you want to reach.
         </h1>
         <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-          We’ll look at your public website, then show two clearly labelled AI views: one
-          current-web result and one no-web model-knowledge result. Evidence first. Grand claims
-          firmly left at the gate.
+          We assess your public website, then turn what it says into buyer profiles, likely
+          questions, and practical LLM findings. Your website evidence and the model's
+          interpretation stay clearly labelled.
         </p>
         <form className="mt-8 max-w-xl" onSubmit={onSubmit} noValidate>
           <label htmlFor="domain" className="mb-2 block text-sm font-bold">
@@ -292,7 +242,6 @@ function Entry({
               Use your own domain, not a social-media profile.
             </p>
           )}
-          <TurnstileWidget onTokenChange={onTurnstileTokenChange} />
         </form>
       </div>
       <WebsiteSketch />
@@ -304,7 +253,7 @@ function WebsiteSketch() {
   return (
     <div className="relative mx-auto w-full max-w-md" aria-hidden="true">
       <div className="absolute -top-5 -right-2 rotate-3 rounded-sm border border-ink bg-sun px-3 py-2 text-xs font-bold shadow-[3px_3px_0_var(--ink)]">
-        PUBLIC WEB ONLY
+        AI SEARCH CHECK
       </div>
       <div className="overflow-hidden rounded-lg border-2 border-ink bg-card shadow-[8px_8px_0_var(--ink)]">
         <div className="flex items-center gap-2 border-b-2 border-ink bg-secondary px-4 py-3">
@@ -371,45 +320,79 @@ function AssessmentProgress({
   domain: string;
   result: DomainAssessmentSubmissionResult | undefined;
 }) {
+  const assessmentStages = [
+    ["Website opened", "Checking that public pages are reachable."],
+    ["Business details checked", "Reading services, proof, and service-area information."],
+    ["Buyer profile identified", "Creating three evidence-led buyer profiles."],
+    ["Questions buyers ask AI", "Identifying the questions those buyers are likely to ask."],
+    [
+      "Local context checked",
+      "Using service-area evidence from the website to set the local context.",
+    ],
+    ["Compiling results for you", "Organising the website assessment into your report."],
+  ] as const;
+  const [activeStage, setActiveStage] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveStage((current) => Math.min(current + 1, assessmentStages.length - 1));
+    }, 1_150);
+    return () => window.clearInterval(timer);
+  }, [assessmentStages.length]);
+
   return (
     <StateShell
       icon={<FileSearch />}
       kicker="Assessment in progress"
       title="Following the public trail."
-      body="Your submitted domain stays visible while secure server-side checks assemble dated public evidence."
+      body="Your submitted domain stays visible while secure server-side checks assemble dated public website evidence and LLM findings."
     >
       <div className="mt-5 flex items-center gap-2 rounded-md border border-border bg-card px-4 py-3 text-sm font-bold">
         <Globe2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
         <span className="truncate">{domain}</span>
       </div>
       <div className="mt-7 overflow-hidden rounded-md border border-border bg-card">
-        <div className="relative h-2 overflow-hidden bg-leaf-soft">
-          <div className="scan-line absolute inset-y-0 w-1/3 bg-leaf" />
+        <div className="h-2 overflow-hidden bg-sun-soft" aria-hidden="true">
+          <div
+            className="h-full bg-leaf transition-[width] duration-700 ease-out"
+            style={{ width: `${((activeStage + 1) / assessmentStages.length) * 100}%` }}
+          />
         </div>
-        <ul className="divide-y divide-border">
-          {[
-            ["Website opened", "Public pages are reachable", true],
-            ["Business details checked", "Services and Auckland signals found", true],
-            ["Current-web result", "One specific question, stamped in time", false],
-            ["Model-knowledge result", "A separate answer with no live web search", false],
-          ].map(([title, note, done]) => (
-            <li key={String(title)} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 p-4">
-              <span
-                className={cn(
-                  "mt-0.5 grid size-6 place-items-center rounded-full",
-                  done ? "bg-leaf text-primary-foreground" : "bg-sun-soft text-ink",
-                )}
+        <ul className="divide-y divide-border" aria-live="polite">
+          {assessmentStages.map(([title, note], index) => {
+            const isComplete = index < activeStage;
+            const isActive = index === activeStage;
+            return (
+              <li
+                key={title}
+                data-state={isComplete ? "complete" : isActive ? "active" : "pending"}
+                data-testid={`assessment-stage-${index}`}
+                className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 p-4"
               >
-                {done ? <Check className="size-4" /> : <Clock3 className="size-4" />}
-              </span>
-              <div>
-                <p className="font-bold">{title}</p>
-                <p className="text-sm text-muted-foreground">{note}</p>
-              </div>
-            </li>
-          ))}
+                <span
+                  className={cn(
+                    "mt-0.5 grid size-6 place-items-center rounded-full",
+                    isComplete
+                      ? "bg-leaf text-primary-foreground"
+                      : isActive
+                        ? "bg-sun text-ink ring-2 ring-sun/40 ring-offset-2"
+                        : "bg-sun-soft text-ink",
+                  )}
+                >
+                  {isComplete ? <Check className="size-4" /> : <Clock3 className="size-4" />}
+                </span>
+                <div>
+                  <p className="font-bold">{title}</p>
+                  <p className="text-sm text-muted-foreground">{note}</p>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </div>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Showing the assessment sequence while your result is prepared.
+      </p>
       {result ? (
         <p className="mt-6 text-sm text-muted-foreground" role="status">
           {result.kind === "limited"
@@ -421,333 +404,25 @@ function AssessmentProgress({
   );
 }
 
-function Teaser({ result, onRequest }: { result: StoredAiEvidence; onRequest: () => void }) {
-  return (
-    <div>
-      <div className="mb-8 max-w-3xl">
-        <p className="mb-3 text-sm font-bold uppercase text-primary">
-          {result.normalisedDomain} · first look
-        </p>
-        <h1 className="display-face text-4xl font-bold sm:text-6xl">
-          A public website can give us something solid to work with.
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Here is the bounded evidence captured for this website. The dated AI views remain separate
-          and are shown after you confirm the delivery address.
-        </p>
-      </div>
-      <div className="grid gap-5 md:grid-cols-2">
-        <EvidenceBlock
-          tone="leaf"
-          title="What we observed"
-          icon={<CheckCircle2 />}
-          items={[
-            result.excerpt,
-            `Assessment recorded at ${formatAucklandTime(result.triggeredAtUtc)}.`,
-            "The fuller result keeps current-web evidence separate from model knowledge.",
-          ]}
-        />
-        <EvidenceBlock
-          tone="sun"
-          title="What this may suggest"
-          icon={<Sparkles />}
-          items={[
-            "The current-web view is a dated observation, not a permanent ranking.",
-            "The model-knowledge view does not use a live web search.",
-            "The next screen shows only the stored result for this assessment.",
-          ]}
-        />
-      </div>
-      <section
-        aria-label="Locked fuller result preview"
-        className="relative mt-8 overflow-hidden rounded-lg border-2 border-ink bg-card p-5 shadow-[5px_5px_0_var(--ink)]"
-      >
-        <div className="pointer-events-none select-none blur-sm" aria-hidden="true">
-          <p className="text-xs font-bold uppercase text-muted-foreground">Fuller result preview</p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <div className="h-20 rounded bg-leaf-soft" />
-            <div className="h-20 rounded bg-sun-soft" />
-          </div>
-        </div>
-        <div className="absolute inset-0 grid place-items-center bg-card/65 px-5 text-center">
-          <div>
-            <p className="font-bold">The fuller on-page result is ready to unlock.</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Enter an email and confirm it in this local demo. No email is sent.
-            </p>
-          </div>
-        </div>
-      </section>
-      <div className="mt-7 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-lg text-sm text-muted-foreground">
-          The full result keeps the dated current-web and no-web model-knowledge views separate.
-        </p>
-        <Button onClick={onRequest} size="lg" className="h-12">
-          Send my free assessment <ArrowRight />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function EvidenceBlock({
-  title,
-  icon,
-  items,
-  tone,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  items: string[];
-  tone: "leaf" | "sun";
-}) {
-  return (
-    <section
-      className={cn(
-        "rounded-lg border-2 border-ink p-5 shadow-[5px_5px_0_var(--ink)] sm:p-6",
-        tone === "leaf" ? "bg-leaf-soft" : "bg-sun-soft",
-      )}
-    >
-      <h2 className="display-face flex items-center gap-3 text-2xl font-bold">
-        {icon}
-        {title}
-      </h2>
-      <ul className="mt-5 space-y-4">
-        {items.map((item) => (
-          <li key={item} className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
-            <span className="mt-2 size-2 rounded-full bg-ink" />
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-function SearchResult({
-  result,
-  onStartOver,
-}: {
-  result: StoredAiEvidence;
-  onStartOver: () => void;
-}) {
-  const currentWeb = result.currentWeb;
-  const modelKnowledge = result.modelKnowledge;
-  return (
-    <div className="mx-auto max-w-4xl">
-      <div className="flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-bold uppercase text-primary">Two distinct AI views</p>
-          <h1 className="display-face mt-2 text-4xl font-bold sm:text-5xl">
-            Keep current-web evidence and model knowledge separate.
-          </h1>
-        </div>
-        <div className="rounded-md bg-ink px-4 py-3 text-sm font-semibold text-primary-foreground">
-          <Clock3 className="mr-2 inline size-4" aria-hidden="true" />
-          {formatAucklandTime(result.triggeredAtUtc)}
-          <br />
-          <span className="font-normal opacity-80">Auckland, New Zealand</span>
-        </div>
-      </div>
-      <section
-        aria-labelledby="current-web-title"
-        className="mt-6 rounded-lg border-2 border-ink bg-card p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7"
-      >
-        <div className="flex items-start gap-3">
-          <Search className="mt-1 size-6 shrink-0 text-primary" aria-hidden="true" />
-          <div>
-            <p className="text-xs font-bold uppercase text-muted-foreground">Current-web result</p>
-            <h2 id="current-web-title" className="display-face mt-1 text-2xl font-bold sm:text-3xl">
-              {currentWeb.question}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This result uses a live web-search tool. Sources are shown where available.
-            </p>
-          </div>
-        </div>
-        <ol className="mt-7 divide-y divide-border border-y border-border">
-          {currentWeb.observedResults.map(({ position, name, summary }) => (
-            <li
-              key={`${position}-${name}`}
-              className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-5"
-            >
-              <span className="display-face grid size-10 place-items-center rounded-full bg-sun text-xl font-bold text-ink">
-                {position}
-              </span>
-              <div className="min-w-0">
-                <h3 className="text-lg font-bold">{name}</h3>
-                <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <MapPin className="size-4 shrink-0" aria-hidden="true" />
-                  {summary}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        {currentWeb.citations.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2" aria-label="Current-web sources">
-            {currentWeb.citations.map((citation) => (
-              <a
-                key={citation.url}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-2.5 py-1 text-xs font-semibold hover:bg-sun-soft"
-                href={citation.url}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <ExternalLink className="size-3" aria-hidden="true" />
-                {citation.title}
-              </a>
-            ))}
-          </div>
-        )}
-        <div className="mt-5 flex items-start gap-3 rounded-md bg-sun-soft p-4 text-sm">
-          <AlertTriangle className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-          <p>
-            <strong>
-              This is the order returned in this specific dated current-web test. Results may vary.
-            </strong>
-          </p>
-        </div>
-      </section>
-      <section
-        aria-labelledby="model-knowledge-title"
-        className="mt-7 rounded-lg border-2 border-ink bg-secondary p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7"
-      >
-        <div className="flex items-start gap-3">
-          <Sparkles className="mt-1 size-6 shrink-0 text-coral" aria-hidden="true" />
-          <div>
-            <p className="text-xs font-bold uppercase text-muted-foreground">
-              Model-knowledge result · no live web search
-            </p>
-            <h2
-              id="model-knowledge-title"
-              className="display-face mt-1 text-2xl font-bold sm:text-3xl"
-            >
-              {modelKnowledge.question}
-            </h2>
-          </div>
-        </div>
-        <ol className="mt-6 divide-y divide-border border-y border-border">
-          {modelKnowledge.observedResults.map(({ position, name, summary }) => (
-            <li
-              key={`${position}-${name}`}
-              className="grid grid-cols-[auto_minmax(0,1fr)] gap-4 py-5"
-            >
-              <span className="display-face grid size-10 place-items-center rounded-full bg-coral-soft text-xl font-bold text-ink">
-                {position}
-              </span>
-              <div className="min-w-0">
-                <h3 className="text-lg font-bold">{name}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{summary}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-5 flex items-start gap-3 rounded-md bg-coral-soft p-4 text-sm">
-          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-coral" aria-hidden="true" />
-          <p>
-            <strong>
-              This response did not use a live web search. It may be incomplete or out of date and
-              is not a verified current result.
-            </strong>
-          </p>
-        </div>
-      </section>
-      <section className="mt-8 rounded-lg border-2 border-dashed border-border bg-paper p-5">
-        <p className="text-xs font-bold uppercase text-muted-foreground">Future MVP 2</p>
-        <h2 className="display-face mt-1 text-2xl font-bold">
-          A deeper paid assessment belongs here later.
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Pricing, payment and the paid scope are not decided or active in this prototype.
-        </p>
-        <Button disabled className="mt-4">
-          Future full assessment
-        </Button>
-      </section>
-      <div className="mt-7 flex justify-end">
-        <Button variant="outline" className="h-12 bg-card" onClick={onStartOver}>
-          <ArrowLeft /> Check another website
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function formatAucklandTime(value: string): string {
-  return new Intl.DateTimeFormat("en-NZ", {
-    dateStyle: "long",
-    timeStyle: "short",
-    timeZone: "Pacific/Auckland",
-  }).format(new Date(value));
-}
-
-function maskEmail(email: string) {
-  const [local, domain] = email.trim().split("@");
-  return `${local?.slice(0, 1) ?? ""}•••@${domain ?? ""}`;
-}
-
-function Confirmation({
-  email,
-  onConfirm,
-  onChange,
-}: {
-  email: string;
-  onConfirm: () => void;
-  onChange: () => void;
-}) {
-  return (
-    <StateShell
-      icon={<Mail />}
-      kicker="One last check"
-      title="Is this the right email?"
-      body="This prototype only confirms your intended delivery address. It does not send mail or prove mailbox ownership."
-    >
-      <div className="mt-6 rounded-md border-2 border-ink bg-leaf-soft p-5">
-        <p className="text-sm font-bold uppercase">Assessment for</p>
-        <p className="mt-1 text-xl font-bold" data-testid="masked-email">
-          {maskEmail(email)}
-        </p>
-      </div>
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <Button className="h-12" onClick={onConfirm}>
-          Confirm and reveal result <ArrowRight />
-        </Button>
-        <Button variant="outline" className="h-12 bg-card" onClick={onChange}>
-          Change email
-        </Button>
-      </div>
-    </StateShell>
-  );
-}
-
-function Consent({
+function ReportReveal({
   email,
   setEmail,
-  deliveryConsent,
-  setDeliveryConsent,
-  marketingConsent,
-  setMarketingConsent,
   error,
   onSubmit,
 }: {
   email: string;
   setEmail: (value: string) => void;
-  deliveryConsent: boolean;
-  setDeliveryConsent: (value: boolean) => void;
-  marketingConsent: boolean;
-  setMarketingConsent: (value: boolean) => void;
   error: string;
   onSubmit: (event: FormEvent) => void;
 }) {
   return (
     <StateShell
       icon={<Mail />}
-      kicker="Report delivery"
-      title="Where should we send it?"
-      body="No account is required. We only need permission to deliver this assessment."
+      kicker="Your assessment is ready"
+      title="See your free website report."
+      body="Enter an email address to reveal this report on this device. We do not send email or create a delivery record at this stage."
     >
-      <form className="mt-7" onSubmit={onSubmit} noValidate>
+      <form className="mt-7 max-w-xl" onSubmit={onSubmit} noValidate>
         <label htmlFor="email" className="mb-2 block text-sm font-bold">
           Email address
         </label>
@@ -762,127 +437,197 @@ function Consent({
           className="h-12 border-2 bg-card text-base"
         />
         <p id="email-help" className="mt-2 text-sm text-muted-foreground">
-          When delivery is connected, the service will send a private PDF attachment here after the
-          provider accepts it.
+          This is a local reveal step. PDF and email delivery will be offered separately in a later
+          release.
         </p>
-        <div className="mt-6 space-y-4 border-t border-border pt-5">
-          <label className="grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-3">
-            <Checkbox
-              className="mt-0.5 size-5"
-              checked={deliveryConsent}
-              onCheckedChange={(value) => setDeliveryConsent(value === true)}
-            />
-            <span>
-              <strong className="block">
-                Email me this assessment <span className="text-destructive">(required)</span>
-              </strong>
-              <span className="text-sm text-muted-foreground">
-                I agree to ShortList sending this report and essential delivery updates.
-              </span>
-            </span>
-          </label>
-          <label className="grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] gap-3">
-            <Checkbox
-              className="mt-0.5 size-5"
-              checked={marketingConsent}
-              onCheckedChange={(value) => setMarketingConsent(value === true)}
-            />
-            <span>
-              <strong className="block">
-                Send occasional practical tips{" "}
-                <span className="font-normal text-muted-foreground">(optional)</span>
-              </strong>
-              <span className="text-sm text-muted-foreground">
-                News and useful ideas for improving public visibility. Unsubscribe anytime.
-              </span>
-            </span>
-          </label>
-        </div>
-        {error && (
-          <p
-            id="email-error"
-            role="alert"
-            className="mt-4 flex items-center gap-2 text-sm font-semibold text-destructive"
-          >
-            <AlertTriangle className="size-4 shrink-0" />
+        {error ? (
+          <p id="email-error" className="mt-3 text-sm font-semibold text-destructive" role="alert">
             {error}
           </p>
-        )}
-        <Button type="submit" size="lg" className="mt-6 h-12 w-full sm:w-auto">
-          Send my assessment <ArrowRight />
+        ) : null}
+        <Button type="submit" size="lg" className="mt-6 h-12">
+          See free report now <ArrowRight />
         </Button>
       </form>
     </StateShell>
   );
 }
 
-function Entitlement({ onStartOver }: { onStartOver: () => void }) {
+function SearchResult({
+  result,
+  onStartOver,
+}: {
+  result: StoredAssessmentResult;
+  onStartOver: () => void;
+}) {
+  if (isStoredGeoAssessment(result)) {
+    return <GeoSearchResult result={result} onStartOver={onStartOver} />;
+  }
   return (
-    <StateShell
-      icon={<CheckCircle2 />}
-      kicker="Future delivery state"
-      title="A report would be on its way."
-      body="This local frontend demo does not send email. When delivery is implemented, provider acceptance will mean a private PDF attachment has been handed to the email provider — not that it has reached an inbox."
-    >
-      <div className="mt-6 rounded-md border-2 border-ink bg-leaf-soft p-5">
-        <p className="font-bold">Future resend path</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The later delivery service will handle bounded retries and a recipient-safe resend path.
-          This button is visual only.
+    <div className="mx-auto max-w-3xl">
+      <section className="rounded-lg border-2 border-ink bg-card p-6 shadow-[6px_6px_0_var(--ink)]">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Saved assessment</p>
+        <h1 className="display-face mt-2 text-3xl font-bold">
+          This earlier assessment needs a refresh.
+        </h1>
+        <p className="mt-3 text-muted-foreground">
+          {result.normalisedDomain} was assessed with an older result format. ShortList now uses a
+          website-led report with buyer profiles and stored LLM findings, so it will not show an old
+          external-search view in its place.
         </p>
-        <Button variant="outline" className="mt-4 h-11 bg-card">
-          <RefreshCw /> Preview resend state
+      </section>
+      <div className="mt-7 flex justify-end">
+        <Button variant="outline" className="h-12 bg-card" onClick={onStartOver}>
+          <ArrowLeft /> Check another website
         </Button>
       </div>
-      <Button variant="ghost" className="mt-5 h-11" onClick={onStartOver}>
-        <ArrowLeft /> Check another website
-      </Button>
-    </StateShell>
+    </div>
   );
 }
 
-function RateLimit({ onStartOver }: { onStartOver: () => void }) {
+function GeoSearchResult({
+  result,
+  onStartOver,
+}: {
+  result: StoredGeoAssessment;
+  onStartOver: () => void;
+}) {
+  const businessName = result.profile.businessName?.value ?? result.normalisedDomain;
+  const modelFindings = result.findings.model_knowledge;
+  const serviceAreas = result.profile.serviceAreas.map((area) => area.value);
+  const overview = [
+    result.profile.valuePropositions.map((item) => item.value).join(" "),
+    result.profile.services.length > 0
+      ? `Services identified: ${result.profile.services.map((service) => service.value).join(", ")}.`
+      : "The website did not make its services clear enough to identify.",
+    serviceAreas.length > 0 ? `Service areas: ${serviceAreas.join(", ")}.` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
-    <StateShell
-      icon={<Clock3 />}
-      kicker="Please pause"
-      title="Too many requests from this browser."
-      body="To keep the future service fair and affordable, it will limit repeated requests. This is a visual prototype state only; no browser or IP address is stored here."
-    >
-      <div className="mt-6 rounded-md border-2 border-ink bg-sun-soft p-5">
-        <p className="font-bold">Try again later</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The final waiting period and privacy-minimised abuse controls will be defined in the
-          safety implementation packet.
-        </p>
+    <div className="mx-auto max-w-5xl">
+      <div className="flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-bold uppercase text-primary">Your website assessment</p>
+          <h1 className="display-face mt-2 text-4xl font-bold sm:text-5xl">
+            A practical first look at {businessName}.
+          </h1>
+        </div>
+        <div className="rounded-md bg-ink px-4 py-3 text-sm font-semibold text-primary-foreground">
+          <Clock3 className="mr-2 inline size-4" aria-hidden="true" />
+          {formatUtcTime(result.triggeredAtUtc)}
+          <br />
+          <span className="font-normal opacity-80">UTC observation time</span>
+        </div>
       </div>
-      <Button className="mt-6 h-11" onClick={onStartOver}>
-        <ArrowLeft /> Back to website entry
-      </Button>
-    </StateShell>
+
+      <section className="mt-6 rounded-lg border-2 border-ink bg-card p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Website assessed</p>
+        <h2 className="display-face mt-1 text-2xl font-bold">{result.normalisedDomain}</h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          We read the public website and asked the model to organise what it found. This report does
+          not show an external web-search ranking.
+        </p>
+      </section>
+
+      <section className="mt-7 rounded-lg border-2 border-ink bg-leaf-soft p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Business overview</p>
+        <h2 className="display-face mt-1 text-2xl font-bold">What the website says about you</h2>
+        <p className="mt-3 text-base leading-7 text-muted-foreground">
+          {overview || result.excerpt}
+        </p>
+        {result.profile.limitations.length > 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            <strong>Evidence limits:</strong> {result.profile.limitations.join(" ")}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="mt-7" aria-labelledby="buyer-profiles-title">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Buyer profiles</p>
+        <h2 id="buyer-profiles-title" className="display-face mt-1 text-3xl font-bold">
+          Three people your website appears to be trying to reach.
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+          Each profile and question is an LLM interpretation of the assessed website copy. Treat it
+          as a starting point for improving your message.
+        </p>
+        <div className="mt-5 grid gap-5 md:grid-cols-3">
+          {result.icps.map((icp) => {
+            const questions = modelFindings.filter((finding) => finding.icpId === icp.id);
+            return (
+              <article
+                key={icp.id}
+                data-testid={`icp-${icp.id}`}
+                className="rounded-lg border-2 border-ink bg-secondary p-5 shadow-[5px_5px_0_var(--ink)]"
+              >
+                <h3 className="display-face text-2xl font-bold">{icp.label}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{icp.audienceDescription}</p>
+                <p className="mt-3 text-xs font-semibold text-muted-foreground">
+                  Questions they may ask
+                </p>
+                <ol className="mt-3 space-y-3">
+                  {questions.map((finding, index) => (
+                    <li
+                      key={finding.questionId}
+                      data-testid="icp-question"
+                      className="border-t border-border pt-3 text-sm"
+                    >
+                      <p className="font-bold">
+                        {index + 1}. {finding.questionText}
+                      </p>
+                      <p className="mt-1 text-muted-foreground">
+                        {finding.answerSummary ?? "The model did not retain a usable answer."}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-4 text-xs text-muted-foreground">{icp.uncertainty}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mt-7 rounded-lg border-2 border-ink bg-sun-soft p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Top findings</p>
+        <h2 className="display-face mt-1 text-2xl font-bold">What the model returned</h2>
+        <ul className="mt-4 space-y-3">
+          {modelFindings.slice(0, 3).map((finding) => (
+            <li key={finding.questionId} className="border-t border-border pt-3 text-sm">
+              <strong>{finding.questionText}</strong>
+              <span className="text-muted-foreground"> — {finding.answerSummary}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-xs text-muted-foreground">
+          These are stored LLM findings from this assessment. They are not a live-web result or a
+          permanent ranking.
+        </p>
+      </section>
+      <div className="mt-7 flex justify-end">
+        <Button variant="outline" className="h-12 bg-card" onClick={onStartOver}>
+          <ArrowLeft /> Check another website
+        </Button>
+      </div>
+    </div>
   );
 }
 
-function ExhaustedEntitlement({ onStartOver }: { onStartOver: () => void }) {
-  return (
-    <StateShell
-      icon={<AlertTriangle />}
-      kicker="Free limit reached"
-      title="This email has used its free requests."
-      body="The future service will enforce the approved free-request entitlement privately. This demonstration does not collect an email or keep a customer record."
-    >
-      <div className="mt-6 rounded-md border-2 border-ink bg-coral-soft p-5">
-        <p className="font-bold">No account has been created</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The final customer-record, duplicate-domain, and recipient-access rules belong to the
-          later email and entitlement packet.
-        </p>
-      </div>
-      <Button className="mt-6 h-11" onClick={onStartOver}>
-        <ArrowLeft /> Back to website entry
-      </Button>
-    </StateShell>
-  );
+function isStoredGeoAssessment(result: StoredAssessmentResult): result is StoredGeoAssessment {
+  return "profile" in result && "findings" in result;
+}
+
+function formatUtcTime(value: string): string {
+  return new Intl.DateTimeFormat("en-NZ", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  }).format(new Date(value));
 }
 
 function Failure({
@@ -932,31 +677,27 @@ function Failure({
           assessment.
         </p>
       ) : null}
+      {content.supportRef ? (
+        <p className="mt-4 text-xs text-muted-foreground">
+          Support reference: {content.supportRef}
+        </p>
+      ) : null}
     </StateShell>
   );
 }
 
 function failureContent(result: DomainAssessmentSubmissionResult) {
   switch (result.kind) {
-    case "verification_failed":
-      return {
-        kind: result.kind,
-        kicker: "Security check needed",
-        title: "We couldn’t verify the security check.",
-        body: "Refresh the page and try the security check again before submitting your website.",
-        nextStepsTitle: "What you can do",
-        nextSteps: ["Refresh this page.", "Complete the security check and try again."],
-        retryLabel: "Try again",
-      };
     case "assessment_unavailable":
       return {
         kind: result.kind,
         kicker: "Assessment unavailable",
         title: "The assessment service is temporarily unavailable.",
-        body: "No assessment was made for this website. Please try again shortly.",
+        body: "Your assessment could not be completed. Please try again shortly.",
         nextStepsTitle: "What you can do",
         nextSteps: ["Try again shortly."],
         retryLabel: "Try again",
+        supportRef: result.supportRef,
       };
     case "admission_rejected":
       return {

@@ -41,11 +41,10 @@ flowchart TD
     Evidence --> Decision{Enough safe evidence?}
     Decision -->|No| Limited
     Decision -->|Yes, GEO packet| Profile[Profile → 3 ICPs → 9 buyer questions]
-    Profile --> Evaluation[Same questions in current-web and no-web modes]
+    Profile --> Evaluation[Run approved LLM evaluation stages]
     Evaluation -->|Write, GEO packet| AiEvidence[(D1: GEO assessment graph)]
-    Evidence -->|Current #10 prototype teaser| Teaser[Honest on-page teaser]
-    Evaluation -->|Later MVP 1| Teaser
-    Teaser --> Visitor
+    Evaluation --> Report[Current increment: on-page report\nafter local email reveal]
+    Report --> Visitor
     Limited --> Visitor
     Refusal --> Visitor
 ```
@@ -67,7 +66,7 @@ flowchart TD
     Admission -->|Yes| Fetch[Fetch and extract public website evidence]
     Fetch -->|Insufficient or unreadable| EvidenceLimited[We could not make a fair assessment\nStore a limited assessment run]
     Fetch -->|Enough evidence| Profile[Build profile, ICPs and buyer questions]
-    Profile --> Ai[Run the same nine questions in two AI modes]
+    Profile --> Ai[Run approved LLM evaluation stages\nand persist structured findings]
     Ai --> Complete[Return the completed assessment]
 ```
 
@@ -100,7 +99,7 @@ limited-evidence screen cannot be used to diagnose an entry-path failure.
 | TanStack server function | The private application boundary: validates the domain, applies admission/control rules, coordinates the assessment, and returns a deliberately narrow result. | Yes; it can use Worker bindings and secrets. |
 | Cloudflare D1 | The relational system of record for customers, assessment runs, and evidence. | Yes; it is not publicly queryable by domain name. |
 | Public business website | Supplies public page content only after the safe-fetch rules allow it. | It is treated as untrusted input. |
-| AI provider (GEO packet) | Produces a profile/ICP/question package and two separately labelled evaluations of the same questions after approved evidence and cost controls. | Its API key remains server-side. |
+| AI provider (GEO packet) | Produces the profile/ICP/question package and structured findings from approved website evidence after cost controls. Any configured evaluation modes remain explicit record provenance, not a customer-facing ranking promise. | Its API key remains server-side. |
 
 ## Database writes for the current assessment path
 
@@ -128,6 +127,10 @@ request alone:
 - Discord alerting for a limited-evidence case;
 - the configurable GEO prompt package, model evaluations and cost recording;
 - a public deployment at `shortlist.successbycs.com`.
+
+The current on-page report increment is owned by #57 after #55's assessment
+graph is accepted. It uses the same retained assessment records; its local
+email reveal is not a recipient, consent, PDF, or delivery capability.
 
 Those later components will extend the same assessment record rather than
 creating a second source of truth. The approved architecture decision is in

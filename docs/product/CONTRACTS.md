@@ -116,6 +116,17 @@ received/read.
 
 ## 5. Entitlement, email confirmation, private result, and delivery contract
 
+### Current on-page report increment
+
+Before the recipient/delivery contract is implemented, #57 may use an email
+field only as local browser state to reveal the on-page assessment. It must not
+write a recipient record, state that consent was retained, start a delivery
+attempt, generate a PDF, or call the value an email-confirmed private report.
+The report renderer consumes the stored website-evidence, profile, ICP,
+question, and finding graph; it does not call an AI provider while rendering.
+Website-derived observations, LLM interpretation, and uncertainty remain
+separately labelled.
+
 | Contract                | Required state                                                                                                                                                      | Idempotency / privacy rule                                                                                                                                                        |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Entitlement decision v1 | recipient ID, request time, lifetime used count, allowlist decision, duplicate/resend/exhausted outcome                                                             | Same normalised recipient/domain is idempotent: no new assessment or allowance. Chris allowlist is server-only and does not bypass safety controls.                               |
