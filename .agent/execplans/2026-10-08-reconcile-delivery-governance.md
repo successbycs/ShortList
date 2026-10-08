@@ -32,6 +32,7 @@ The owner authorised closure of GitHub Issues only when every task and acceptanc
 - The checked-in web dependency state includes both `package-lock.json` and `bun.lock`, no `packageManager`, a Nitro prerelease, and a `rolldown` override.
 - Local Wrangler type generation writes optional logs beneath the user config path. In the sandbox that path is read-only, so verification uses a disposable `XDG_CONFIG_HOME`; the generated type output is unchanged.
 - npm audit reports three high-severity development-chain advisories under Wrangler/Miniflare/Sharp. Its offered change is a major Wrangler transition and needs its own compatibility packet.
+- The first remote CI run passed the new `web-quality` gate but failed the legacy Python harness: its bootstrap tests copied the now-bootstrapped ShortList repository while expecting an unbootstrapped `src/app_template` fixture. The test must build its own minimal template fixture.
 
 ## Decision Log
 

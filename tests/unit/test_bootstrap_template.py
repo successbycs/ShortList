@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import shutil
 import subprocess
 import sys
 from importlib.util import module_from_spec, spec_from_file_location
@@ -20,12 +19,52 @@ main = MODULE.main
 
 @pytest.fixture
 def copied_template(tmp_path: Path) -> Path:
-    root = Path(__file__).resolve().parents[2]
-    if (root / MODULE.STATE_FILE).exists():
-        pytest.skip("bootstrap self-tests require the unbootstrapped source template")
     destination = tmp_path / "template-copy"
-    ignored = shutil.ignore_patterns(".git", ".venv", "var", "__pycache__")
-    shutil.copytree(root, destination, ignore=ignored)
+    package = destination / "src" / "app_template"
+    package.mkdir(parents=True)
+    (destination / "tests").mkdir()
+    scripts = destination / "scripts"
+    scripts.mkdir()
+
+    (destination / "pyproject.toml").write_text(
+        """[project]
+name = "app-template"
+
+[project.scripts]
+app-template = "app_template.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/app_template"]
+
+[tool.app-template.github]
+repository = "successbycs/template"
+""",
+        encoding="utf-8",
+    )
+    (destination / "README.md").write_text("# App Template\n", encoding="utf-8")
+    (destination / "WORKFLOW.md").write_text("repo: successbycs/template\n", encoding="utf-8")
+    (destination / "compose.yaml").write_text("services: {}\n", encoding="utf-8")
+    (scripts / "prove_deployed_software.py").write_text(
+        "from app_template.audit import AuditStore\n",
+        encoding="utf-8",
+    )
+    (scripts / "install_upstream_symphony.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (scripts / "run_upstream_symphony_dashboard.sh").write_text(
+        "#!/usr/bin/env bash\n",
+        encoding="utf-8",
+    )
+    (package / "__init__.py").write_text('__version__ = "0.1.0"\n', encoding="utf-8")
+    (package / "audit.py").write_text("class AuditStore: pass\n", encoding="utf-8")
+    (package / "config.py").write_text(
+        'def default_name() -> str:\n    return "app-template"\n',
+        encoding="utf-8",
+    )
+    (package / "cli.py").write_text(
+        "import argparse\n\n"
+        "parser = argparse.ArgumentParser()\n"
+        "parser.parse_args()\n",
+        encoding="utf-8",
+    )
     return destination
 
 
@@ -47,7 +86,7 @@ def test_dry_run_preserves_files(copied_template: Path, capsys: pytest.CaptureFi
 
     assert '"status": "dry-run"' in capsys.readouterr().out
     assert (copied_template / "pyproject.toml").read_text(encoding="utf-8") == original
-    assert (copied_template / "src" / "shortlist").is_dir()
+    assert (copied_template / "src" / "app_template").is_dir()
 
 
 def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> None:
@@ -65,7 +104,7 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert main(arguments) == 0
     assert main(arguments) == 0
     assert (copied_template / "src" / "demo_app").is_dir()
-    assert not (copied_template / "src" / "shortlist").exists()
+    assert not (copied_template / "src" / "app_template").exists()
     assert 'name = "demo-app"' in (copied_template / "pyproject.toml").read_text(encoding="utf-8")
     assert 'repository = "example-owner/demo-app"' in (
         copied_template / "pyproject.toml"
@@ -124,7 +163,7 @@ def test_invalid_name_and_conflict_fail_without_overwrite(copied_template: Path)
     ]
     assert main(invalid_name) == 2
     assert main(conflict) == 2
-    assert (copied_template / "src" / "shortlist").is_dir()
+    assert (copied_template / "src" / "app_template").is_dir()
 
 
 def test_invalid_github_repository_fails_without_changes(copied_template: Path) -> None:
@@ -140,4 +179,4 @@ def test_invalid_github_repository_fails_without_changes(copied_template: Path) 
     ]
 
     assert main(arguments) == 2
-    assert (copied_template / "src" / "shortlist").is_dir()
+    assert (copied_template / "src" / "app_template").is_dir()
