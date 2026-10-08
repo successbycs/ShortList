@@ -15,7 +15,7 @@ or incomplete closure.
 | --- | --- | --- | --- |
 | #56 | closed | Owner approval, remote commit `6dab1572af77810d749eb3cd08d36f2aabf1f1df`, skill provenance/licence/review-date evidence, routing guardrails, and no-side-effect boundary were re-audited. Closure evidence comment: 2026-10-08. | Closed 2026-10-08 after verified criterion audit. |
 | #48 | conditional candidate | Local truthful-failure code/test evidence exists. Its former verification-failure path must be explicitly reconciled with the approved #49 Turnstile removal, not silently marked passed. | Re-audit before any closure. |
-| #57 | partial | INC-01–INC-05 are implemented locally with focused/full suite evidence. The Issue depends on #55’s accepted evidence graph; no remote CI or release proof exists. | Keep open. |
+| #57 | partial | INC-01–INC-05 are implemented locally; PR #58 provides remote CI evidence for the current web suite, but #55’s accepted evidence graph and all release/deployment proof remain outstanding. | Keep open. |
 | #55 | partial | Typed GEO/report graph and deterministic local tests are implemented. Approved cumulative pricing/spend policy and replay/operational evidence are explicitly outstanding. | Keep open. |
 | #10 | parent / partial | Admission-lease repair is in local history and has local verification. The parent’s broader safe-assessment and production exit gates remain unresolved. | Keep open. |
 | #49 | partial | Turnstile removal is present in local source and tests. The required public page/Worker observation after deployment is unobserved. | Keep open. |
@@ -26,6 +26,7 @@ or incomplete closure.
 | #13–#16, #19–#20 | parent/release work | Privacy, E2E, UAT, launch, and learning have independent requirements and production/human gates. | Keep open. |
 | #12 | deferred MVP 2 | Paid assessment/payment work is explicitly out of the current increment. | Keep open. |
 | #26, #31–#33, #36–#46 | deferred MVP 3+ | Marketing, sales, outreach, measurement, and acquisition remain human-led future work. | Keep open. |
+| #47 | deferred architecture investigation | Symphony admission-controller work is explicitly deferred; the existing single-worker/human-handoff model remains unchanged. | Keep open. |
 | #30 | partial / blocked | Local configuration support exists, but provider selection, ownership, revocation and Cloudflare binding handoff are unresolved. | Keep open. |
 
 ## Evidence protocol

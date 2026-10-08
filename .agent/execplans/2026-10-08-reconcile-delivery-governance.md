@@ -16,12 +16,12 @@ The owner authorised closure of GitHub Issues only when every task and acceptanc
 - [x] (2026-10-08T06:46:00Z) Added the initial criterion-level Issue ledger, truthful repository/application documentation, npm toolchain policy, bounded development-agent roles, PR evidence template, and an unconditionally emitted web CI workflow.
 - [x] (2026-10-08T06:48:00Z) Ran clean npm installation; generated Worker types with a temporary writable Wrangler config path; lint completed with eight existing/generated warnings and zero errors; 113 tests, strict typecheck, production build, and whitespace check passed.
 - [x] (2026-10-08T06:48:00Z) Recorded three high-severity development-chain npm advisories as a tracked Wrangler exception; no bulk upgrade was applied.
-- [x] Create a criterion-level Issue acceptance ledger and reconcile each open Issue.
+- [ ] Complete the promised criterion-level mapping for every open Issue; the current ledger is a disposition summary and needs further granularity.
 - [x] Reconcile repository/product documentation and dependency governance.
 - [x] (2026-10-08T08:22:00Z) Proved `web-quality` remotely: PR #58 passed `verify` and `web-quality`; disposable PR #59 passed `verify` and failed `web-quality` on the deliberate non-zero test command; then closed/deleted the disposable branch without merge.
-- [x] (2026-10-08T08:22:00Z) Protected `main` with up-to-date pull requests and required `verify` plus `web-quality` status checks, including administrators; no human-review count is required for the current single-owner workflow.
+- [ ] Correct CI npm-version enforcement and remote-prove it; configure and verify an explicit pull-request requirement rather than overstating status-check protection.
 - [x] (2026-10-08T06:53:32Z) Posted criterion evidence and closed #56. Reconciled #49’s local-source wording and #53’s dependency order; production-bound Issues remain open.
-- [ ] Add bounded development-agent role contracts and perform independent handoff review.
+- [x] (2026-10-08T08:30:00Z) Added bounded development-agent roles and received Astra independent review; its blocking findings are being corrected before completion.
 
 ## Surprises & Discoveries
 
@@ -138,13 +138,9 @@ Read operations are repeatable. Preserve Issue body content before edits and re-
 
 ## Outcomes & Retrospective
 
-Initial local governance packet is complete but not remotely proven. The repository now has a web CI workflow that will emit `web-quality` for every pull request and a documented npm/Node policy, but no remote Actions run, disposable failing PR, protection/ruleset, or publication exists yet. Local verification used Node v22.22.0 and npm v11.13.0: `npm ci`; `wrangler types` with temporary XDG config; lint (zero errors, eight existing/generated warnings); 113/113 Vitest tests; `tsc --noEmit`; Vite/Nitro build; and `git diff --check`.
+PR #58 is the scoped remote evidence boundary. It has passed `verify` (Ruff, 40 Python tests, and Markdown links) and `web-quality` (locked npm install, Worker types, lint, 113 web tests, typecheck, and build). PR #59 proved regression propagation: its deliberate non-zero test command left `verify` passing and made `web-quality` fail; it was closed without merge and its local/remote branch was deleted. The Python harness repairs were necessary because product-repository tests were copying a bootstrapped repository as an unbootstrapped template, and because Markdown checking traversed generated/dependency/vendor trees.
 
-PR #58 is now the scoped remote evidence boundary. Its final GitHub Actions run passed both `verify` (Ruff, 40 Python tests, and Markdown links) and `web-quality` (locked npm install, Worker types, lint, 113 web tests, typecheck, and build). The Python harness repairs were necessary because the product repository is bootstrapped while its tests were copying it as an unbootstrapped template, and because Markdown checking traversed generated/dependency/vendor trees. The next step is a disposable failing-PR proof before protection is configured.
-
-The disposable proof is complete: PR #59 used a one-commit replacement of the web test command with an unconditional non-zero exit. `verify` passed and `web-quality` failed. It was closed without merge and its local/remote branch was removed. GitHub branch protection on `main` now requires an up-to-date pull request with `verify` and `web-quality`; administrators are included, force pushes/deletions are disabled, and no unavailable reviewer approval was configured.
-
-Remaining safe work is to publish a scoped change for remote CI proof, prove the `web-quality` gate on both a passing and deliberately failing pull request, then configure an appropriate protection/ruleset. Live diagnostic/release work requires separately scoped authority and observable boundaries.
+Astra review found that the passing web CI run used npm 10.9.9 and emitted an engine warning despite the declared npm 11 contract. It also found that required status checks with administrator enforcement do not by themselves prove direct pushes are prevented. Before plan completion, the workflow must install npm 11.13.0 and pass remotely, the branch protection must explicitly require pull requests (with zero approvals if supported for the single-owner workflow), the PR description must remove its untracked ExecPlan link, and the Issue ledger must become fully criterion-level rather than a grouped disposition summary.
 
 Issue #56 is now closed at https://github.com/successbycs/ShortList/issues/56 after a current-body re-read, remote-commit verification, a criterion-by-criterion comment, and closed-state verification. #49 and #53 have readable reconciliation comments; their operational criteria remain open. No other Issue was closed because its current acceptance boundaries are incomplete, deferred, or unobserved.
 
