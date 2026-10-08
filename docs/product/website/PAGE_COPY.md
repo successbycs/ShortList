@@ -16,37 +16,36 @@ change without a recorded product decision.
 
 | Journey point | Required meaning | Copy boundary |
 | --- | --- | --- |
-| Landing promise | Check one public business website and see useful evidence before entering email. | Do not promise leads, revenue, a stable rank, or an official provider result. |
+| Landing promise | Check one public business website and see a structured assessment. | Do not promise leads, revenue, a stable rank, or an official provider result. |
 | Domain input | Ask for a public business website/domain. | Do not ask for credentials, private access, or email before teaser value. |
 | Progress | Explain an understandable current stage without a fabricated completion time. | Do not expose provider, secret, or internal runtime detail. |
-| Teaser | Before email capture, show a useful, concise, dated finding from each of the current-web and no-web model-knowledge views, alongside observed evidence, qualified inference, and limitations. | The teaser must remain useful without revealing the full assessment. The no-web result says it may be incomplete/out of date and is not verified current. |
-| Blurred fuller result | Explain that a fuller result is ready after delivery details are confirmed. | The teaser remains useful; the blur does not hide all value. |
-| Email/consent | Email sends the requested PDF; delivery consent is required and marketing optional. | Do not imply account creation, mandatory marketing, or ownership verification. |
-| Masked email | Show Confirm and send plus Change email. | Say it checks the intended address only, not inbox ownership. |
-| Full result/PDF status | Reveal the full on-page result and state PDF send status. | Provider acceptance is not inbox receipt or reading. |
+| Progress | Explain website assessment, buyer-profile, buyer-question, and result-compilation stages. | The animation is explanatory; it is not a live server trace or a time promise. |
+| Local email reveal | Ask for an email and offer **See free report now** before the on-page report. | Until #11 exists, say neither that consent is stored nor that an email/PDF will be sent. |
+| On-page report | Show domain, business overview, three ICP hypotheses, three buyer questions per ICP, and structured LLM findings. | Label website evidence, LLM interpretation, and uncertainty distinctly. Do not call a finding a permanent/current ranking. |
 | Limits/duplicates | Explain entitlement, resend, or support outcome. | Do not reveal another recipient's activity. |
 | Failure | Explain limitation and approved support route. | Do not invent findings, promise manual fulfilment, or expose internals. |
 | Future CTA | Reserve a next-step location for MVP 2. | No MVP 1 price, checkout, payment, active offer, or lead capture. |
 
 ## Controlled terminology
 
-- Current-web result is one observed dated result, not an objective, official,
-  permanent, or universal rank.
-- Model-knowledge result has no invented citations and may be incomplete or out
-  of date; it is not a verified current result.
-- Minimum Assessment is the free result rendered after confirmation and sent as
-  a PDF attachment.
-- Confirm your email address means confirming intended delivery, not proving
-  mailbox ownership.
+For the current increment, call the outcome a **website assessment report**.
+Say that the public website was assessed and that the LLM interpretation is a
+starting point, not a fact guaranteed about customers or AI systems. Use
+**See free report now** for the local reveal. Do not refer to sending,
+confirming, consenting to, or delivering an email/PDF.
 
-## Approved journey decision
+Current-web and model-knowledge language belongs to the broader MVP 1 baseline
+only. If a later release exposes either mode, preserve its dated provenance and
+do not call it an objective, official, permanent, or universal rank.
 
-On 2026-10-07, Chris approved the evidence-first journey: visitors receive a
-compact, dated result from each AI view before sharing an email address. The
-full answer set, available citations, all buyer-question findings, and the
-private PDF remain behind the masked-email confirmation step. Customer-facing
-copy must describe the live private-PDF delivery journey; it must not describe
-the product as a local demo or say that no email is sent.
+## Current journey decision
+
+On 2026-10-07, Chris set the current increment: the real website assessment
+feeds an LLM-structured on-page report. The visitor sees assessment progress,
+enters an email to reveal the report, then sees the business overview, three
+ICPs, three buyer questions per ICP, and stored findings. PDF generation,
+recipient persistence, and email delivery remain deferred. Customer-facing
+copy must not imply that a PDF was generated or an email was sent.
 
 ## Review gates
 

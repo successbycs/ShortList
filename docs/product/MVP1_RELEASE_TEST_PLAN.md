@@ -56,6 +56,19 @@ prove that the deployed Worker has its D1 binding.
 | RT-15 | Lint, strict types, complete Vitest suite, production build, and whitespace checks pass with no unaddressed warning/error. | Automated | Dated command output in Issue/ExecPlan. | Re-run after every promoted packet. |
 | RT-16 | The deployed Worker contains the reviewed source, rather than a stale generated `.output` artifact. | Release process | A production build immediately before deploy; deploy output records the new generated server-module hashes and Worker version. | Added after the 6 October stale-artifact finding; re-run for release. |
 
+## Current on-page report increment
+
+These criteria govern #57's bounded local implementation. They do not mark the
+broader PDF/email MVP release ready and do not replace the RT-series production
+requirements above.
+
+| ID | Scenario and expected outcome | Layer | Required evidence | Current status |
+| --- | --- | --- | --- | --- |
+| IR-01 | The checking UI starts with yellow clocks, advances its explanatory stages, and ends on **Compiling results for you** without claiming a streamed server trace. | Component | Focused journey test. | Passed locally; release proof pending. |
+| IR-02 | A completed stored assessment offers local email reveal with **See free report now**, without storing consent or starting delivery. | Component + integration | Journey test with server-function fixture and no delivery invocation. | Passed locally; release proof pending. |
+| IR-03 | The on-page report displays domain, evidence-based overview, exactly three ICPs, three persisted questions per ICP, and parsed stored findings. | Integration | Stored-graph repository fixture plus renderer test. | Passed locally; release proof pending. |
+| IR-04 | The UI distinguishes website-derived evidence, LLM interpretation, and uncertainty, and never claims an email/PDF was sent. | Component + human | Regression test and copy review. | Passed locally; release proof pending. |
+
 ## Release command set
 
 Run from `apps/web` after each promoted packet and before release review:

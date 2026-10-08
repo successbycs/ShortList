@@ -5,6 +5,8 @@ import { admitPublicDomain } from "@/lib/domain-admission";
 describe("admitPublicDomain", () => {
   it.each([
     ["Harbour-Handyman.CO.NZ", "harbour-handyman.co.nz"],
+    ["lawnrite.co.nz", "lawnrite.co.nz"],
+    ["https://www.lawnrite.co.nz/", "www.lawnrite.co.nz"],
     [" https://example.co.nz/path?campaign=test ", "example.co.nz"],
     ["https://xn--bcher-kva.example", "xn--bcher-kva.example"],
   ])("normalises a supported public website target %#", (input, expected) => {

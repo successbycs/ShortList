@@ -20,3 +20,20 @@ scope and evidence, human review, explicit authorization, target verification,
 the narrowly approved deployment, and real-boundary proof. Do not add a CI
 deployment step, credential, or provider configuration without an approved
 change that updates this document and the release workflow.
+
+## Deferred: CI/CD delivery pipeline
+
+**Status:** planned for a later, separately approved delivery phase; not a
+current release prerequisite and not implemented.
+
+A future pipeline may automate the already-approved, non-production source
+checks and create a reviewable deployment candidate. It must not turn a merge
+or successful CI run into production-release authority. Before implementing
+it, define the target environments, protected-branch and review policy,
+least-privilege deployment identity, secret custody, migration gate, artifact
+provenance, rollback procedure, and required public-boundary verification.
+
+Until those decisions and the resulting implementation are reviewed, ShortList
+continues to use the manual, authorization-gated release sequence. The future
+pipeline must be recorded as its own GitHub Issue and ExecPlan because it
+changes delivery authority and production trust boundaries.

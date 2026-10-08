@@ -6,20 +6,34 @@ import re
 from pathlib import Path
 
 LINK = re.compile(r"\[[^]]+\]\(([^)]+)\)")
+URI_SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+PLACEHOLDER = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 
-def main() -> int:
-    root = Path(__file__).resolve().parents[1]
+def find_broken_links(root: Path) -> list[str]:
     failures: list[str] = []
     for markdown in root.rglob("*.md"):
-        if any(part in {".git", ".venv"} for part in markdown.parts):
+        if any(part in {".git", ".venv", "node_modules", "var"} for part in markdown.parts):
+            continue
+        if markdown.is_relative_to(root / ".codex" / "skills"):
             continue
         for target in LINK.findall(markdown.read_text(encoding="utf-8")):
-            if target.startswith(("http://", "https://", "mailto:", "#")):
+            target = target.strip().strip("<>")
+            if (
+                target.startswith(("#", "/", "{{"))
+                or URI_SCHEME.match(target)
+                or PLACEHOLDER.fullmatch(target)
+            ):
                 continue
             file_target = target.split("#", 1)[0]
             if file_target and not (markdown.parent / file_target).resolve().is_file():
                 failures.append(f"{markdown.relative_to(root)} -> {target}")
+    return failures
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parents[1]
+    failures = find_broken_links(root)
     if failures:
         print("Broken Markdown links:\n" + "\n".join(failures))
         return 1

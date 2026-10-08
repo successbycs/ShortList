@@ -63,11 +63,12 @@ function hasExpectedLocationBoundary(request: AiSearchRunRequest): boolean {
   const { locationContext } = request.configuration;
   if (request.mode === "model_knowledge") return locationContext.kind === "no_web_search";
   return (
-    locationContext.kind === "web_search_location" &&
-    Boolean(locationContext.city) &&
-    Boolean(locationContext.region) &&
-    Boolean(locationContext.country) &&
-    Boolean(locationContext.timezone)
+    locationContext.kind === "global_no_default_location" ||
+    (locationContext.kind === "web_search_location" &&
+      Boolean(locationContext.city) &&
+      Boolean(locationContext.region) &&
+      Boolean(locationContext.country) &&
+      Boolean(locationContext.timezone))
   );
 }
 

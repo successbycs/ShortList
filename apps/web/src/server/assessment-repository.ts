@@ -47,10 +47,14 @@ export async function createAssessmentAdmission(
   database: D1DatabaseLike,
   input: NewAssessmentAdmission,
 ): Promise<AssessmentAdmissionRecord> {
-  const createId = input.createId ?? crypto.randomUUID;
+  // Cloudflare's Web Crypto methods require the `crypto` receiver. Do not
+  // detach `crypto.randomUUID` from it.
+  const createId = input.createId ?? (() => crypto.randomUUID());
   const customerId = await getOrCreateCustomer(database, input, createId);
   const assessmentId = createId();
 
+  // `displayed_timezone` is legacy schema metadata. The public result uses
+  // UTC and no geographic scope depends on this retained value.
   const runResult = await database
     .prepare(
       `INSERT INTO assessment_runs (

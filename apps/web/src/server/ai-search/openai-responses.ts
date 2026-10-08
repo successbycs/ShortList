@@ -89,33 +89,30 @@ function createResponseRequest(
     },
   };
   if (request.mode === "web_grounded") {
+    const location = request.configuration.locationContext;
     body["tools"] = [
       {
         type: "web_search",
         search_context_size: config.webSearch.searchContextSize,
         external_web_access: config.webSearch.externalWebAccess,
-        user_location: {
-          type: "approximate",
-          city:
-            request.configuration.locationContext.kind === "web_search_location"
-              ? request.configuration.locationContext.city
-              : undefined,
-          region:
-            request.configuration.locationContext.kind === "web_search_location"
-              ? request.configuration.locationContext.region
-              : undefined,
-          country:
-            request.configuration.locationContext.kind === "web_search_location"
-              ? request.configuration.locationContext.country
-              : undefined,
-          timezone:
-            request.configuration.locationContext.kind === "web_search_location"
-              ? request.configuration.locationContext.timezone
-              : undefined,
-        },
+        ...(location.kind === "web_search_location"
+          ? {
+              user_location: {
+                type: "approximate",
+                city: location.city,
+                region: location.region,
+                country: location.country,
+                timezone: location.timezone,
+              },
+            }
+          : {}),
       },
     ];
     body["tool_choice"] = config.webSearch.toolChoice;
+    // Preserve the web tool's source metadata as a truthful fallback when the
+    // model's structured JSON has no inline URL annotations. This is provider
+    // output, not a generated citation.
+    body["include"] = ["web_search_call.action.sources"];
   }
   return body;
 }
@@ -149,11 +146,17 @@ function parseResponsesPayload(
   const parsedResults = parseResults(content?.text);
   const usage = parseUsage(payload["usage"], request.estimatedSpendUsd);
   if (!parsedResults || !usage) return { kind: "failure" };
+  const inlineCitations = parseCitations(content?.annotations);
   return {
     kind: "success",
     mode: request.mode,
     observedResults: parsedResults,
-    citations: request.mode === "web_grounded" ? parseCitations(content?.annotations) : [],
+    citations:
+      request.mode === "web_grounded"
+        ? inlineCitations.length
+          ? inlineCitations
+          : parseWebSearchSources(payload["output"])
+        : [],
     usage,
   };
 }
@@ -214,6 +217,29 @@ function parseCitations(value: unknown): Citation[] {
     if (typeof url === "string" && typeof title === "string") citations.push({ url, title });
   }
   return citations;
+}
+
+function parseWebSearchSources(value: unknown): Citation[] {
+  if (!Array.isArray(value)) return [];
+  const citations = new Map<string, Citation>();
+  for (const item of value) {
+    if (!isRecord(item) || item["type"] !== "web_search_call" || !isRecord(item["action"])) {
+      continue;
+    }
+    const sources = item["action"]["sources"];
+    if (!Array.isArray(sources)) continue;
+    for (const source of sources) {
+      if (!isRecord(source) || typeof source["url"] !== "string") continue;
+      try {
+        const parsedUrl = new URL(source["url"]);
+        if (!["http:", "https:"].includes(parsedUrl.protocol)) continue;
+        citations.set(source["url"], { url: source["url"], title: parsedUrl.hostname });
+      } catch {
+        // Ignore malformed provider metadata; it is not safe evidence.
+      }
+    }
+  }
+  return [...citations.values()];
 }
 
 function parseUsage(value: unknown, estimatedSpendUsd: number): AiSearchUsage | undefined {

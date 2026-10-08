@@ -27,6 +27,7 @@ it does not make unresolved scope safe.
 | Delivery/retry/escalation | #27 | Provider-acceptance boundary, 5/20/60 retry, terminal and two-hour escalation tests. |
 | Privacy/support/failure | #13 after #11/#27 | Public privacy/support/deletion paths, including one privacy-minimised Discord alert for a final `evidence_insufficient` run, and reason-coded operator recovery tests. |
 | Website experience | #28 approved mockups -> #10/#11 implementation | Desktop/mobile state coverage, keyboard/accessibility and truthful-content review. |
+| Current on-page assessment report increment | #55 assessment graph -> #57 report journey | Stored website evidence, three ICPs, three questions per ICP, and structured findings render on page after a local email reveal. No PDF/email delivery claim. |
 | End-to-end confidence | #14 -> #15 -> #16 | Requirement acceptance matrix, UAT/launch gate, then controlled learning. |
 
 ## 3. Dependency order
@@ -44,11 +45,18 @@ it does not make unresolved scope safe.
 #9 (closed) + #7 (closed) + exact AI configuration ─> #5 AI-search evidence adapter
 #9 (closed) + #5 + #35 ─────────────────────────────> #10 safe domain assessment and teaser
 #10 + #5 + #35 ──────────────────────────────────────> #11 email/consent/entitlement and on-page result confirmation
+#55 assessment graph and hardening ───────────────────> #57 on-page assessment report journey
 #7 + #25 + #11 + #35 ────────────────────────────────> #27 PDF generation/delivery
 #11 + #27 ─────────────────────────> #13 privacy/support/recovery
 #10 + #11 + #13 + #27 ─────────────> #14 end-to-end verification
 #14 ────────────────────────────────> #15 launch readiness -> #16 learning
 ```
+
+For the current report increment, #57 depends on #55's persisted assessment
+graph and its correctness hardening. #11 remains the owner of real recipient,
+consent, entitlement, and delivery capabilities; #27 remains the owner of PDF
+generation and delivery. Neither is implemented or implied by #57's local
+email-reveal UI.
 
 #25 is closed visual-contract evidence. #24 is closed safety/data design
 evidence, but the exact safe-fetch, abuse, suburb-reference, and lifecycle

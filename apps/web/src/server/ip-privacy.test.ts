@@ -11,7 +11,7 @@ describe("IP privacy boundary", () => {
     await expect(createIpDayHmac("203.0.113.9", "test-only-secret", now)).resolves.toBe(digest);
   });
 
-  it("uses a different digest on a different Auckland calendar day", async () => {
+  it("uses a different digest on a different UTC calendar day", async () => {
     const first = await createIpDayHmac(
       "203.0.113.9",
       "test-only-secret",

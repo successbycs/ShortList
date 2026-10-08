@@ -20,6 +20,10 @@ function fixtureFetch(...responses: Response[]): FetchImplementation {
 }
 
 describe("fetchPublicHtml", () => {
+  it("uses the approved five MiB decoded-HTML ceiling", () => {
+    expect(MVP1_SAFE_FETCH_POLICY.maxHtmlBytesPerPage).toBe(5 * 1_024 * 1_024);
+  });
+
   it("uses manual redirects, re-validates destinations and returns bounded HTML", async () => {
     const transport = fixtureFetch(
       response("", { status: 302, headers: { location: "/welcome" } }),
@@ -42,7 +46,14 @@ describe("fetchPublicHtml", () => {
     expect(transport).toHaveBeenNthCalledWith(
       1,
       new URL("https://harbourhandyman.co.nz/"),
-      expect.objectContaining({ redirect: "manual", cache: "no-store" }),
+      expect.objectContaining({
+        redirect: "manual",
+        cache: "no-store",
+        headers: {
+          Accept: "text/html, application/xhtml+xml",
+          "User-Agent": "ShortList/1.0 (+https://shortlist.successbycs.com)",
+        },
+      }),
     );
   });
 

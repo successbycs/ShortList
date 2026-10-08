@@ -33,6 +33,17 @@ value. The experience may use light humour about the internet, AI, and search,
 but clarity wins whenever humour conflicts with a decision, consent, cost, or
 failure message.
 
+## Current report increment
+
+For #57, the active journey is domain entry → explanatory assessment progress
+→ local email reveal → on-page report. The report shows the submitted domain,
+website-derived business overview, three ICP hypotheses, three buyer questions
+per ICP, and stored LLM findings. The email field is not persisted consent,
+mailbox verification, entitlement, or delivery. PDF/email delivery and the
+broader confirmation path remain later work under #11 and #27. The older state
+inventory below remains the broader MVP 1 target, not a claim that those later
+boundaries are live now.
+
 ## Visual direction
 
 Use a confident editorial layout with purposeful small-business/search

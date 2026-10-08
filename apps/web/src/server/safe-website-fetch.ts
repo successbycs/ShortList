@@ -3,11 +3,16 @@ import { admitPublicDomain } from "@/lib/domain-admission";
 export const MVP1_SAFE_FETCH_POLICY = {
   maxPagesPerAssessment: 3,
   allowedContentTypes: ["text/html", "application/xhtml+xml"],
-  maxHtmlBytesPerPage: 1_048_576,
+  // Five MiB admits ordinary modern small-business pages (including the
+  // measured 1.36 MiB decoded Green Gecko homepage) while retaining a firm
+  // per-page Worker-memory boundary.
+  maxHtmlBytesPerPage: 5 * 1_024 * 1_024,
   pageTimeoutMs: 8_000,
   assessmentTimeoutMs: 20_000,
   maxRedirects: 3,
 } as const;
+
+const SHORTLIST_FETCH_USER_AGENT = "ShortList/1.0 (+https://shortlist.successbycs.com)";
 
 export type SafeFetchPolicy = {
   maxPagesPerAssessment: number;
@@ -148,7 +153,12 @@ async function fetchOne(
       method: "GET",
       redirect: "manual",
       cache: "no-store",
-      headers: { Accept: "text/html, application/xhtml+xml" },
+      headers: {
+        Accept: "text/html, application/xhtml+xml",
+        // Use a fixed, transparent service identity. Never forward a visitor's
+        // user agent, cookies, or other request credentials to their website.
+        "User-Agent": SHORTLIST_FETCH_USER_AGENT,
+      },
       signal: controller.signal,
     });
     return { kind: "response", response };

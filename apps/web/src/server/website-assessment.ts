@@ -7,6 +7,7 @@ import {
   type AssessmentAdmissionRecord,
   type D1DatabaseLike,
 } from "./assessment-repository";
+import { recordWebsiteSource } from "./geo-assessment-repository";
 import {
   fetchPublicHtml,
   MVP1_SAFE_FETCH_POLICY,
@@ -14,13 +15,23 @@ import {
   type SafeFetchPolicy,
 } from "./safe-website-fetch";
 import { extractBoundedWebsiteEvidence } from "./website-evidence";
+import type { JsonValue } from "./website-evidence";
+import type { AssessmentDiagnosticPhase } from "./assessment-diagnostics";
 
 export type WebsiteAssessmentResult =
   | { kind: "invalid_input"; reasonCode: string }
   | {
       kind: "preview_ready";
       assessment: AssessmentAdmissionRecord;
-      evidence: { evidenceId: string; excerpt: string; sourceUrl: string };
+      evidence: {
+        evidenceId: string;
+        websiteSourceId: string;
+        excerpt: string;
+        sourceUrl: string;
+        title: string | null;
+        description: string | null;
+        jsonLd: readonly JsonValue[];
+      };
     }
   | { kind: "limited"; assessment: AssessmentAdmissionRecord; reasonCode: string };
 
@@ -31,13 +42,14 @@ export type WebsiteAssessmentDependencies = {
   createId?: () => string;
   safeFetchPolicy?: SafeFetchPolicy;
   contractVersion?: string;
+  onPhase?: (phase: AssessmentDiagnosticPhase) => void;
 };
 
 /**
  * Runs the non-AI first slice of a ShortList assessment. The caller injects
  * its D1 binding and transport so this boundary can be proven without a live
  * website, provider request, or credential. A future route must still apply
- * Turnstile, rate and concurrency controls before invoking it.
+ * domain validation, rate and concurrency controls before invoking it.
  */
 export async function runWebsiteAssessment(
   originalSubmission: string,
@@ -49,11 +61,14 @@ export async function runWebsiteAssessment(
   }
 
   const now = dependencies.now ?? (() => new Date());
-  const createId = dependencies.createId ?? crypto.randomUUID;
+  // Cloudflare's Web Crypto methods require the `crypto` receiver. Do not pass
+  // `crypto.randomUUID` directly as a callback.
+  const createId = dependencies.createId ?? (() => crypto.randomUUID());
   const safeFetchPolicy = dependencies.safeFetchPolicy ?? MVP1_SAFE_FETCH_POLICY;
   const contractVersion = dependencies.contractVersion ?? "mvp1-v1";
   const triggeredAtUtc = now().toISOString();
   const inputUrl = `https://${admission.normalisedDomain}/`;
+  dependencies.onPhase?.("d1_write");
   const assessment = await createAssessmentAdmission(dependencies.database, {
     normalisedDomain: admission.normalisedDomain,
     originalSubmission,
@@ -63,6 +78,7 @@ export async function runWebsiteAssessment(
     createId,
   });
 
+  dependencies.onPhase?.("website_fetch");
   const fetched = await fetchPublicHtml(
     inputUrl,
     safeFetchPolicy,
@@ -72,6 +88,7 @@ export async function runWebsiteAssessment(
   const evidenceId = createId();
 
   if (fetched.kind === "limited") {
+    dependencies.onPhase?.("d1_write");
     await recordWebsiteEvidence(dependencies.database, {
       evidenceId,
       assessmentId: assessment.assessmentId,
@@ -83,6 +100,7 @@ export async function runWebsiteAssessment(
       extractionOutcome: "not_run",
       contractVersion,
     });
+    dependencies.onPhase?.("result_persist");
     await completeAssessmentRun(dependencies.database, {
       assessmentId: assessment.assessmentId,
       status: "limited",
@@ -103,10 +121,13 @@ export async function runWebsiteAssessment(
       allowedContentTypes: safeFetchPolicy.allowedContentTypes,
       maxHtmlBytes: safeFetchPolicy.maxHtmlBytesPerPage,
       maxExcerptCharacters: 1_500,
+      maxJsonLdBlocks: 10,
+      maxJsonLdCharacters: 20_000,
     },
   );
 
   if (extracted.kind === "limited") {
+    dependencies.onPhase?.("d1_write");
     await recordWebsiteEvidence(dependencies.database, {
       evidenceId,
       assessmentId: assessment.assessmentId,
@@ -118,6 +139,7 @@ export async function runWebsiteAssessment(
       extractionOutcome: extracted.reasonCode,
       contractVersion,
     });
+    dependencies.onPhase?.("result_persist");
     await completeAssessmentRun(dependencies.database, {
       assessmentId: assessment.assessmentId,
       status: "limited",
@@ -126,6 +148,7 @@ export async function runWebsiteAssessment(
     return { kind: "limited", assessment, reasonCode: extracted.reasonCode };
   }
 
+  dependencies.onPhase?.("d1_write");
   await recordWebsiteEvidence(dependencies.database, {
     evidenceId,
     assessmentId: assessment.assessmentId,
@@ -137,6 +160,21 @@ export async function runWebsiteAssessment(
     extractionOutcome: "captured",
     contractVersion,
   });
+  const websiteSourceId = createId();
+  await recordWebsiteSource(dependencies.database, {
+    websiteSourceId,
+    assessmentId: assessment.assessmentId,
+    websiteEvidenceId: evidenceId,
+    sourceUrl: extracted.sourceUrl,
+    observedAtUtc,
+    contentType: extracted.contentType,
+    title: extracted.title ?? null,
+    description: extracted.description ?? null,
+    visibleText: extracted.excerpt,
+    jsonLd: extracted.jsonLd,
+    extractionVersion: "website-evidence-v2",
+  });
+  dependencies.onPhase?.("result_persist");
   await completeAssessmentRun(dependencies.database, {
     assessmentId: assessment.assessmentId,
     status: "preview_ready",
@@ -148,8 +186,12 @@ export async function runWebsiteAssessment(
     assessment,
     evidence: {
       evidenceId,
+      websiteSourceId,
       excerpt: extracted.excerpt,
       sourceUrl: extracted.sourceUrl,
+      title: extracted.title ?? null,
+      description: extracted.description ?? null,
+      jsonLd: extracted.jsonLd,
     },
   };
 }
