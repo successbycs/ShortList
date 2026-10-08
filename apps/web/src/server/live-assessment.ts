@@ -1,7 +1,5 @@
 import { admitPublicDomain } from "@/lib/domain-admission";
 
-import type { AiSearchRunRequest } from "./ai-search";
-import { findStoredAssessment, type StoredAiEvidence } from "./ai-evidence-repository";
 import { completeAssessmentRun, type D1DatabaseLike } from "./assessment-repository";
 import { executeAndPersistGeoAssessment } from "./geo-assessment-execution";
 import {
@@ -13,19 +11,21 @@ import { createOpenAiGeoResponsesProvider } from "./geo-openai-responses";
 import { runWebsiteAssessment } from "./website-assessment";
 import { admitAssessmentStart } from "./assessment-admission";
 import type { AssessmentDiagnosticPhase } from "./assessment-diagnostics";
+import {
+  findLegacyComparableBusinessAssessment,
+  type LegacyComparableBusinessAssessment,
+} from "./legacy-ai-search";
 
-const MODEL_ID = "gpt-6-luna";
 const REQUEST_TIMEOUT_MS = 45_000;
 const MAX_OUTPUT_TOKENS = 600;
 const MAX_INPUT_TOKENS = 16_000;
-const MAX_ESTIMATED_SPEND_USD_PER_VIEW = 0.01;
 const GEO_RUN_TOKEN_LIMITS = {
   // Five bounded stages: profile, ICP, questions and two evaluations.
   maxInputTokens: MAX_INPUT_TOKENS * 5,
   maxOutputTokens: MAX_OUTPUT_TOKENS * 5,
 } as const;
 
-export type StoredAssessmentResult = StoredAiEvidence | StoredGeoAssessment;
+export type StoredAssessmentResult = LegacyComparableBusinessAssessment | StoredGeoAssessment;
 
 export type LiveAssessmentResult =
   | { kind: "cached"; result: StoredAssessmentResult }
@@ -68,7 +68,10 @@ export async function runLiveAssessment(
   dependencies.onPhase?.("d1_cache");
   const existing =
     (await findStoredGeoAssessment(dependencies.database, admission.normalisedDomain)) ??
-    (await findStoredAssessment(dependencies.database, admission.normalisedDomain));
+    (await findLegacyComparableBusinessAssessment(
+      dependencies.database,
+      admission.normalisedDomain,
+    ));
   if (existing) return { kind: "cached", result: existing };
 
   dependencies.onPhase?.("admission");
@@ -185,54 +188,4 @@ export async function runLiveAssessment(
   } finally {
     await start.release();
   }
-}
-
-export function createAiRequests(
-  assessment: { assessmentId: string; normalisedDomain: string },
-  websiteExcerpt: string,
-  executedAt: Date,
-): [AiSearchRunRequest, AiSearchRunRequest] {
-  const executedAtUtc = executedAt.toISOString();
-  const description = normaliseExcerpt(websiteExcerpt);
-  const serviceDescription = `the services described by ${assessment.normalisedDomain}: ${description}`;
-  const base = {
-    assessmentId: assessment.assessmentId,
-    normalisedDomain: assessment.normalisedDomain,
-    businessType: serviceDescription,
-    executedAtUtc,
-    limits: {
-      maxInputTokens: MAX_INPUT_TOKENS,
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
-      maxEstimatedSpendUsd: MAX_ESTIMATED_SPEND_USD_PER_VIEW,
-    },
-    requestedInputTokens: Math.max(1, Math.ceil(description.length / 4) + 100),
-    maximumOutputTokens: MAX_OUTPUT_TOKENS,
-    estimatedSpendUsd: MAX_ESTIMATED_SPEND_USD_PER_VIEW,
-  } as const;
-  return [
-    {
-      ...base,
-      mode: "web_grounded",
-      question: `For ${serviceDescription}, identify up to three businesses that appear to offer the same kind of service today. Use only current public-web evidence. Return their names, a concise description of the service each appears to offer, and source URLs where available. Do not imply a universal ranking.`,
-      configuration: {
-        modelId: MODEL_ID,
-        searchConfigurationRef: "mvp1-web-low-global-v1",
-        locationContext: { kind: "global_no_default_location" },
-      },
-    },
-    {
-      ...base,
-      mode: "model_knowledge",
-      question: `Without a live web search, for ${serviceDescription}, identify up to three businesses that may offer the same kind of service. Return their names and a concise description, or return fewer when uncertain. Do not imply that the result is current, verified, complete, or globally representative.`,
-      configuration: {
-        modelId: MODEL_ID,
-        searchConfigurationRef: "mvp1-model-knowledge-no-web-global-v1",
-        locationContext: { kind: "no_web_search" },
-      },
-    },
-  ];
-}
-
-function normaliseExcerpt(value: string): string {
-  return value.replace(/\s+/g, " ").trim().slice(0, 1_500);
 }
