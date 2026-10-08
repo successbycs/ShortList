@@ -1,10 +1,18 @@
-# shortlist
+# ShortList
 
-A generic Python-first project template with a local, Docker-based development harness. It contains no product-domain logic, external integrations, or optional services by default.
+ShortList is a monorepository for a local website-assessment product and its
+reusable Python-first engineering harness. The product lives in `apps/web`;
+root Python and Docker assets provide a deterministic development harness.
+Neither local implementation nor a passing build proves a deployed service,
+configured provider, or customer delivery.
 
 ## Intended workflow
 
-Use [GETTING_STARTED.md](GETTING_STARTED.md) to create the local environment, then run the safe self-test and deterministic no-op demo. Read [docs/INDEX.md](docs/INDEX.md) for the template documentation catalogue and [AGENTS.md](AGENTS.md) for development-agent instructions.
+For the harness, use [GETTING_STARTED.md](GETTING_STARTED.md). For the web
+application, read [apps/web/README.md](apps/web/README.md) and install with
+`npm --prefix apps/web ci`. Read [docs/INDEX.md](docs/INDEX.md) for the
+documentation catalogue and [AGENTS.md](AGENTS.md) for development-agent
+instructions.
 
 ## Using Symphony for ShortList delivery
 
@@ -41,7 +49,11 @@ review in [docs/product/BACKPORT_CANDIDATES.md](docs/product/BACKPORT_CANDIDATES
 
 ## Current implementation status
 
-The Python self-test foundation and local Docker verification are implemented.
-Interactive VS Code Dev Container attachment and observed remote GitHub Actions
-results still require their respective environments. Cloud deployment, image
-publication, runtime AI agents, and optional capability packs are deferred.
+The Python self-test foundation and the local web assessment/report increment
+are implemented. The web increment provides bounded local server/runtime
+logic, deterministic fixtures, and an on-page report reveal; it does not imply
+configured production providers, recipient persistence, consent capture, PDF
+or email delivery, payment, or deployment. See
+[product requirements](docs/product/REQUIREMENTS.md) and the
+[MVP 1 release test plan](docs/product/MVP1_RELEASE_TEST_PLAN.md) for the
+separate local and deployed evidence boundaries.
