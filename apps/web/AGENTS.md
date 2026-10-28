@@ -9,4 +9,20 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep ShortList as a frontend-only stateful prototype until persistence or real assessment services are explicitly requested, because its current purpose is flow validation.
+## ShortList web app notes
+
+- This is the ShortList product: a Cloudflare Worker (`shortlist-web`) with a
+  D1 database (`SHORTLIST_DB`) and a live OpenAI Responses provider. It is no
+  longer a front-end-only prototype. See [README.md](README.md) for what is
+  built and what is not.
+- Follow the repository [AGENTS.md](../../AGENTS.md), including its review and
+  merge rule.
+- The Worker reads two secrets, `OPENAI_API_KEY` and
+  `ASSESSMENT_IP_HASH_SECRET`. Never commit, log or paste their values.
+- Schema changes go in a new numbered file in `migrations/`; never edit an
+  applied migration. Applying migrations to the remote database and deploying
+  the Worker are manual steps Chris authorises each time.
+- Tests must not call the real provider or the remote database; use the
+  existing fakes.
+- Before a PR, run `npm run types`, `npm run lint`, `npm test`,
+  `npm run typecheck` and `npm run build` (the `web-quality` CI check).

@@ -1,18 +1,54 @@
 # Repository Instructions for Coding Agents
 
-This repository is a reusable Python-first project template. Preserve its generic nature: do not add application domain logic, live external integrations, credentials, or optional services unless the active task explicitly requires them.
+This repository is **ShortList**, a website assessment product by SuccessByCS.
+It has two parts:
+
+- **The product: `apps/web`.** A TanStack Start (React, TypeScript) app that
+  runs as the Cloudflare Worker `shortlist-web`, with a D1 database
+  (`SHORTLIST_DB`) and a live OpenAI Responses provider. It serves
+  shortlist.successbycs.com. Read [`apps/web/AGENTS.md`](apps/web/AGENTS.md)
+  and [`apps/web/README.md`](apps/web/README.md) before changing it.
+- **The reusable Python harness and template: the repository root.**
+  `scripts/verify.py` (lint, tests, Markdown links), the small `src/shortlist`
+  package, Docker Compose, the Dev Container and `scripts/bootstrap_template.py`.
+  This is development tooling and a template for new projects; the product does
+  not import it. Keep it generic: no ShortList product logic, credentials or
+  live integrations in the root Python code.
 
 Read [`.agent/PLANS.md`](.agent/PLANS.md) before creating, updating, or implementing an ExecPlan.
+
+## Review and merge
+
+Every change follows one path:
+
+1. **Issue.** Work starts from a GitHub Issue in `successbycs/ShortList` that
+   states the outcome, the files in scope and how to tell it is done.
+2. **Branch.** One Issue, one branch, named like `issue/<number>-<short-name>`.
+   `main` accepts changes only through pull requests.
+3. **Pull request.** Open a PR that links the Issue (`Closes #<n>`), says what
+   changed and how it was verified, and names the builder
+   (`Built by: <tool / model>`).
+4. **Review by a different model.** A model other than the builder reviews the
+   PR and gives a verdict. Codex (Astra) reviews normally. While Codex is
+   unavailable, Claude Sonnet 5.5 stands in, and the PR records that.
+5. **Merge** only when both required checks are green (`verify` from
+   `.github/workflows/ci.yml` and `web-quality` from
+   `.github/workflows/web-ci.yml`) and the review verdict is **approve**.
+
+Merging is not deploying. **Chris authorises** every deployment, every remote
+D1 migration and any other production change (secrets, routes, provider
+settings), each time. A merged PR, a green check or an Issue comment is never
+that authority. See the [Release Workflow](docs/workflows/RELEASE_WORKFLOW.md).
 
 ## ExecPlans
 
 For a complex feature, significant refactor, multi-file change with material design choices, migration, or work expected to span more than one focused session, first create an ExecPlan in `.agent/execplans/` using the exact requirements in `.agent/PLANS.md`. An ExecPlan is the task’s self-contained, living execution document; it is not a brief task list.
 
-Use the filename `.agent/execplans/YYYY-MM-DD-<short-action-name>.md`. Before implementation, inspect the working tree and relevant repository guidance, then make the plan concrete. Keep the same plan updated throughout implementation, including every stop point. For small, low-risk changes, an ExecPlan is optional unless the user requests one.
-
-To initiate one, use this prompt from the repository root:
-
-    Create an ExecPlan for <desired outcome> following .agent/PLANS.md. Save it as .agent/execplans/YYYY-MM-DD-<short-action-name>.md. Inspect the repository first, resolve routine ambiguities in the plan, and do not implement the change yet.
+Use the filename `.agent/execplans/YYYY-MM-DD-<short-action-name>.md` and start
+it with a one-line status (Active, Complete or Superseded, with a date). Move a
+plan to `.agent/execplans/archive/` when it is Complete or Superseded. Keep the
+same plan updated throughout implementation, including every stop point. For
+small, low-risk changes, an ExecPlan is optional unless the user requests one.
 
 An ExecPlan does not grant permission for destructive actions, production access, secret handling, or external side effects. Follow the user’s authorization and applicable repository instructions for those actions.
 
@@ -21,7 +57,9 @@ An ExecPlan does not grant permission for destructive actions, production access
 - Before target-dependent operations, follow [Session scope and execution target](docs/harness/CODEX_OPERATING_MODEL.md#session-scope-and-execution-target).
 - Preserve unrelated and pre-existing changes.
 - Prefer small, additive, testable changes and record observable evidence.
-- Treat configuration, Docker, deployment, and agent-runtime setup as absent until they are implemented and verified; documentation is not proof of enforcement.
+- Never commit secrets or put them in logs. Name secrets (for example
+  `OPENAI_API_KEY`), never their values.
+- Do not force-push or rewrite published history.
 - Keep build-time coding-agent instructions separate from runtime application-agent prompts and behavior.
 - For work that changes ShortList positioning, offers, customer-facing website
   design or copy, SEO/GEO content, schema markup, marketing measurement,
@@ -30,18 +68,10 @@ An ExecPlan does not grant permission for destructive actions, production access
   skill in `.codex/skills/` (Claude Code reads the same skills through the links
   in `.claude/skills/`). Product requirements, approved architecture,
   privacy/security controls, and explicit user decisions take priority.
-
-## Disruptive host restart handoff
-
-An approved host restart such as `wsl --shutdown` ends the active WSL Codex
-session. It is a two-session procedure, not a resumable turn. Before the
-restart, record the baseline and document the blocker in the Issue
-with the exact human recovery action. A human reopens the workspace and starts
-a new user-directed Codex session; that new session performs the after-test and
-requests restoration. If either handoff or after-test is missing, record the
-criterion as blocked or unobserved, not passed. Follow
-`docs/operations/TROUBLESHOOTING.md`; do not add this manual host procedure to
-Symphony runtime automation.
+- An approved host restart (for example `wsl --shutdown`) ends the agent
+  session; record the baseline and recovery action first, as the
+  [Definition of Done](docs/harness/DEFINITION_OF_DONE.md#disruptive-host-restart-evidence)
+  describes.
 
 ## Quality warnings
 
@@ -57,9 +87,8 @@ Terminal output and chat updates are not durable completion proof. Follow
 record verification, and its risk criteria before deciding whether an ExecPlan
 is required.
 
-## User-started GitHub Issue sessions
+## GitHub Issues
 
-When work involves a GitHub Issue, follow the canonical
-[`docs/harness/GITHUB_ISSUE_WORKFLOW.md`](docs/harness/GITHUB_ISSUE_WORKFLOW.md).
-It governs target verification, collaborative decision capture, comments,
-human review, and the separate requirements for upstream Symphony dispatch.
+When work involves a GitHub Issue, follow
+[`docs/harness/GITHUB_ISSUE_WORKFLOW.md`](docs/harness/GITHUB_ISSUE_WORKFLOW.md)
+for target verification, decision capture and Issue comments.

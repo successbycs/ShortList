@@ -1,5 +1,7 @@
 # Codex WSL sandbox mount incident record
 
+> **Historical record (noted 2026-10-28).** This template-era incident (successbycs/template Issues) is not being worked in ShortList, and the Symphony runtime it mentions is retired. The text below is unchanged.
+
 Status: unresolved. Owner: repository operator and Codex runtime maintainer.
 Update: supported extension 26.928.40906 installed; bundled Codex 0.159.2 passed real-host comparison. Human editor reload and normal-editor after-test remain pending in #35.
 Started: 2026-10-02 00:45 UTC. Related issues: [#29](https://github.com/successbycs/template/issues/29), [#32](https://github.com/successbycs/template/issues/32), [#33](https://github.com/successbycs/template/issues/33), [#34](https://github.com/successbycs/template/issues/34).
@@ -32,7 +34,7 @@ This is the detailed evidence record for the repeated Codex sandbox failure
 naming /mnt/wslg/distro. It preserves observations, attempted remedies,
 contradictions, and decisions for diagnosis and a possible upstream report.
 The implementation record remains
-[the incident ExecPlan](../../.agent/execplans/2026-10-01-repair-wsl-sandbox-mounts.md).
+[the incident ExecPlan](../../.agent/execplans/archive/2026-10-01-repair-wsl-sandbox-mounts.md).
 The operator procedure remains [Troubleshooting](TROUBLESHOOTING.md).
 
 The failure is observed while Codex prepares its sandbox, before the requested
@@ -142,9 +144,9 @@ has not been enabled on the active process.
 | Native Windows Codex | #34 created; no native Windows experiment executed. | Alternative remains unobserved. |
 | Source patch or supported runtime upgrade | No candidate built, installed, or tested. | Not attempted; no upstream fix can be claimed. |
 
-Historical records: [incident plan](../../.agent/execplans/2026-10-01-repair-wsl-sandbox-mounts.md),
-[design plan](../../.agent/execplans/2026-10-02-design-wslg-disable-experiment.md),
-[execution plan](../../.agent/execplans/2026-10-02-run-wslg-disable-spike.md).
+Historical records: [incident plan](../../.agent/execplans/archive/2026-10-01-repair-wsl-sandbox-mounts.md),
+[design plan](../../.agent/execplans/archive/2026-10-02-design-wslg-disable-experiment.md),
+[execution plan](../../.agent/execplans/archive/2026-10-02-run-wslg-disable-spike.md).
 Relevant recorded commits include bcf6a54 (baseline), 7aa1534 (restart handoff),
 and f91b7df (timeout/restoration). These references preserve earlier evidence;
 they are not a replacement for missing after-state traces.

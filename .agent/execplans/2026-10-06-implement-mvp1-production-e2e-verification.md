@@ -1,5 +1,7 @@
 # Implement MVP 1 production E2E verification
 
+**Status:** Active (2026-10-28): ShortList #48 to #54 are open.
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture

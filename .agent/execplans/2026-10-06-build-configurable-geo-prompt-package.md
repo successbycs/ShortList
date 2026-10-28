@@ -1,5 +1,7 @@
 # Build a configurable, ICP-led GEO assessment package
 
+**Status:** Active (2026-10-28): ShortList #55 is open; the fresh local D1 proof step remains.
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture

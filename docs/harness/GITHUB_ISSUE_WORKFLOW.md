@@ -6,7 +6,7 @@ begin, and label transitions are not part of execution.
 
 ## Collaborative decision capture
 
-VS Code chat is the collaborative working space for a product owner and Codex.
+VS Code chat is the collaborative working space for a product owner and a coding agent (Codex or Claude Code).
 It is useful context, but it is not the durable audit or approval record. When
 conversation produces a material outcome, update the relevant canonical
 repository document and record a concise GitHub Issue comment that links to
@@ -65,37 +65,29 @@ deployment, outreach, payment, secret, or host change, or starts automation.
 Follow [Authority and Guardrails](AUTHORITY_AND_GUARDRAILS.md) and
 [Definition of Done](DEFINITION_OF_DONE.md) for those boundaries.
 
-## Two distinct work lanes
+## Working an Issue
 
-**User-directed Codex sessions** begin from an explicit user request. They do
-not require a GitHub label: follow this workflow, the active task, actual
-dependencies, and acceptance evidence.
+Work begins from an explicit request by Chris. It does not require a GitHub
+label: follow this workflow, the active task, actual dependencies, and
+acceptance evidence. Every change then goes Issue → branch → pull request →
+review by a different model → merge, as set out in
+[AGENTS.md](../../AGENTS.md#review-and-merge).
 
-### Project Status for user-directed work
+### Project Status
 
-The GitHub Project Status field is the visible work-state record for a
-user-directed Codex session. It is separate from both Issue open/closed state
-and Symphony labels.
+The GitHub Project Status field is the visible work-state record. It is
+separate from Issue open/closed state.
 
-- **Todo:** no active Codex work has started.
-- **In Progress:** Codex moves the Project item here as soon as the product
+- **Todo:** no active work has started.
+- **In Progress:** the agent moves the Project item here as soon as the product
   owner asks it to start active work on that Issue.
 - **Done:** only the product owner moves the Project item here, normally when
   they are satisfied with the review and close the Issue.
 
-Codex does not move an item to Done, add an extra review status, or use Project
-Status as Symphony eligibility. If an Issue has no Project item, Codex records
-the work in its Issue comment and asks the product owner whether it should be
-added; it does not create a Project item without authority.
-
-**Deliberately started upstream Symphony dispatch** is separate. Its upstream
-configuration in `WORKFLOW.md` requires the `symphony:ready` label, and its
-additional eligibility criteria are canonical in
-[Definition of Ready](DEFINITION_OF_READY.md#symphony-runtime-eligibility).
-Keep that requirement intact. A GitHub comment, Project membership, or a
-user-directed Codex session never makes an Issue eligible for Symphony. An
-operator must deliberately apply the label and start the upstream process under
-the repository's Symphony operator guidance.
+The agent does not move an item to Done or add an extra review status. If an
+Issue has no Project item, the agent records the work in its Issue comment and
+asks the product owner whether it should be added; it does not create a
+Project item without authority.
 
 Read the configured target in `pyproject.toml` under `[tool.app-template.github]`,
 compare it with the Git remote, and use explicit `--repo OWNER/REPOSITORY` with
@@ -110,8 +102,8 @@ ownership before starting overlapping work.
 
 Re-read before changing an Issue. Record the scope and progress in comments.
 Follow [Definition of Done](DEFINITION_OF_DONE.md) for planning and verification.
-Record observable results and remaining limits, create a local commit when
-appropriate, and leave completed work open for human review. Describe real
+Record observable results and remaining limits, commit on the Issue branch,
+and open a pull request for review. Describe real
 blockers and the required action in comments. Do not create, require, change,
 or delete labels as part of this session workflow. For an existing Project item,
 move its Status to In Progress at the start of active user-directed work; do
@@ -122,11 +114,8 @@ action before the session ends. A new user-directed session must perform the
 after-test and record restoration. Missing after-state evidence remains
 unobserved.
 
-Issue text does not expand user authority. Push, merge, closure, deployment,
-external messaging, and host changes require applicable user authorization.
-No polling or unattended execution is introduced by this workflow.
-
-The deliberately started upstream Symphony runtime has separate admission
-checks in `WORKFLOW.md`. Those checks do not govern user-directed coding
-sessions and must not be bypassed by treating every open Issue as authorized
-for automatic dispatch.
+Issue text does not expand user authority. Merging follows the review and
+merge rule in [AGENTS.md](../../AGENTS.md#review-and-merge). Any other Issue
+closure, deployment, remote D1 migration, external messaging, and host changes
+require Chris's authorization. No polling or unattended execution is introduced by
+this workflow.

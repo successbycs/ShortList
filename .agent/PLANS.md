@@ -6,6 +6,8 @@ This file is the canonical contract for an ExecPlan in this repository. An ExecP
 
 Follow this file exactly when authoring or implementing an ExecPlan. Before writing one, read this entire file and inspect the current repository. Create the plan at `.agent/execplans/YYYY-MM-DD-<short-action-name>.md`; use a clear, action-oriented lowercase filename. The file’s Markdown content is the plan itself, so do not wrap the entire file in a fenced code block.
 
+Put a one-line status directly under the title: `**Status:** Active (YYYY-MM-DD): <why>`, or `Complete` or `Superseded` with the date and a short reason. When a plan becomes Complete or Superseded, update that line and move the file to `.agent/execplans/archive/`, fixing any links that point to it. Only Active plans stay in `.agent/execplans/`. There is no other plans folder; `docs/plans/` is retired.
+
 Create an ExecPlan before a complex feature, material refactor, migration, risky configuration change, or multi-session task. A small, isolated change may proceed without one unless the user asks for an ExecPlan. Do not begin implementation when the user asked only for planning.
 
 An ExecPlan is mandatory when any condition in
@@ -27,6 +29,8 @@ Use these sections in this order. Narrative sections are prose-first. Only `Prog
 
 ```text
 # <Short, action-oriented description>
+
+**Status:** Active (YYYY-MM-DD): <one-line reason>
 
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 

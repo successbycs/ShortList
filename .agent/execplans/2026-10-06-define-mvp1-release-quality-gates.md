@@ -1,5 +1,7 @@
 # Define MVP 1 release quality gates
 
+**Status:** Active (2026-10-28): gates defined; release evidence against them is still being gathered (ShortList #48 to #54).
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture

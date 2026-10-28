@@ -1,5 +1,7 @@
 # Implement the approved ShortList data model in safe live-system phases
 
+**Status:** Active (2026-10-28): later packets are still open.
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture

@@ -9,10 +9,9 @@ about: Propose a bounded product or template capability
 
 ## Acceptance evidence
 
-## Code packets
+## Files in scope
 
-List repository-relative paths this task may change. If scope is unknown, say
-`unscoped — serialize`; do not assume it may run concurrently.
+List repository-relative paths this task may change.
 
 ## Dependencies and verification
 
