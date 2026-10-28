@@ -25,3 +25,8 @@ Thumbs.db
 
 # Generated bootstrap state
 .template-bootstrap-state.json
+
+# Raw ChatGPT transcripts: kept locally, never committed (contain account details)
+docs/product/discovery/GEO Chatgpt Chat.md
+docs/product/discovery/Workflow.md
+docs/product/discovery/ai-shortlist-conversation-transcript.pdf
