@@ -39,7 +39,7 @@ or incomplete closure.
 | #44 | deferred sales decision | Discovery/free-to-paid journey depends on positioning and paid-offer decisions. | Open. |
 | #45 | deferred experiment | Four-week acquisition experiment requires preceding marketing/sales decisions and owner approval. | Open. |
 | #46 | deferred telemetry | Operational telemetry is explicitly MVP 3+ work; no new collection is authorised. | Open. |
-| #47 | moot (2026-10-28) | Symphony was retired by Chris on 2026-10-28, so a Symphony admission controller will not be built. | Open; closure pending Chris. |
+| #47 | moot (2026-10-28) | Symphony was retired by Chris on 2026-10-28, so a Symphony admission controller will not be built. | Closed as not planned on 2026-10-28 (Chris approved in session). |
 | #48 | partial / re-audit required | Local 2026-10-06 UI evidence covered truthful failure states, but its `verification_failed` criterion must be reconciled with the later #49 Turnstile removal before closure. | Open. |
 | #49 | partial / operational proof required | Source removal is in local history; public page observation and valid submission reaching deployed Worker remain unobserved. | Open. |
 | #50 | partial / operational proof required | Diagnostics/redaction and local repair exist; required support-reference-to-Worker-tail correlation after redeployment is unobserved. | Open. |
