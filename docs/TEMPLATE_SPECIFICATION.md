@@ -56,7 +56,7 @@ This is the canonical requirements record for the `successbycs/template` reposit
 
 ## Required documentation and repository layout
 
-The implementation must create `docs/INDEX.md` as a catalogue. Every catalogue entry records purpose, status, responsible role, and update trigger. Documents must contain useful templates, questions, and instructions—not empty headings—and use one canonical source per policy with related-document links and update triggers. Application-specific material is explicitly marked **template** or **deferred**.
+The implementation must create `docs/INDEX.md` as a catalogue. Every catalogue entry records purpose, status, responsible role, and update trigger. *Changed 2026-10-28 (#69): ShortList's index records status, owner and update trigger once for the page, plus a table of which document owns each fact, instead of per entry.* Documents must contain useful templates, questions, and instructions—not empty headings—and use one canonical source per policy with related-document links and update triggers. Application-specific material is explicitly marked **template** or **deferred**.
 
 | ID | Requirement |
 | --- | --- |
@@ -66,7 +66,7 @@ The implementation must create `docs/INDEX.md` as a catalogue. Every catalogue e
 | RQ-053 | Create architecture documents: `ARCHITECTURE.md`, `DATA_MODEL.md`, `DATA_CONTRACTS.md`, `INTEGRATIONS.md`, `CONFIGURATION.md`, `SECURITY_ARCHITECTURE.md`, `THREAT_MODEL.md`, `LIFECYCLE_AND_APPROVALS.md`, `FAILURE_MODES.md`, and `DEPENDENCY_POLICY.md`. `ARCHITECTURE.md` links to and incorporates the workflows. |
 | RQ-054 | Create harness documents: `DECISIONS.md`, `OPEN_QUESTIONS.md`, `CODEX_OPERATING_MODEL.md`, `DEVELOPMENT_AGENT_CATALOGUE.md`, `AUTHORITY_AND_GUARDRAILS.md`, `DEFINITION_OF_READY.md`, `DEFINITION_OF_DONE.md`, `AUTOMATION_CONTRACT.md`, `DOCUMENTATION_MAINTENANCE.md`, `SOURCES.md`, and `adr/`. |
 | RQ-055 | Create workflow documents: `DEVELOPMENT_WORKFLOW.md`, `PLANNING_WORKFLOW.md`, `AI_CHANGE_WORKFLOW.md`, `DATA_CHANGE_WORKFLOW.md`, `RELEASE_WORKFLOW.md`, `INCIDENT_WORKFLOW.md`, and `RECONCILIATION_WORKFLOW.md`. |
-| RQ-056 | Create planning layout: `docs/plans/README.md`, `docs/plans/active/`, and `docs/plans/completed/`. |
+| RQ-056 | Create planning layout: `docs/plans/README.md`, `docs/plans/active/`, and `docs/plans/completed/`. *Changed 2026-10-28 (#64): plans now live in `.agent/execplans/` with finished ones in `.agent/execplans/archive/`; `docs/plans/README.md` is a pointer.* |
 | RQ-057 | Create AI documents: `AI_SYSTEM_DESIGN.md`, `APPLICATION_AGENT_CATALOGUE.md`, `AGENT_CONTRACTS.md`, `MODEL_POLICY.md`, `PROMPT_REGISTRY.md`, `CONTEXT_POLICY.md`, `TOOL_POLICY.md`, `SAFETY_POLICY.md`, and `STRUCTURED_OUTPUTS.md`. Explain that build-time Codex guidance is separate from runtime prompts. |
 | RQ-058 | Create quality documents: `TEST_STRATEGY.md`, `EVALUATION_STRATEGY.md`, `REPLAY_TESTING.md`, `REGRESSION_LOG.md`, `DEMO_CHECKLIST.md`, and `VERIFICATION_MATRIX.md`. |
 | RQ-059 | Create operations documents: `LOCAL_RUNBOOK.md`, `OBSERVABILITY.md`, `AUDIT_TRAIL.md`, `DATA_RETENTION.md`, `BACKUP_RESTORE.md`, `TROUBLESHOOTING.md`, `INCIDENT_RESPONSE.md`, `KILL_SWITCH_AND_RECOVERY.md`, `CI_CD_STRATEGY.md`, and `RESOURCE_BUDGET.md`. |
@@ -93,4 +93,4 @@ decision remain unresolved; this template does not fabricate either.
 
 ## Cross-references
 
-Execution order, acceptance criteria, and blockers are in [the bootstrap plan](plans/active/template-bootstrap.md). Requirement-to-evidence status is in [the verification matrix](quality/VERIFICATION_MATRIX.md).
+Execution order, acceptance criteria, and blockers are in [the bootstrap summary](../.agent/execplans/archive/2026-09-29-template-bootstrap-summary.md). Requirement-to-evidence status is in [the verification matrix](quality/VERIFICATION_MATRIX.md).
