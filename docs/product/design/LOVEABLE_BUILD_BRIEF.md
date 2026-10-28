@@ -1,5 +1,10 @@
 # Loveable build brief — ShortList MVP 1
 
+**Status:** historical. This prompt produced the Loveable prototype for #28
+(closed 2026-10-05). That prototype was adopted into `apps/web/`, which is now
+the source. Do not use this brief for new work; scope is in
+[REQUIREMENTS.md](../REQUIREMENTS.md).
+
 Use this to create a **design prototype only**. Do not connect a database, AI,
 email, payment, authentication, analytics, or deployment. Use fictional/example
 content and clearly labelled placeholders.

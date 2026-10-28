@@ -1,8 +1,12 @@
 # ShortList MVP 1 user stories
 
-**Status:** review draft
+**Status:** approved by Chris in #3 on 2026-10-04; describes the MVP 1 end state
 **Owner:** Chris / SuccessByCS
 **Requirements:** [REQUIREMENTS.md](REQUIREMENTS.md)
+
+The current increment (#57) covers only part of US-001 and US-002: the email
+entry reveals the report in the browser, with no teaser, confirmation,
+consent or PDF yet. See the current increment in REQUIREMENTS.
 
 ## Owner stories
 

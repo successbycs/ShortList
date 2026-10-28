@@ -1,5 +1,7 @@
 #Standard Report Template, Branded SuccessByCS chris@uccessbycs.com
 
+**Status:** source material, not requirements. See [README.md](README.md).
+
 # AI Search Recommendation Check
 ## [Business name]
 [Website URL]

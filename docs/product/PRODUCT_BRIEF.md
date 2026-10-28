@@ -1,6 +1,7 @@
 # ShortList product brief
 
-**Status:** MVP 1 review draft
+**Status:** approved by Chris in #3 on 2026-10-04; later aligned with the
+global-scope decision recorded in #55. Describes the MVP 1 end state.
 **Owner:** Chris / SuccessByCS
 **Canonical requirements:** [REQUIREMENTS.md](REQUIREMENTS.md)
 
@@ -18,6 +19,12 @@ submit a public domain. If they choose, they confirm a masked email address,
 then see the full Minimum ShortList Assessment on the same responsive page and
 receive its professional PDF attachment. It tests whether that value earns
 email capture and useful feedback before any paid offer is introduced.
+
+**Current increment (not the MVP 1 end state):** today's build shows the
+report on the page after an email entry that stays in the browser. There is
+no teaser, masked-email confirmation, consent or PDF yet (#11, #27). See
+[REQUIREMENTS.md](REQUIREMENTS.md), including its open decision on
+teaser-before-email.
 
 ## Audience and learning focus
 

@@ -1,7 +1,9 @@
 # ShortList MVP 1 — Requirements Candidate
 
-**Status:** detailed decision record supporting the canonical review draft in
-[`REQUIREMENTS.md`](REQUIREMENTS.md) | **Owner:** Chris / SuccessByCS |
+**Status:** historical decision record (2026-10-04). Scope is owned by the
+approved baseline in [`REQUIREMENTS.md`](REQUIREMENTS.md); where the two
+differ, REQUIREMENTS wins. Section 7's acceptance scenarios are still
+referenced from REQUIREMENTS. | **Owner:** Chris / SuccessByCS |
 **Created:** 2026-10-04
 
 This is the proposed MVP 1 scope for ShortList. It is based on the discovery
@@ -205,6 +207,12 @@ customer outcomes. A buyer situation is a hypothesis based on the website, not
 a verified fact about the business's customers.
 
 ### 3.4 Dated AI-search teaser
+
+> **Superseded in part.** The observed-order and "top three" wording in this
+> record (here, section 2 and scenario M1-AC-03) is demoted by MVP1-JNY-003
+> in [REQUIREMENTS.md](REQUIREMENTS.md): a list of alternatives is supporting
+> context only. The current method is the ICP-led
+> [GEO prompt contract](GEO_PROMPT_CONTRACT.md).
 
 Each successful free assessment runs **two separately labelled AI-model
 results** using the same website-derived buyer questions. The first is a

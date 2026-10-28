@@ -1,6 +1,8 @@
 # ShortList safe assessment and private-access design
 
-**Status:** draft for #24 review; no control is configured or implemented  
+**Status:** approved by Chris in #24 on 2026-10-05. Many controls are now
+implemented locally (see [REQUEST_FLOW.md](REQUEST_FLOW.md)) but are not
+release-proven (#51–#54).  
 **Owner:** Chris / SuccessByCS  
 **Requirements:** [REQUIREMENTS.md](REQUIREMENTS.md)  
 **Contracts:** [CONTRACTS.md](CONTRACTS.md)
