@@ -27,7 +27,8 @@ An ExecPlan does not grant permission for destructive actions, production access
   design or copy, SEO/GEO content, schema markup, marketing measurement,
   outreach, or sales material: read
   `docs/marketing/MARKETING_BRAIN.md` first, then use an applicable project
-  skill in `.codex/skills/`. Product requirements, approved architecture,
+  skill in `.codex/skills/` (Claude Code reads the same skills through the links
+  in `.claude/skills/`). Product requirements, approved architecture,
   privacy/security controls, and explicit user decisions take priority.
 
 ## Disruptive host restart handoff
