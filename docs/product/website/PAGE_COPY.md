@@ -30,8 +30,7 @@ change without a recorded product decision.
 
 The domain-input row (no email before teaser value) is the MVP 1 end state,
 confirmed by Chris on 28 Oct 2026 (#71). The local-reveal row describes the
-current interim increment (#57) and is replaced when the teaser is built. See
-[Requirements](../REQUIREMENTS.md).
+current interim increment (#57). See [Requirements](../REQUIREMENTS.md).
 
 ## Controlled terminology
 
