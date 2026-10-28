@@ -1,6 +1,6 @@
 # AI model qualification matrix
 
-**Status:** documentation-only evidence register for GitHub Issue #23; no provider account, credential, or API request used
+**Status:** historical documentation-only evidence register for GitHub Issue #23 (closed); no provider account, credential, or API request used. The provider decision is made: GPT-6 Luna (see [REQUIREMENTS.md](../REQUIREMENTS.md)). The Auckland/top-three framing is superseded by the [GEO prompt contract](../GEO_PROMPT_CONTRACT.md).
 **Retrieved:** 2026-10-05 (Pacific/Auckland)  
 **Companion review:** [AI-search and website-analysis capability review](AI_SEARCH_ANALYSIS_CAPABILITY_REVIEW.md)
 

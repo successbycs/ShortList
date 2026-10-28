@@ -1,5 +1,8 @@
 # GEO Check — MVP Requirements
 
+**Status:** source material, not requirements. Its price was never approved.
+See [README.md](README.md).
+
 ## 1. Product purpose
 
 GEO Check helps a small Auckland service business understand whether its public website makes it clear to AI-powered web search what it sells, who it serves, and where it operates.

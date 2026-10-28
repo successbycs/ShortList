@@ -93,21 +93,24 @@ owner gates are resolved. They must not be guessed in this plan.
 | PDF examples/rubric | #27 | Chris, using #25 |
 | GPT-6 Luna web/no-web endpoint configuration, web location, token/timeout/spend cap, public terminology | #5 | Chris |
 | Sender/support domain, email provider, alert configuration, real-boundary tests | #27/#13 | Chris |
-| Upstream Symphony label-release/restart proof | Any future deliberate ShortList Symphony admission | Chris, through template #46; no ShortList product Issue is re-admitted before observed proof |
+| Upstream Symphony label-release/restart proof | No longer applies | Symphony retired by Chris on 28 Oct 2026 |
 
-## 6. Symphony admission
+## 6. Symphony admission (retired)
 
-Upstream Symphony requires an open Issue with `symphony:ready`, closed native
+**Retired 28 Oct 2026.** Chris retired Symphony, so no Issue is admitted to
+it and nothing in this section is an instruction. Work follows Issue → branch → pull request → review by a different model → merge on green checks, with Chris authorising every deploy.
+The text below is kept as the historical record.
+
+Upstream Symphony required an open Issue with `symphony:ready`, closed native
 dependencies, a concise outcome/non-goals, named code packets, exact
-verification, and an accountable human owner. It does not decide any gate in
+verification, and an accountable human owner. It did not decide any gate in
 section 5.
 
-#5 is currently **not** Symphony-admitted: it has no `symphony:ready` label.
-Its native dependencies are now closed and its implementation plan exists, but
+#5 was **not** Symphony-admitted: it had no `symphony:ready` label.
+Its native dependencies were closed and its implementation plan exists, but
 the exact GPT-6 Luna web/no-web configuration, web location, timeout, spend cap, and public terminology
-remain owner decisions. Do not start Symphony while the separate #29
-continuation/handoff policy proof remains unresolved. #29 is deliberately
-label-free pending #34 and template #46.
+remained owner decisions. Symphony was not to be started while the separate
+#29 continuation/handoff policy proof was unresolved.
 
 ## 7. Definition of done for #8
 

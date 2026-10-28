@@ -3,6 +3,10 @@
 **Status:** deferred MVP 3+ planning input — not authority for outreach,
 pricing, customer contact, paid claims, or automation.
 **Owner:** Chris / SuccessByCS
+**Scope note:** a narrow local category here, or the New Zealand vertical in
+#36, is an outreach cohort, not a limit on who can use ShortList. The public
+assessment is global; see [REQUIREMENTS.md](../product/REQUIREMENTS.md)
+section 1 and ASM-006 in [ASSUMPTIONS.md](../product/ASSUMPTIONS.md).
 
 This document describes a deliberately manual, one-person operating rhythm for
 testing whether ShortList can become a useful paid service after MVP 1 is live,

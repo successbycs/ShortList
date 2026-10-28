@@ -1,6 +1,8 @@
 # ShortList MVP 1 website experience and visual acceptance brief
 
-**Status:** draft for #28 review; mockups still required  
+**Status:** accepted: Chris closed #28 on 2026-10-05 after the Loveable
+export was adopted (see the [design register](README.md)). The current
+increment differs; see "Current report increment" below.  
 **Requirements:** [../REQUIREMENTS.md](../REQUIREMENTS.md)  
 **Mockup register:** [README.md](README.md)
 

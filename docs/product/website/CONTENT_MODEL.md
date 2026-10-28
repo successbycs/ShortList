@@ -1,6 +1,6 @@
 # ShortList MVP 1 content model
 
-**Status:** draft implementation-control model
+**Status:** implementation-control model approved by Chris in #34 on 2026-10-05
 **Owner:** Chris / SuccessByCS
 **Record contract:** [Contracts](../CONTRACTS.md)
 **Data requirement:** [Requirements](../REQUIREMENTS.md)

@@ -1,59 +1,60 @@
 # ShortList
 
-ShortList is a monorepository for a local website-assessment product and its
-reusable Python-first engineering harness. The product lives in `apps/web`;
-root Python and Docker assets provide a deterministic development harness.
-Neither local implementation nor a passing build proves a deployed service,
-configured provider, or customer delivery.
+ShortList is a free, self-service website assessment for small businesses,
+wherever they are. A visitor enters their public business website. ShortList
+reads the site's public pages and uses an AI model to describe the business,
+suggest three likely ideal customer profiles (ICPs) and write three questions
+each of those buyers might ask. It then shows the result on the page, keeping
+website evidence, the model's interpretation and uncertainty clearly apart.
 
-## Intended workflow
+The scope, and the difference between the current increment and the full
+MVP 1, are owned by [docs/product/REQUIREMENTS.md](docs/product/REQUIREMENTS.md).
 
-For the harness, use [GETTING_STARTED.md](GETTING_STARTED.md). For the web
-application, read [apps/web/README.md](apps/web/README.md) and install with
-`npm --prefix apps/web ci`. Read [docs/INDEX.md](docs/INDEX.md) for the
-documentation catalogue and [AGENTS.md](AGENTS.md) for development-agent
-instructions.
+## What the live site does today
 
-## Using Symphony for ShortList delivery
+<https://shortlist.successbycs.com> shows one page with a single form: enter a
+business website and select **Check my website**. The page is labelled as a
+prototype. The intended journey is: progress screens, then an email field that
+only unlocks the report in the browser, then an on-page report. The email is
+not stored or sent.
 
-Symphony is a GitHub-first engineering-work scheduler. It is not the product
-manager, website host, customer-facing ShortList service, or an autonomous
-decision-maker. The canonical procedure for capturing decisions in GitHub and
-for distinguishing user-directed Codex work from upstream Symphony dispatch is
-[the GitHub Issue workflow](docs/harness/GITHUB_ISSUE_WORKFLOW.md).
+The live site does **not** capture emails, record consent, create a PDF, send
+email or take payment. Those are later work (#11, #27, #12), and no price has
+been approved (#40).
 
-The working loop is:
+A completed assessment on the live site has **not** yet been proven. The
+release checks are still open (#51–#54); see the
+[MVP 1 release test plan](docs/product/MVP1_RELEASE_TEST_PLAN.md).
 
-1. Chris and Codex define and approve the product requirements, decisions, and
-   acceptance criteria.
-2. Create a small GitHub Issue with one outcome, explicit dependencies, and a
-   clear way to verify it.
-3. When the Issue is eligible, Symphony may assign it to one configured Codex
-   worker for implementation.
-4. The worker records evidence in GitHub, removes only its own
-   `symphony:ready` label to stop further dispatch, and leaves the Issue open
-   for human review. A person decides whether to accept, change, close, or
-   deliberately re-queue the work.
+## Built locally, not release-proven
 
-For ShortList, product-discovery and commercial decisions stay human-led.
-Symphony becomes useful after the requirements are approved, for bounded
-engineering work such as the self-service website, secure assessment endpoint,
-data storage, report delivery, and email-address confirmation. It should not be used to send
-customer outreach or to decide product scope.
+The code in [`apps/web`](apps/web/README.md) contains the full assessment:
+domain checks, safe website fetch, admission and rate limits, the GEO
+assessment chain (business profile, three ICPs, nine buyer questions and
+their evaluations), storage in Cloudflare D1 and the on-page report. It passes
+its local tests. Each current-increment requirement (INC-01 to INC-05) is
+"implemented locally; release proof pending" until the release Issues above
+are closed with evidence.
 
-See [docs/product/MVP_1_REQUIREMENTS_CANDIDATE.md](docs/product/MVP_1_REQUIREMENTS_CANDIDATE.md)
-for the current review-only ShortList MVP candidate.
+## Where to read more
 
-The reusable parts of this operating model are recorded for later V1-template
-review in [docs/product/BACKPORT_CANDIDATES.md](docs/product/BACKPORT_CANDIDATES.md).
+- [docs/product/REQUIREMENTS.md](docs/product/REQUIREMENTS.md): what
+  ShortList must do, what is in the current increment and what is deferred.
+- [apps/web/README.md](apps/web/README.md): the web application and how to
+  run it locally.
+- [AGENTS.md](AGENTS.md): rules for anyone, human or AI, working in this repo.
+- [docs/INDEX.md](docs/INDEX.md): the documentation catalogue.
 
-## Current implementation status
+## How work is delivered
 
-The Python self-test foundation and the local web assessment/report increment
-are implemented. The web increment provides bounded local server/runtime
-logic, deterministic fixtures, and an on-page report reveal; it does not imply
-configured production providers, recipient persistence, consent capture, PDF
-or email delivery, payment, or deployment. See
-[product requirements](docs/product/REQUIREMENTS.md) and the
-[MVP 1 release test plan](docs/product/MVP1_RELEASE_TEST_PLAN.md) for the
-separate local and deployed evidence boundaries.
+Every change starts as a GitHub Issue, is built on its own branch, and is
+opened as a pull request. A different AI model from the builder reviews it,
+and it is merged once checks pass. Chris authorises every deploy.
+
+## Development tooling
+
+The root Python files (`src/shortlist`, `scripts/verify.py`, `compose.yaml`,
+`.devcontainer`) are development tooling and a reusable project template. The
+product does not use them. Run the repository checks with
+`uv run python scripts/verify.py`; see [GETTING_STARTED.md](GETTING_STARTED.md)
+for the harness.

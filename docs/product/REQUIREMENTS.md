@@ -1,9 +1,14 @@
 # ShortList MVP 1 requirements
 
-**Status:** approved MVP 1 baseline (product-owner approval recorded in #1 and #2 on 2026-10-04)
+**Status:** approved MVP 1 baseline (product-owner approval recorded in #1 and #2 on 2026-10-04).
+This file owns ShortList scope; other documents link here rather than restate it.
 **Owner:** Chris / SuccessByCS
 **Last reconciled:** 2026-10-07
-**Detailed decision record:** [MVP 1 requirements candidate](MVP_1_REQUIREMENTS_CANDIDATE.md)
+**Detailed decision record:** [MVP 1 requirements candidate](MVP_1_REQUIREMENTS_CANDIDATE.md) (historical)
+**Build status (28 Oct 2026):** the current increment below is implemented
+locally and the site is live at shortlist.successbycs.com, but no completed
+live assessment has been proven. Release Issues #51–#54 are open, so every
+INC row stays "implemented locally; release proof pending".
 
 ## Current release increment — 2026-10-07
 
@@ -30,6 +35,16 @@ increment only after its relevant safety and E2E prerequisites are accepted.
 | INC-03 | The revealed on-page report renders the submitted domain, an evidence-based business overview, exactly three ICP hypotheses, and exactly three persisted buyer questions per ICP. | Stored-graph fixture and renderer test. | Implemented locally; release proof pending. |
 | INC-04 | Each rendered finding is parsed/stored LLM output; website evidence, LLM interpretation, and uncertainty are visibly distinct. | Repository/renderer tests and copy review. | Implemented locally; release proof pending. |
 | INC-05 | The current increment does not claim that an email was sent, a PDF was created, consent was retained, or an address was verified. | UI regression test and content review. | Implemented locally; release proof pending. |
+
+> **Open decision for Chris (28 Oct 2026): teaser before email.**
+> MVP1-JNY-001 and MVP1-RESULT-001 below require a useful teaser before any
+> email is asked for. The current increment (#57), the
+> [Marketing Brain](../marketing/MARKETING_BRAIN.md) change log (2026-10-07)
+> and the local-reveal row in [page copy](website/PAGE_COPY.md) ask for the
+> email before the report, with no teaser. Option A: keep teaser-before-email
+> as the MVP 1 end state and treat the current increment as an interim step.
+> Option B: replace MVP1-JNY-001 with the email-to-reveal journey. Both texts
+> are left unchanged until you decide.
 
 ## 1. Purpose and scope
 
@@ -123,13 +138,14 @@ implementation work:
 
 ## 5. Traceability and delivery boundary
 
-This document is the canonical MVP 1 requirements baseline once approved in
-GitHub #2. The detailed candidate preserves the underlying decision wording and
-acceptance scenarios until then. Design/feasibility Issues #23–#28 determine
-provider, security, data, visual, and contract implementation choices. Build
+This document is the canonical MVP 1 requirements baseline, approved in
+GitHub #2. The candidate is kept as the historical decision record; its
+section 7 still holds the detailed acceptance scenarios referenced above.
+Design/feasibility Issues #23–#28 determine provider, security, data, visual, and contract implementation choices. Build
 Issues must map to the requirement IDs above and may not turn a deferred item
 into an implied commitment.
 
-Symphony may execute a deliberately approved, bounded future implementation
-Issue. It does not choose any unresolved item here, approve a release, send
-customer communications, take payment, or change production systems.
+Build work follows Issue → branch → pull request → review by a different
+model → merge on green checks, with Chris authorising every deploy. No coding
+agent chooses an unresolved item here, approves a release, sends customer communications, takes payment, or
+changes production systems.

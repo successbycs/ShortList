@@ -1,6 +1,6 @@
 # ShortList assumptions register
 
-**Status:** active MVP 1 assumptions
+**Status:** active MVP 1 assumptions (approved by Chris in #3 on 2026-10-04)
 **Owner:** Chris / SuccessByCS
 
 | ID | Assumption | Impact if false | Validation method | Owner | Status |
@@ -13,6 +13,10 @@
 | ASM-006 | A later outreach cohort may be selected without defining public assessment eligibility. | Keep outreach planning separate from the global inbound product. | Review defined cohort measures and qualitative feedback when outreach begins. | Product owner | Deferred |
 | ASM-007 | An approved global market profile and evidence-supported service area can support honest context reporting. | Use an unable-to-determine result until a suitable profile and evidence are available. | Design review of profile scope, upkeep, and country/locale assumptions. | Technical design owner | Unvalidated |
 | ASM-008 | A fully automated normal journey can handle expected failures without manual fulfilment. | The MVP is not ready for public launch. | Failure-path verification of fetch, search, PDF, storage, and provider handoff. | Technical design owner | Unvalidated |
+
+ASM-001 and ASM-004 describe the MVP 1 end state. The current increment
+(#57) has no teaser, confirmation step or PDF, so they cannot be tested on
+it yet; see [REQUIREMENTS.md](REQUIREMENTS.md).
 
 An assumption is not implementation authority. A change to an approved
 requirement requires an explicit decision in the relevant Issue and canonical

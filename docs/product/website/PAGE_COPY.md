@@ -1,6 +1,8 @@
 # ShortList MVP 1 page-copy control
 
-**Status:** draft wording for Chris's review; not approved public copy
+**Status:** page-copy control approved by Chris in #34 on 2026-10-05. The
+exact public wording still needs Chris's approval before launch (see Review
+gates). The local-reveal rows were added on 2026-10-07 for #57.
 **Owner:** Chris / SuccessByCS
 **Truthfulness rules:** [Requirements](../REQUIREMENTS.md) and
 [Website experience](../design/WEBSITE_EXPERIENCE.md)
@@ -25,6 +27,10 @@ change without a recorded product decision.
 | Limits/duplicates | Explain entitlement, resend, or support outcome. | Do not reveal another recipient's activity. |
 | Failure | Explain limitation and approved support route. | Do not invent findings, promise manual fulfilment, or expose internals. |
 | Future CTA | Reserve a next-step location for MVP 2. | No MVP 1 price, checkout, payment, active offer, or lead capture. |
+
+The domain-input row (no email before teaser value) and the local-reveal row
+conflict. This is an open decision for Chris, recorded in
+[Requirements](../REQUIREMENTS.md); neither row is changed here.
 
 ## Controlled terminology
 

@@ -1,6 +1,6 @@
 # ShortList product design evidence
 
-**Status:** design workspace; no public website or production design is implied  
+**Status:** design workspace. These designs are inputs; for what the live site does today, see the [root README](../../../README.md).  
 **Owner:** Chris / SuccessByCS  
 **Design Issues:** [#28](https://github.com/successbycs/ShortList/issues/28) website experience and [#25](https://github.com/successbycs/ShortList/issues/25) PDF acceptance
 
@@ -77,6 +77,10 @@ the design exploration tool; the adopted `apps/web/` source is now the selected
 frontend foundation, not a deployed production service.
 
 ## Current prototype boundary
+
+**Update, 28 Oct 2026:** this section describes 5 October 2026. `apps/web`
+now contains the assessment runtime and is deployed for the current
+increment; see [REQUIREMENTS.md](../REQUIREMENTS.md).
 
 The current frontend demo remains a pre-service prototype. It does **not** yet
 implement the later approved masked-email confirmation/change step, blurred
