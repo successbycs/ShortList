@@ -10,5 +10,4 @@ Plans no longer live here. Every ExecPlan is in `.agent/execplans/`, following
 - Active plans: `.agent/execplans/`
 - Complete or superseded plans: `.agent/execplans/archive/`
 
-`active/template-bootstrap.md` is only a pointer to its new home and can be
-removed once nothing links to it.
+The template bootstrap record is in `.agent/execplans/archive/2026-09-29-template-bootstrap-summary.md`.

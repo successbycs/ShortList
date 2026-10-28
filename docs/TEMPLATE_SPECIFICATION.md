@@ -93,4 +93,4 @@ decision remain unresolved; this template does not fabricate either.
 
 ## Cross-references
 
-Execution order, acceptance criteria, and blockers are in [the bootstrap plan](plans/active/template-bootstrap.md). Requirement-to-evidence status is in [the verification matrix](quality/VERIFICATION_MATRIX.md).
+Execution order, acceptance criteria, and blockers are in [the bootstrap summary](../.agent/execplans/archive/2026-09-29-template-bootstrap-summary.md). Requirement-to-evidence status is in [the verification matrix](quality/VERIFICATION_MATRIX.md).
