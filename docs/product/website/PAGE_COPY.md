@@ -28,9 +28,10 @@ change without a recorded product decision.
 | Failure | Explain limitation and approved support route. | Do not invent findings, promise manual fulfilment, or expose internals. |
 | Future CTA | Reserve a next-step location for MVP 2. | No MVP 1 price, checkout, payment, active offer, or lead capture. |
 
-The domain-input row (no email before teaser value) and the local-reveal row
-conflict. This is an open decision for Chris, recorded in
-[Requirements](../REQUIREMENTS.md); neither row is changed here.
+The domain-input row (no email before teaser value) is the MVP 1 end state,
+confirmed by Chris on 28 Oct 2026 (#71). The local-reveal row describes the
+current interim increment (#57) and is replaced when the teaser is built. See
+[Requirements](../REQUIREMENTS.md).
 
 ## Controlled terminology
 

@@ -65,7 +65,8 @@ also belong in the owning GitHub Issue.
 
 ## Change log
 
-- 2026-10-28 — Product row aligned with REQUIREMENTS ("small businesses", not "small service businesses"). The 2026-10-07 teaser entry below conflicts with MVP1-JNY-001; this is an open decision for Chris recorded in `docs/product/REQUIREMENTS.md`, not resolved here.
+- 2026-10-28 — Chris decided the teaser before email stays the MVP 1 end state (#71). The 2026-10-07 entry below describes the current interim increment only; it does not replace the end state.
+- 2026-10-28 — Product row aligned with REQUIREMENTS ("small businesses", not "small service businesses"). The 2026-10-07 teaser entry below conflicted with MVP1-JNY-001 (resolved in the entry above).
 - 2026-10-07 — Current release increment set: on-page website-assessment report after local email reveal; PDF/email delivery remains deferred under #11/#27. See GitHub #57 and `docs/product/REQUIREMENTS.md`.
 - 2026-10-07 — Reconciled geography to the approved global self-service scope in `docs/product/REQUIREMENTS.md`; historical Auckland-first material is not public-product scope.
 - 2026-10-07 — Superseded the earlier evidence-first teaser decision for the current release increment: assessment progress leads to a local email reveal and an on-page website-assessment report. PDF/email delivery remains deferred under #11/#27.

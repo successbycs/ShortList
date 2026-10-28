@@ -36,15 +36,11 @@ increment only after its relevant safety and E2E prerequisites are accepted.
 | INC-04 | Each rendered finding is parsed/stored LLM output; website evidence, LLM interpretation, and uncertainty are visibly distinct. | Repository/renderer tests and copy review. | Implemented locally; release proof pending. |
 | INC-05 | The current increment does not claim that an email was sent, a PDF was created, consent was retained, or an address was verified. | UI regression test and content review. | Implemented locally; release proof pending. |
 
-> **Open decision for Chris (28 Oct 2026): teaser before email.**
-> MVP1-JNY-001 and MVP1-RESULT-001 below require a useful teaser before any
-> email is asked for. The current increment (#57), the
-> [Marketing Brain](../marketing/MARKETING_BRAIN.md) change log (2026-10-07)
-> and the local-reveal row in [page copy](website/PAGE_COPY.md) ask for the
-> email before the report, with no teaser. Option A: keep teaser-before-email
-> as the MVP 1 end state and treat the current increment as an interim step.
-> Option B: replace MVP1-JNY-001 with the email-to-reveal journey. Both texts
-> are left unchanged until you decide.
+> **Decision by Chris (28 Oct 2026, #71): teaser before email stays.**
+> MVP1-JNY-001 and MVP1-RESULT-001 below remain the MVP 1 end state: a useful
+> teaser comes before any email is asked for. The current increment (#57),
+> which asks for the email before the on-page report with no teaser, is an
+> interim step towards that end state, not a change to it.
 
 ## 1. Purpose and scope
 
