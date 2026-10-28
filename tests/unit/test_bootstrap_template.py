@@ -42,7 +42,6 @@ repository = "successbycs/template"
         encoding="utf-8",
     )
     (destination / "README.md").write_text("# App Template\n", encoding="utf-8")
-    (destination / "WORKFLOW.md").write_text("repo: successbycs/template\n", encoding="utf-8")
     (destination / "compose.yaml").write_text("services: {}\n", encoding="utf-8")
     (scripts / "prove_deployed_software.py").write_text(
         "from app_template.audit import AuditStore\n",
@@ -102,11 +101,8 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     assert 'repository = "example-owner/demo-app"' in (
         copied_template / "pyproject.toml"
     ).read_text(encoding="utf-8")
-    assert "repo: example-owner/demo-app" in (copied_template / "WORKFLOW.md").read_text(
-        encoding="utf-8"
-    )
     assert not (copied_template / "src" / "demo_app" / "symphony").exists()
-    assert (copied_template / "WORKFLOW.md").is_file()
+    assert not (copied_template / "WORKFLOW.md").exists()
     proof = copied_template / "scripts" / "prove_deployed_software.py"
     assert "from demo_app.audit import AuditStore" in proof.read_text(encoding="utf-8")
     result = subprocess.run(
