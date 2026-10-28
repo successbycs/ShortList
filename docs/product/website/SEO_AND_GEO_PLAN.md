@@ -1,6 +1,6 @@
 # ShortList MVP 1 SEO and GEO plan
 
-**Status:** draft launch-control plan; no production SEO/GEO configuration
+**Status:** launch-control plan approved by Chris in #34 on 2026-10-05; no production SEO/GEO configuration
 **Owner:** Chris / SuccessByCS
 **Product boundary:** [Requirements](../REQUIREMENTS.md)
 
@@ -52,4 +52,4 @@ configuration is selected by this document.
 
 The website-control Issue owns this plan's review. Launch readiness owns final
 domain, public metadata, crawler configuration, and deployed verification. No
-Symphony worker chooses SEO/GEO claims, a domain, or public content strategy.
+coding agent chooses SEO/GEO claims, a domain, or public content strategy.

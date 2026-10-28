@@ -1,6 +1,6 @@
 # ShortList MVP 1 Minimum Assessment PDF visual acceptance
 
-**Status:** draft for #25 review; illustrative samples exist, but no production renderer or delivery service is configured
+**Status:** accepted: Chris closed #25 on 2026-10-05 after reviewing the standard and examples (see the [design register](README.md)). Illustrative samples exist, but no production renderer or delivery service is configured. PDFs are not in the current increment (#27).
 **Requirements:** [../REQUIREMENTS.md](../REQUIREMENTS.md)
 **Evidence and report contract:** [../CONTRACTS.md](../CONTRACTS.md)
 **Website experience:** [WEBSITE_EXPERIENCE.md](WEBSITE_EXPERIENCE.md)

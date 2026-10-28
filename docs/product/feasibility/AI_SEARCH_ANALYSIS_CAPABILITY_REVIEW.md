@@ -1,6 +1,11 @@
 # AI-search and website-analysis capability review
 
-**Status:** documentation-only evidence; provider and customer-facing terminology remain open for product-owner decision  
+**Status:** historical #23 evidence record. **Superseded in part:** the provider
+question is closed (Chris selected OpenAI GPT-6 Luna in #23, now closed), and
+the "Auckland business-type query / top three" framing below is replaced by
+the global, ICP-led method in the [GEO prompt contract](../GEO_PROMPT_CONTRACT.md)
+and MVP1-JNY-003 in [REQUIREMENTS.md](../REQUIREMENTS.md). Customer-facing
+terminology remains open.  
 **Issue:** [#23](https://github.com/successbycs/ShortList/issues/23)  
 **Retrieved:** 2026-10-05 (Pacific/Auckland)  
 **Scope:** MVP 1 feasibility only. No credentials, provider configuration, live API calls, charges, customer data, or public result claims were used.

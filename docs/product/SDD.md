@@ -1,6 +1,8 @@
 # ShortList MVP 1 software design document
 
-**Status:** approved MVP 1 design baseline; no service is configured or deployed
+**Status:** approved MVP 1 design baseline. Since approval, the Worker has been
+deployed and its D1 database created for the current increment (not release-proven,
+#51–#54). R2, Workflows, email and PDF services are not configured.
 **Owner:** Chris / SuccessByCS  
 **Design Issue:** [#6](https://github.com/successbycs/ShortList/issues/6)  
 **Canonical requirements:** [REQUIREMENTS.md](REQUIREMENTS.md)
@@ -151,7 +153,7 @@ recommend options and obtain product-owner approval before implementation.
 | PDF renderer                      | No rendering library/service is selected.                                                                                                              | Decision needed                     | #25 defines visual acceptance; #27 selects and implements a bounded renderer.                                                                                                         |
 | Private operator alert            | Discord is the approved channel policy, but its integration/configuration is not selected or configured.                                               | Partially selected                  | #22 supplies the minimum alert policy; #27 selects/configures only with explicit authority.                                                                                           |
 | Analytics and attribution         | Cloudflare Web Analytics is a candidate for aggregate measurement; first-party attribution records are required.                                       | Candidate                           | #24/#7 define privacy/retention and data contracts; #9/#10 implement approved controls.                                                                                               |
-| Engineering work scheduler        | Upstream OpenAI Symphony is the selected coding-work scheduler; it is not a ShortList application runtime or customer feature.                         | Selected                            | #5 receives `symphony:ready` only through deliberate operator admission; it does not choose product technology.                                                                       |
+| Engineering work scheduler        | None. Upstream OpenAI Symphony was selected earlier; Chris retired it on 28 Oct 2026.                                                                  | Retired                             | Work follows Issue → branch → pull request → review by a different model → merge on green checks, with Chris authorising every deploy. |
 
 ## 4. Core journey and state boundaries
 
@@ -244,7 +246,7 @@ doubles, and reconciliation for an unknown external result.
 | D1/R2/Workflows       | D1 persists private product records; R2 holds private PDFs; Workflows performs durable delivery retries. | Reviewed migrations/bindings, recipient-isolation and state-machine tests, backup/retention/deletion design, and separately authorised account configuration.        |
 | Email provider        | Deliver private PDF attachment and status provider acceptance.                                           | Configured authenticated sender, safe test double and approved real-boundary test, retry/reconciliation evidence.                                                    |
 | Discord/private alert | Alert Chris at the two-hour escalation.                                                                  | Approved destination/configuration, minimum payload verification, and no-customer-content proof.                                                                     |
-| Symphony              | Execute a future bounded coding packet.                                                                  | An open Issue with a reviewed code packet, exact verification, closed dependencies, accountable human owner, `symphony:ready`, and deliberate operator launch.       |
+| Symphony              | Retired by Chris on 28 Oct 2026; not used.                                                               | Not applicable.                                                                                                                                                      |
 
 ## 8. Requirement traceability
 
@@ -293,7 +295,7 @@ doubles, and reconciliation for an unknown external result.
 | MVP1-UX-001     | The public website boundary requires mobile-first accessibility and visual review.                                        | #28 and M1-AC-15                            |
 | MVP1-OUT-001    | Outreach is explicitly outside the inbound MVP path and needs a later consent gate.                                       | #26; M1-AC-16/17                            |
 
-## 9. Decisions not delegated to implementation or Symphony
+## 9. Decisions not delegated to implementation
 
 The following remain owner decisions. A later agent may analyse options and
 implement an approved choice, but it must not choose silently.
@@ -330,10 +332,8 @@ implement an approved choice, but it must not choose silently.
 #10 + #11 + #13 + #27 ──> #14 end-to-end MVP verification ──> #15 launch readiness
 ```
 
-#5 is a future Symphony-owned implementation Issue, not a feasibility proof.
-It is intentionally not `symphony:ready` until #7 and #9 are closed and #8
-adds its reviewed code packet and exact verification. This prevents the
-upstream scheduler from claiming an unscoped task.
+Historical note: #5 was once planned as a Symphony-run Issue. Symphony was
+retired on 28 Oct 2026 and #5 is closed.
 
 ## 11. Verification and review boundary
 
@@ -348,5 +348,5 @@ This SDD is acceptable for review when it:
 
 The document alone is not proof that any service works. Provider calls, account
 configuration, live email, Discord alerting, storage, Cloudflare controls,
-production deployment, customer outreach, payment, and Symphony dispatch all
-remain unobserved unless later explicitly authorised and evidenced.
+production deployment, customer outreach and payment all remain unobserved
+unless later explicitly authorised and evidenced.

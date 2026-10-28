@@ -55,8 +55,8 @@ passes.
 - Relevant GitHub Issues have plain-language Markdown comments with reviewed
   commit, tests, public proof, and limitations. Never put escaped `\\n` text in
   a comment.
-- Chris makes the final release decision. Symphony can produce a bounded code
-  packet; it cannot approve deployment or call a release done.
+- Chris makes the final release decision and authorises every deploy. No
+  coding agent can approve a deployment or call a release done.
 
 ## Not sufficient on its own
 
@@ -77,6 +77,9 @@ live entry path is therefore unproven and the displayed message was not
 diagnostically truthful. Issue #48 supplies the UI truthfulness correction; it
 still requires review, promotion, deployment, and a fresh real assessment plus
 cached replay.
+
+**Update, 28 Oct 2026:** still not ready for release. #48–#54 remain open
+and RT-12 in the release test plan is still unproven.
 
 Use [MVP1_RELEASE_TEST_PLAN.md](MVP1_RELEASE_TEST_PLAN.md) with
 [REQUEST_FLOW.md](REQUEST_FLOW.md) to record the remaining evidence.

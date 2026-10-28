@@ -7,6 +7,10 @@ do not leak into the reusable template.
 
 ## Symphony operating model
 
+> **Retired 28 Oct 2026.** Chris retired Symphony. This section, down to
+> "Human-readable Issue comments", is a historical record only: do not
+> backport it or follow it. ShortList work follows Issue → branch → pull request → review by a different model → merge on green checks, with Chris authorising every deploy.
+
 Backport a short, plain-English explanation of how to use upstream Symphony in
 a project created from V1:
 
@@ -150,14 +154,14 @@ maintains Issues, milestones, labels, comments, or Project items:
    canonical planning document; neither REST nor GraphQL creates meaningful
    dependency semantics by itself.
 6. Keep product status and execution eligibility separate: Project status is
-   for human visibility; an upstream `symphony:ready` label is an explicit
-   automation admission decision. Do not alter either as a side effect of
-   unrelated work.
+   for human visibility; an approval label is an explicit decision to start
+   work. Do not alter either as a side effect of unrelated work.
 
 This is not a custom GitHub orchestration layer. It is a small, reusable
 decision guide for selecting the native API surface and verifying each change.
 
-The template copy should also say what Symphony is **not**: it is not the
+Historical (Symphony retired 28 Oct 2026): the template copy was also to say
+what Symphony is **not**: it is not the
 application runtime, website host, customer-facing service, or an autonomous
 product manager. It must not be used to send customer outreach or to make
 commercial decisions.

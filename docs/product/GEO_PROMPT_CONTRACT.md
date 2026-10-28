@@ -6,6 +6,16 @@ repeatable, evidence-led GEO assessment method.
 
 **Data design:** [ShortList data model](../architecture/DATA_MODEL.md)
 
+> **Open decision for Chris (28 Oct 2026): is the GEO method approved?**
+> This contract says "draft for product-owner review" and #55 is still open.
+> The [prompt package](prompts/GEO_ASSESSMENT_V1.md) says "approved runtime
+> method v1.0.0", and migration `0008_seed_geo_assessment_v1.sql` seeds it
+> with status `approved`. Comments on #55 also record that Chris approved the
+> GEO prompt-package ExecPlan and refer to "the approved GEO method", which
+> may mean the method is approved even though this text is not. Option A: approve this contract as it stands and
+> record that in #55. Option B: keep it a draft and mark the prompt package
+> as not yet approved. Neither status is changed here.
+
 ## What ShortList is assessing
 
 ShortList tests how selected AI modes understand and recommend a submitted

@@ -1,6 +1,6 @@
 # ShortList MVP 1 information architecture
 
-**Status:** draft for product/design review
+**Status:** approved by Chris in #34 on 2026-10-05; describes the MVP 1 end state (current increment: see [Requirements](../REQUIREMENTS.md))
 **Owner:** Chris / SuccessByCS
 **Canonical journey:** [Requirements](../REQUIREMENTS.md)
 **Design states:** [Website experience](../design/WEBSITE_EXPERIENCE.md)
