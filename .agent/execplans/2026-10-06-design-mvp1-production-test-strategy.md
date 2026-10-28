@@ -1,5 +1,7 @@
 # Design MVP 1 production test strategy
 
+**Status:** Active (2026-10-28): design used by ShortList #48 to #54, all open; Chris's acceptance is not yet recorded here.
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture

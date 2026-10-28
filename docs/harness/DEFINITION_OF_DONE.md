@@ -1,10 +1,24 @@
 # Definition of Done
 
-**Status:** template | **Owner:** change owner | **Update:** completion policy changes.
+**Status:** active | **Owner:** change owner | **Update:** completion policy changes.
 
 Done means scope implemented, relevant tests/evidence recorded, docs/config
 updated, limitations stated, and required review/authorization complete. A
 blocked check remains blocked, not passed.
+
+## Checks and review before merge
+
+A pull request is done only when:
+
+- both required CI checks pass: `verify` (Python harness, `scripts/verify.py`)
+  and `web-quality` (web app: types, lint, tests, typecheck, build);
+- a model other than the builder has reviewed it and given an **approve**
+  verdict, as set out in [AGENTS.md](../../AGENTS.md#review-and-merge); and
+- the PR says what changed, how it was verified, and what is still unproven.
+
+Merge is not release. Deployment, remote D1 migrations and other production
+changes need Chris's separate authorisation, and a capability that depends on
+them is not done until the real boundary is proven (below).
 
 ## Operational proof for capability claims
 

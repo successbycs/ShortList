@@ -1,7 +1,14 @@
 # Plans
 
-**Status:** active
+**Status:** retired location (2026-10-28)
 **Responsible role:** change owner
 **Update when:** plan lifecycle changes.
 
-`active/` contains requirement-facing milestone summaries. `.agent/execplans/` contains the self-contained operational ExecPlan required for material work. Move completed plans to `completed/` only after their outcomes and evidence are recorded.
+Plans no longer live here. Every ExecPlan is in `.agent/execplans/`, following
+[.agent/PLANS.md](../../.agent/PLANS.md):
+
+- Active plans: `.agent/execplans/`
+- Complete or superseded plans: `.agent/execplans/archive/`
+
+`active/template-bootstrap.md` is only a pointer to its new home and can be
+removed once nothing links to it.

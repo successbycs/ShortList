@@ -2,8 +2,12 @@
 
 **Status:** active | **Owner:** template maintainer | **Update:** development harness changes.
 
-The baseline agent is Codex, guided by `AGENTS.md`, `.agent/PLANS.md`, and the
-project skills below. Skills are advisory instructions, not permission controls.
+The development agents are Codex and Claude Code, guided by `AGENTS.md`,
+`.agent/PLANS.md`, and the project skills below. One builds a change; a
+different model reviews it. Codex (Astra) is the normal reviewer, and Claude
+Sonnet 5.5 stands in while Codex is unavailable (see
+[AGENTS.md](../../AGENTS.md#review-and-merge)). Skills are advisory
+instructions, not permission controls.
 
 | Role | Coverage | Trigger / boundary |
 | --- | --- | --- |
@@ -16,7 +20,6 @@ project skills below. Skills are advisory instructions, not permission controls.
 ## Bounded assistance roles
 
 These are review patterns, not autonomous runtime agents or scheduler entries.
-They do not change Symphony’s single-worker/human-handoff boundary.
 
 | Role | Inputs and output | Authority and stop condition | Review owner |
 | --- | --- | --- | --- |

@@ -1,5 +1,7 @@
 # Implement safe domain assessment and immediate preview
 
+**Status:** Active (2026-10-28): ShortList #10 is open; live proof steps remain.
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture

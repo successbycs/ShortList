@@ -48,11 +48,6 @@ repository = "successbycs/template"
         "from app_template.audit import AuditStore\n",
         encoding="utf-8",
     )
-    (scripts / "install_upstream_symphony.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
-    (scripts / "run_upstream_symphony_dashboard.sh").write_text(
-        "#!/usr/bin/env bash\n",
-        encoding="utf-8",
-    )
     (package / "__init__.py").write_text('__version__ = "0.1.0"\n', encoding="utf-8")
     (package / "audit.py").write_text("class AuditStore: pass\n", encoding="utf-8")
     (package / "config.py").write_text(
@@ -112,8 +107,6 @@ def test_bootstrap_renames_package_and_is_repeatable(copied_template: Path) -> N
     )
     assert not (copied_template / "src" / "demo_app" / "symphony").exists()
     assert (copied_template / "WORKFLOW.md").is_file()
-    assert (copied_template / "scripts" / "install_upstream_symphony.sh").is_file()
-    assert (copied_template / "scripts" / "run_upstream_symphony_dashboard.sh").is_file()
     proof = copied_template / "scripts" / "prove_deployed_software.py"
     assert "from demo_app.audit import AuditStore" in proof.read_text(encoding="utf-8")
     result = subprocess.run(

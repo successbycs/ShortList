@@ -122,7 +122,7 @@ directories are created fresh, outside Symphony, and removed at exit. No
 thread/model turn or provider request is made by this harness.
 
 The source-level proof plan remains
-[the incident ExecPlan](../../../.agent/execplans/2026-10-01-repair-wsl-sandbox-mounts.md).
+[the incident ExecPlan](../../../.agent/execplans/archive/2026-10-01-repair-wsl-sandbox-mounts.md).
 
 ## Activation and completed editor acceptance
 
