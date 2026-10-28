@@ -34,3 +34,9 @@
   and are not archived.
 - **Raw ChatGPT transcripts stay local only.** They are not tracked in Git
   (#62).
+- **Teaser before email stays.** The MVP 1 end state shows a useful,
+  evidence-based teaser before asking for an email (MVP1-JNY-001). Today's
+  email-to-reveal page (#57) is an interim step (#71).
+- **The GEO method is approved.** [GEO_PROMPT_CONTRACT.md](../product/GEO_PROMPT_CONTRACT.md)
+  is approved as it stands, matching the prompt package v1.0.0. Its listed
+  "deliberate open decisions" stay open (#71, #55).
