@@ -1,5 +1,7 @@
 # Lean MVP 1 reset: prove one report with ten real businesses
 
+**Status:** Active (2026-11-01): plan written; four Proposed decisions await Chris's approval before Step 1.
+
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture
@@ -43,9 +45,11 @@ to it.
 4. **Proof means a real report in a browser.** Unit tests and local builds are
    needed but prove nothing on their own. A dedicated verifier tool is not built
    for MVP 1.
-5. **Keep the safety that exists; add none.** Safe website fetch, domain
-   checks, run limits, no secrets in code or logs, and the cost cap all stay.
-   No new protection layers before real visitors exist.
+5. **Keep the safety that exists; add only what real visitors need.** Safe
+   website fetch, domain checks, run limits, per-call token limits, and no
+   secrets in code or logs all stay. The only new safeguards are the daily
+   spending cap (Step 5) and the privacy handling for stored emails (Step 4).
+   There is no spending cap today.
 6. **Manual before automated.** Chris follows up with people by hand. PDFs,
    delivery emails, retries and alerts wait until ten people have said the
    report is worth having.
@@ -61,8 +65,9 @@ to it.
 - [ ] Step 1b — Fix only the failure Step 1 found (if any).
 - [ ] Step 2 — Chris scores three reports.
 - [ ] Step 3 — Fix report quality (only if Step 2 fails its gate).
-- [ ] Step 4 — Make the email worth something.
-- [ ] Step 5 — Cost and limits for real visitors.
+- [ ] Step 4a — Teaser before the email.
+- [ ] Step 4b — Store the email with consent.
+- [ ] Step 5 — Daily spending cap and visitor limits.
 - [ ] Step 6 — Ten real businesses.
 - [ ] Step 7 — Tidy the Issues (alongside Steps 2–6).
 
@@ -79,6 +84,14 @@ to it.
   locally afterwards.
 - Observation: the email box on the live page keeps the address in the
   browser only. Nothing is stored or sent, so the page collects no leads today.
+- Observation: there is no teaser. A completed assessment goes straight to
+  the email box (`use-assessment-journey.ts` moves `completed` and `cached`
+  results to the `reveal` screen). Chris decided on 28 Oct (#71) that a
+  teaser before the email is the MVP 1 end state (requirement MVP1-JNY-001),
+  so Step 4 builds it.
+- Observation: there is no spending cap. Each OpenAI call has token limits,
+  but the run's cost is stored as empty (`estimatedSpendUsd: null`), and
+  nothing limits total runs per day across the site.
 - Observation: the saved-report lookup ignores the prompt version, so a
   domain replays its first report for good, even after the prompts change.
   Evidence: `findStoredGeoAssessment` selects the latest run by domain only.
@@ -110,9 +123,14 @@ them, and the approval is recorded here and on the Issue.
   Rationale: none of these tests whether the report is valuable. They are
   around a week of work, and #27 alone has five failure paths to prove.
   Date/Author: 2026-11-01, Claude Code (Opus 5.5) for Chris.
-- Decision (Proposed): the email and a consent tick are stored in one new
-  database table, so Chris can follow up by hand.
+- Decision (Proposed): the email, a required "send me this report" tick and
+  an optional "you may contact me" tick are stored in one new table, so Chris
+  can follow up by hand. Retention, the deletion contact and the privacy
+  wording are decided by Chris in Step 4 before any code.
   Rationale: an email that goes nowhere tests nothing.
+  Note: the teaser before the email is already approved (Chris, 28 Oct, #71;
+  MVP1-JNY-001). The live page lacks it, so Step 4 builds it; this is not a
+  change of scope.
   Date/Author: 2026-11-01, Claude Code (Opus 5.5) for Chris.
 - Decision (Proposed): Issues #48–#54 are replaced by Steps 1 and 1b of this
   plan; #11, #14 and #27 are narrowed or parked as Step 7 describes.
@@ -156,9 +174,9 @@ database called `shortlist-mvp1`). A visit runs:
    web search, one from the model's own knowledge.
 5. Everything is saved in D1 (`geo-assessment-repository.ts`). A repeat of
    the same domain replays the saved result without new model calls.
-6. The visitor sees a teaser and an email box
-   (`apps/web/src/components/assessment/journey-screens.tsx`). The email is not
-   sent anywhere.
+6. The visitor goes straight to an email box
+   (`apps/web/src/components/assessment/journey-screens.tsx`); there is no
+   teaser yet. The email is not stored or sent anywhere.
 7. The full report is shown on the page.
 
 **Engine B: the "Version 1" proof.** Python scripts in `scripts/` plus
@@ -181,24 +199,35 @@ in `src/shortlist/`, and most of `docs/harness/`, `docs/ai/` and
 
 The steps run in order, and each has a gate. Step 7 runs alongside Steps 2–6.
 
-### Step 0 — Back up and freeze (30 minutes, no approval needed)
+### Step 0 — Back up and freeze (30 minutes; Chris confirms before anything is stashed or stopped)
 
-On Chris's PC, in `/home/chris/ShortList`, save the proof work privately and
-leave the checkout on `main`:
+The proof work on Chris's PC, in `/home/chris/ShortList` on branch
+`discovery/core-assessment-proof`, is mostly uncommitted and includes a
+third-party site crawl under `data/core-proof-runs/`. Nothing from it is
+committed, staged or pushed: the repository is public.
 
-    cd /home/chris/ShortList
-    git stash list   # note anything already stashed
-    tar -czf /home/chris/backups/shortlist-version1-proof-2026-11-01.tar.gz \
-      --exclude=apps/web/node_modules --exclude=.venv .
-    git add -A && git commit -m "Park Version 1 proof work (local only, not for push)"
-    git switch main && git pull --ff-only
+1. Show Chris `git status --short` and confirm it is only the proof work, with
+   no `.env` or key files. If anything else appears, stop and ask.
+2. Copy the whole folder to a private backup outside any repository:
 
-Do **not** push `discovery/core-assessment-proof`. It contains a third-party
-site crawl, and the repository is public. Confirm no Symphony process is
-running (`ps -ef | grep -i symphony`); if one is, stop it by PID.
+       cd /home/chris
+       tar -czf /home/chris/backups/shortlist-version1-proof-2026-11-01.tar.gz \
+         --exclude=ShortList/apps/web/node_modules --exclude=ShortList/.venv ShortList
 
-Gate: the backup file exists and is larger than 1 MB, and `git status` on
-`main` is clean.
+3. Park the uncommitted work in a local stash. A stash never leaves the PC
+   unless someone pushes it deliberately:
+
+       cd /home/chris/ShortList
+       git stash push --include-untracked -m "Version 1 proof work, parked 2026-11-01 (never push)"
+       git switch main && git pull --ff-only
+
+4. List any Symphony processes with `ps -ef | grep -i [s]ymphony`. If one is
+   running, show Chris its PID and command line, and stop only that PID
+   (`kill <pid>`) after he agrees.
+
+Gate: the backup exists and is larger than 1 MB, `tar -tzf` lists
+`ShortList/data/core-proof-runs/`, `git stash list` shows the parked entry,
+and `git status` on `main` is clean.
 
 ### Step 1 — One live run, with Chris watching (1 hour; Chris approves one run)
 
@@ -257,45 +286,114 @@ lessons:
 - require a minimum number of items and reject answers that fall short;
 - reject evidence IDs that were not in the input.
 
-Today the cache lookup (`findStoredGeoAssessment` in
-`geo-assessment-repository.ts`) returns the latest report for a domain
-whatever prompt version made it. So a domain, once assessed, replays its old
-report forever. Change the lookup so it only replays reports made by the
-current approved prompt version, and add one test for that. Then re-run the
-same three domains, re-score, and record both rounds.
+The new version also has to change which version runs, and what the cache
+replays:
+
+- **Which version runs.** The Worker is pinned to prompt package version
+  `1.0.0` when it loads its configuration. Make the version label one setting
+  (a constant in the same place it is set today). Moving to the new version is
+  then a one-line change, reviewed in the PR.
+- **What the cache replays.** `runLiveAssessment` in `live-assessment.ts`
+  checks the cache (`findStoredGeoAssessment` in
+  `geo-assessment-repository.ts`) *before* it loads the configuration. The
+  query selects the latest run for the domain, whatever prompt version made
+  it, so a domain replays its first report forever. Change the order: load
+  the configuration first, then pass the current prompt package version ID
+  into the lookup. The lookup joins the run's configuration snapshot
+  (`assessment_configuration_snapshots`) and only returns reports made with
+  that version. The older comparable-business fallback lookup stays as it is.
+- **Tests:** a report made with the current version is replayed with no
+  model calls; a report made with an older version is not replayed, and a new
+  run starts.
+
+Then re-run the same three domains, re-score, and record both rounds.
 If the gate still fails after two rounds, stop. Chris decides whether the
 report format, the model or the product question needs to change.
 
-### Step 4 — Make the email worth something (one day; deploy needs Chris's OK)
+### Step 4 — Teaser, then an email that counts (two parts of one day each; privacy wording and deploy need Chris's OK)
 
-- Add one D1 table, `report_requests`: assessment run ID, email,
-  `contact_ok` (the visitor ticked "you may contact me about this report"),
-  created time (UTC). One new migration.
-- The email box saves to it through a server function, then reveals the full
-  report. Validation: a basic email format check and the existing rate limit.
-  No confirmation step, no emails sent.
-- Add a one-sentence privacy note under the box and ask Chris to approve its
-  wording: what is kept, why, and that it is deleted on request.
+Step 4a is the teaser; Step 4b is storing the email. Each is its own PR and deploy.
+
+**Before any code, Chris decides and records in the Decision Log:**
+
+- how long emails are kept (suggested: 12 months, then deleted);
+- the contact address for "delete my email" requests;
+- the wording of the privacy note under the email box;
+- what the two ticks mean. "Send me this report" is required and covers only
+  this report. "You may contact me about ShortList" is optional, unticked by
+  default, and is the only basis for any follow-up beyond this report. The
+  requirements call them delivery consent and optional marketing consent.
+
+**Step 4a — Teaser (MVP1-JNY-001, decided by Chris on 28 Oct in #71).** After a
+completed or cached assessment, show the business profile and the three ICP
+names with the date of the observation. The buyer questions and findings stay
+blurred until the email step. This is a change to the existing screens and
+journey state, not a new page.
+
+**Step 4b — Storing the email:**
+
+- One new migration adds `report_requests`: request ID, assessment run ID,
+  normalised email (trimmed and lower-cased), `report_ok` (always 1),
+  `contact_ok` (0 or 1), created time (UTC). There is no other personal data,
+  and the IP is not stored.
+- A new server function accepts only a run ID that exists and is completed,
+  plus the email and the ticks. It checks the email's format and length, and
+  limits writes with the existing privacy-preserving IP hash: at most 5
+  requests per visitor per UTC day, in a new counter table using the same
+  atomic pattern as `assessment_ip_day_limits`. It returns only "saved" or a
+  plain error. It never returns or logs an email, its own or anyone else's,
+  and diagnostics record only the outcome category.
+- After saving, the full report is revealed. No confirmation step, no emails
+  sent.
 - Add a print stylesheet so the browser's "Save as PDF" gives a clean report.
-- Give Chris one command to list recent requests, run on his PC:
 
-      npx wrangler d1 execute shortlist-mvp1 --remote --command \
-        "SELECT created_at_utc, email, contact_ok FROM report_requests ORDER BY created_at_utc DESC LIMIT 50"
+**Tests:** an unknown or unfinished run ID is refused; the sixth request in a
+day is refused; the response and the diagnostic event contain no email; the
+teaser shows the profile and ICPs but not the questions or findings; the
+report is revealed only after saving.
 
-Gate: Chris submits a test request on the live site and sees it in the list.
+**Deleting on request:** Chris runs one documented `DELETE ... WHERE email
+= ?` command and records only the date and "deleted" in a private note, not
+the address.
+
+**Reading the list (operator only).** Chris runs this on his own PC. The
+output contains personal data and is never pasted into an Issue, PR, chat,
+log or this plan:
+
+    npx wrangler d1 execute shortlist-mvp1 --remote --command \
+      "SELECT created_at_utc, email, contact_ok FROM report_requests ORDER BY created_at_utc DESC LIMIT 50"
+
+Gate: on the live site, Chris sees the teaser, submits his own email, sees
+the full report, and finds his row in the list. Record only "row present" in
+this plan.
 
 ### Step 5 — Cost and limits for real visitors (half a day; deploy needs Chris's OK)
 
-- Using the per-run cost from Steps 1–3, set a site-wide daily run cap so the
-  worst day costs no more than an amount Chris chooses (suggested: US$5 a
-  day). The existing two-at-once limit stays.
+- **The price assumption.** Take the highest per-run cost measured in Steps
+  1–3 and add 50%. Chris approves this figure and a daily budget (suggested:
+  US$5). The cap is the budget divided by the per-run figure, rounded down.
+  Record all three numbers in the Decision Log.
+- **The cap.** Add one new migration with a `site_day_runs` table, one row per
+  UTC day. At admission, after the per-visitor check passes, reserve a slot
+  with the same atomic `INSERT ... ON CONFLICT ... DO UPDATE ... WHERE count <
+  cap` pattern that `assessment_ip_day_limits` uses. The update only happens
+  while there is room, so two runs at once cannot both take the last slot. If
+  the reservation fails, release the admission leases as the per-visitor check
+  already does, and return a new `daily_capacity_reached` outcome.
+- **Failed runs still count.** A run that fails after admission keeps its
+  slot, because the money may already be spent. This errs on the side of
+  spending less. Replays from the cache never reserve a slot.
 - Lower `MAX_STARTS_PER_UTC_DAY` from the testing value of 100 to 5 per
   visitor.
-- When the daily cap is reached, the page says so plainly and asks the
+- The page says plainly that today's free checks are used up and asks the
   visitor to try tomorrow.
 
-Gate: a test that sets the cap to 1 shows the honest message on the second
-run.
+**Tests:** with the cap set to 1, two reservations at once give exactly one
+success; the second visitor sees the capacity message; a cached replay works
+after the cap is reached; a failed run does not give its slot back.
+
+Gate: the tests pass, and after deploy Chris sees the cap figure in the
+Decision Log match the deployed setting.
 
 ### Step 6 — Ten real businesses (one to two weeks, led by Chris)
 
