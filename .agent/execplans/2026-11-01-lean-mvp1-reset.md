@@ -1,6 +1,6 @@
 # Lean MVP 1 reset: make the live assessment work well for a real visitor
 
-**Status:** Active (2026-11-01): scope agreed by Chris; Step 0 starts when he says go.
+**Status:** Active (2026-11-01): scope agreed by Chris; Step 0 next.
 
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
@@ -144,9 +144,10 @@ to it.
 - Decision (already made by Chris, 11 Oct): the report engine being proved is
   "Version 1"; fan-out analysis and deeper technical checks are "Version 2" and
   wait until Version 1 is proven.
-- Proposed (needs Chris): Issues #48–#54 are replaced by Steps 1 and 1b.
+- Decision: Issues #48–#54 are closed, replaced by Steps 1 and 1b.
   Rationale: seven Issues to observe one live run is more process than the
   product needs.
+  Date/Author: 2026-11-01, Chris ("close them").
 
 ## Outcomes & Retrospective
 
@@ -452,7 +453,7 @@ open Issues and 78 plans.
 
 On successbycs/ShortList, with Chris's approval:
 
-- If Chris approves the Proposed decision above, close #48–#54 with a comment:
+- Done 2026-11-01: closed #48–#54 with a comment:
   "Replaced by the lean MVP 1 reset plan, Steps 1 and 1b."
 - Mark #11 (email capture), #27 (PDF and delivery) and #14 (full end-to-end
   verification) "Future requirement (Chris, 1 Nov 2026)" in a comment, and
