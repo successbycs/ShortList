@@ -22,7 +22,7 @@ When this plan is done:
 1. a visitor can enter their website and reliably get a report;
 2. Chris has judged the report good enough to show a business owner;
 3. the wait, the wording and any error make sense on a phone and a laptop;
-4. the visitor sees something useful before being asked for anything;
+4. the visitor sees the whole report on the page, with nothing asked of them;
 5. a bad day cannot run up an unexpected bill;
 6. ten real business owners have used it, and Chris knows what to build next.
 
@@ -50,9 +50,14 @@ to it.
    website fetch, domain checks, run limits, per-call token limits, and no
    secrets in code or logs all stay. The only new safeguard is the daily
    spending cap (Step 6). There is no spending cap today.
-6. **Future requirements stay future.** The list at the end of this plan is
+6. **The report lives in the database.** Every part of the report shown on
+   the page is read back from the D1 database, both for a new run and for a
+   repeat visit. Nothing is shown straight from an AI answer held in memory.
+   This is how it works today (`runLiveAssessment` saves the run, then reads
+   it back with `findStoredGeoAssessment`), and no step may change that.
+7. **Future requirements stay future.** The list at the end of this plan is
    not built, partly built or "prepared for" during this plan.
-7. **Spending and deploys need Chris's OK each time**, as the release workflow
+8. **Spending and deploys need Chris's OK each time**, as the release workflow
    (`docs/workflows/RELEASE_WORKFLOW.md`) already requires.
 
 ## Progress
@@ -67,7 +72,7 @@ to it.
 - [ ] Step 2 — Chris scores three reports.
 - [ ] Step 3 — Fix report quality (only if Step 2 fails its gate).
 - [ ] Step 4 — The wait, the wording and the errors make sense.
-- [ ] Step 5 — Teaser first.
+- [ ] Step 5 — Show the whole report on the page.
 - [ ] Step 6 — Daily spending cap.
 - [ ] Step 7 — Ten real businesses.
 - [ ] Step 8 — Tidy the Issues and requirements (alongside Steps 2–7).
@@ -98,8 +103,8 @@ to it.
 - Observation: there is no teaser. A completed assessment goes straight to
   the email box (`use-assessment-journey.ts` moves `completed` and `cached`
   results to the `reveal` screen). Chris decided on 28 Oct (#71) that a
-  teaser before the email is the MVP 1 end state (requirement MVP1-JNY-001),
-  so Step 5 builds it.
+  teaser before the email is the MVP 1 end state (requirement MVP1-JNY-001).
+  On 1 Nov he deferred it: the report is shown in full for now (Step 5).
 - Observation: there is no spending cap. Each OpenAI call has token limits,
   but the run's cost is stored as empty (`estimatedSpendUsd: null`), and
   nothing limits total runs per day across the site.
@@ -130,17 +135,15 @@ to it.
 - Decision: storing the visitor's email and consent becomes a future
   requirement. Until then, nothing the visitor types is stored.
   Date/Author: 2026-11-01, Chris.
-- Decision (already made by Chris, 28 Oct, #71): a teaser comes before any
-  email request (MVP1-JNY-001). Step 5 builds it.
+- Decision: for now, the whole report is shown on the page as soon as it is
+  ready, with no email box, button or teaser gate. All report content is held
+  in the database, and the page shows what the database holds. The
+  teaser-before-email journey (Chris, 28 Oct, #71; MVP1-JNY-001) becomes a
+  future requirement, together with email storage.
+  Date/Author: 2026-11-01, Chris.
 - Decision (already made by Chris, 11 Oct): the report engine being proved is
   "Version 1"; fan-out analysis and deeper technical checks are "Version 2" and
   wait until Version 1 is proven.
-- Open question for Chris (Step 5): with email storage deferred, what reveals
-  the rest of the report after the teaser? (a) keep today's email box, which
-  stores nothing and says so; or (b) a plain "See the full report" button,
-  until email storage is built. Recommendation: (b). Asking for an email that
-  goes nowhere adds a step and tests nothing. Step 5 builds whichever Chris
-  picks.
 - Proposed (needs Chris): Issues #48–#54 are replaced by Steps 1 and 1b.
   Rationale: seven Issues to observe one live run is more process than the
   product needs.
@@ -366,27 +369,28 @@ Gate: Chris walks the journey on his own phone and laptop and is happy with
 every screen. Before and after screenshots are recorded in Artifacts and
 Notes.
 
-### Step 5 — Teaser first (one day; deploy needs Chris's OK)
+### Step 5 — Show the whole report on the page (half a day; deploy needs Chris's OK)
 
-**What will have improved:** a visitor sees something useful about their own
-business (what their website says they do, and the three kinds of customer it
-appeals to) before being asked for anything. That gives them a reason to read
-on.
+**What will have improved:** a visitor sees their complete report the moment
+it is ready (business overview, three ideal customers, nine buyer questions
+and the findings) with nothing to fill in first. Every word of it comes from
+the copy saved in the database, so a repeat visit shows exactly the same
+report.
 
-Requirement MVP1-JNY-001, decided by Chris on 28 Oct (#71). After a completed
-or cached assessment, show the business overview and the three ideal-customer
-names, with the date checked. The buyer questions and findings stay blurred
-below, with the control Chris picked in the open question above: a plain "See
-the full report" button (recommended), or today's email box, which stores
-nothing. This changes the existing screens and journey state; it is not a new
-page. Nothing the visitor types is stored or sent.
+Chris, 1 Nov 2026: display everything on the page for now. In
+`use-assessment-journey.ts`, a `completed` or `cached` result goes straight to
+the `result` screen instead of the `reveal` (email) screen. Remove the email
+box screen from `journey-screens.tsx`; the future email work can rebuild it
+when it is needed. The report screen itself does not change in this step
+(Step 4 handles its wording).
 
-Tests: the teaser shows the overview and ideal customers but not the questions
-or findings; the full report appears only after the visitor's action; cached
-results take the same path.
+Tests: a completed result and a cached result both open the full report with
+no email field on the page; the report shown for a new run equals the report
+read back from the database for that run, so a repeat visit is identical.
 
-Gate: Chris sees the teaser on the live site on phone and laptop, then opens
-the full report.
+Gate: Chris runs one new domain and one repeat domain on the live site, on
+phone and laptop, and sees the full report straight away both times, with the
+same content.
 
 ### Step 6 — Daily spending cap (half a day; deploy needs Chris's OK)
 
@@ -455,8 +459,8 @@ On successbycs/ShortList, with Chris's approval:
   leave them open.
 - In `docs/product/REQUIREMENTS.md`, mark the affected requirement rows
   "Future (Chris, 1 Nov 2026)". Do not delete them. This covers the masked-email
-  confirmation (MVP1-JNY-005), the PDF and delivery rows, and email/consent
-  storage.
+  confirmation (MVP1-JNY-005), the teaser before the email (MVP1-JNY-001),
+  the PDF and delivery rows, and email/consent storage.
 - Leave the marketing Issues (#31–#45) open. Step 7 is their first real input.
 - Add one line at the top of `docs/INDEX.md`: "Active plan:
   `.agent/execplans/2026-11-01-lean-mvp1-reset.md`. Symphony, harness and
@@ -477,6 +481,8 @@ Recorded so nothing is lost. Each needs its own decision after Step 7.
 - **PDF report and delivery** (Chris, 1 Nov): the PDF, the delivery email,
   bounded retries, the two-hour update email and the Discord alert (#27).
 - **Masked-email confirmation step** (Chris, 1 Nov; MVP1-JNY-005).
+- **Teaser before the email** (Chris decided it on 28 Oct, #71, and deferred it
+  on 1 Nov; MVP1-JNY-001). It comes back together with email storage.
 - **Version 2 report engine**: fan-out analysis and deeper technical checks
   (Chris, 11 Oct).
 - **Bot protection** (Turnstile), deferred to MVP 3+ (#49).
@@ -509,7 +515,7 @@ The plan is complete when all of these are recorded in this file:
 - three scored reports that pass the Step 2 gate, first time or after Step 3;
 - before and after screenshots of the journey on phone and laptop, and
   Chris's sign-off (Step 4);
-- the teaser live and the full report opening after it (Step 5);
+- the full report shown straight away for a new and a repeat domain (Step 5);
 - a daily spending cap in place and shown working (Step 6);
 - ten business answers and Chris's decision on what comes next (Step 7).
 
