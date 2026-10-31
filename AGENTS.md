@@ -92,3 +92,17 @@ is required.
 When work involves a GitHub Issue, follow
 [`docs/harness/GITHUB_ISSUE_WORKFLOW.md`](docs/harness/GITHUB_ISSUE_WORKFLOW.md)
 for target verification, decision capture and Issue comments.
+
+## Agent architecture and imported builder skills
+
+Read [the agent architecture charter](docs/architecture/agent-charter.md) when
+changing application-agent objectives, tools, prompts, work selection or lifecycle.
+It requires honest decision ownership and observable proof; it does not replace the
+local product design or authorise new runtime agents/background execution.
+
+Imported from Shipright and adapted to this repository: [start-issue](.agents/skills/start-issue/SKILL.md),
+[investigate](.agents/skills/investigate/SKILL.md), [review-pr](.agents/skills/review-pr/SKILL.md),
+[SDD reference](.agents/skills/shipright-sdd/SKILL.md), and
+[project-charter](.codex/skills/project-charter/SKILL.md). Codex and Claude can discover
+these through their skill directories. Existing local workflows, SDD, prompt approvals,
+review/merge checks and production permissions take precedence over imported examples.
