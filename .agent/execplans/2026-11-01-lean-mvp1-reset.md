@@ -1,29 +1,30 @@
-# Lean MVP 1 reset: prove one report with ten real businesses
+# Lean MVP 1 reset: make the live assessment work well for a real visitor
 
-**Status:** Active (2026-11-01): plan written; four Proposed decisions await Chris's approval before Step 1.
+**Status:** Active (2026-11-01): scope agreed by Chris; Step 0 starts when he says go.
 
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
 ## Purpose / Big Picture
 
-ShortList is meant to answer one question: **will a small-business owner find
-an automated, evidence-based report on their website useful enough to give
-their email for it, and later pay for more?** After a month of work, nobody
-outside the team has seen a report. The live site has every stage deployed,
-but no successful run has ever been recorded. A second report engine sits
-unpushed on Chris's PC, and its last two model runs failed the quality check.
-Most of the effort went into process: scheduler tooling, policies, governance
-documents and multi-Issue diagnosis plans.
+ShortList's website, https://shortlist.successbycs.com, is meant to give a
+small-business owner a useful, evidence-based report on how their website
+explains them to buyers and AI search. Every stage is deployed, but no
+successful live run has ever been recorded, and no one outside the team has
+seen a report. Most of the past month went into process: scheduler tooling,
+policies, governance documents and multi-Issue diagnosis plans.
 
-This plan resets the work to a minimum viable product (MVP): the smallest thing
-that tests the question. When it is done, Chris will have:
+Chris's direction (1 Nov 2026): **focus on the critical path of the live
+website engine working, from the visitor's point of view.** Anything that
+does not help a visitor get a good report, smoothly, is a future requirement.
 
-1. watched one real assessment complete on https://shortlist.successbycs.com;
-2. read and scored reports for three businesses he chose;
-3. collected an email and consent from a visitor who wanted the full report;
-4. put ten real businesses through it and recorded what they said.
+When this plan is done:
 
-Everything else waits until those ten answers are in.
+1. a visitor can enter their website and reliably get a report;
+2. Chris has judged the report good enough to show a business owner;
+3. the wait, the wording and any error make sense on a phone and a laptop;
+4. the visitor sees something useful before being asked for anything;
+5. a bad day cannot run up an unexpected bill;
+6. ten real business owners have used it, and Chris knows what to build next.
 
 The architecture picture
 [`docs/architecture/shortlist-mvp1-status.png`](../../docs/architecture/shortlist-mvp1-status.png)
@@ -32,27 +33,25 @@ to it.
 
 ## Rules for this plan (read before every step)
 
-1. **One engine.** The live website engine (Cloudflare Worker, "Engine A"
-   below) is the product. The Python "Version 1" proof ("Engine B") is backed
-   up and parked. Its lessons may change prompts in Engine A; its code is not
-   ported.
+1. **One engine: the live website.** All work goes into the engine behind the
+   website ("Engine A" below). The separate Python experiment ("Engine B") is
+   backed up and left alone. Its lessons may shape prompts in Engine A; its
+   code is not ported.
 2. **One plan.** This file is the only active ShortList plan. Do not write new
    ExecPlans, policies or architecture documents for MVP 1. Record decisions in
    the Decision Log here and a one-line Issue comment.
-3. **Each step takes a day or less and ends with something Chris can see**: a
-   page, a report, a number. A step that runs past its time box stops and is
-   brought to Chris; it does not grow.
+3. **Every step states what will have improved for Chris or the visitor**, in
+   plain words, and ends with something Chris can see: a page, a report, a
+   number. A step takes a day or less. If it runs over, it stops and comes
+   back to Chris; it does not grow.
 4. **Proof means a real report in a browser.** Unit tests and local builds are
-   needed but prove nothing on their own. A dedicated verifier tool is not built
-   for MVP 1.
+   needed but prove nothing on their own. No dedicated verifier tool is built.
 5. **Keep the safety that exists; add only what real visitors need.** Safe
    website fetch, domain checks, run limits, per-call token limits, and no
-   secrets in code or logs all stay. The only new safeguards are the daily
-   spending cap (Step 5) and the privacy handling for stored emails (Step 4).
-   There is no spending cap today.
-6. **Manual before automated.** Chris follows up with people by hand. PDFs,
-   delivery emails, retries and alerts wait until ten people have said the
-   report is worth having.
+   secrets in code or logs all stay. The only new safeguard is the daily
+   spending cap (Step 6). There is no spending cap today.
+6. **Future requirements stay future.** The list at the end of this plan is
+   not built, partly built or "prepared for" during this plan.
 7. **Spending and deploys need Chris's OK each time**, as the release workflow
    (`docs/workflows/RELEASE_WORKFLOW.md`) already requires.
 
@@ -60,16 +59,18 @@ to it.
 
 - [x] (2026-10-31 23:30Z) Inventoried the repository, live Worker, database
       migrations and the unpushed proof branch; drew the status picture.
-- [ ] Step 0 — Back up and freeze.
+- [x] (2026-11-01) Chris set the scope: the critical path of the live website,
+      with email storage, PDF and delivery as future requirements.
+- [ ] Step 0 — Back up the Version 1 experiment and freeze.
 - [ ] Step 1 — One live run, with Chris watching.
 - [ ] Step 1b — Fix only the failure Step 1 found (if any).
 - [ ] Step 2 — Chris scores three reports.
 - [ ] Step 3 — Fix report quality (only if Step 2 fails its gate).
-- [ ] Step 4a — Teaser before the email.
-- [ ] Step 4b — Store the email with consent.
-- [ ] Step 5 — Daily spending cap and visitor limits.
-- [ ] Step 6 — Ten real businesses.
-- [ ] Step 7 — Tidy the Issues (alongside Steps 2–6).
+- [ ] Step 4 — The wait, the wording and the errors make sense.
+- [ ] Step 5 — Teaser first.
+- [ ] Step 6 — Daily spending cap.
+- [ ] Step 7 — Ten real businesses.
+- [ ] Step 8 — Tidy the Issues and requirements (alongside Steps 2–7).
 
 ## Surprises & Discoveries
 
@@ -83,12 +84,19 @@ to it.
   recorded production attempt (#50) failed on a code defect that was fixed
   locally afterwards.
 - Observation: the email box on the live page keeps the address in the
-  browser only. Nothing is stored or sent, so the page collects no leads today.
+  browser only. Nothing is stored or sent, and the page says so ("We do not
+  send email or create a delivery record at this stage").
+- Observation: the waiting screen is a set of fixed labels, not real progress,
+  and one label says "Local context checked" although the assessment is
+  global. A run makes five OpenAI calls one after another, and each may take
+  up to 45 seconds (`REQUEST_TIMEOUT_MS` in `live-assessment.ts`). The report
+  uses internal terms such as "UTC observation time" and "What the model
+  returned".
 - Observation: there is no teaser. A completed assessment goes straight to
   the email box (`use-assessment-journey.ts` moves `completed` and `cached`
   results to the `reveal` screen). Chris decided on 28 Oct (#71) that a
   teaser before the email is the MVP 1 end state (requirement MVP1-JNY-001),
-  so Step 4 builds it.
+  so Step 5 builds it.
 - Observation: there is no spending cap. Each OpenAI call has token limits,
   but the run's cost is stored as empty (`estimatedSpendUsd: null`), and
   nothing limits total runs per day across the site.
@@ -106,44 +114,38 @@ to it.
 
 ## Decision Log
 
-Decisions marked **Proposed** change the approved MVP 1 requirements
-(`docs/product/REQUIREMENTS.md`). They take effect only when Chris approves
-them, and the approval is recorded here and on the Issue.
-
-- Decision (Proposed): Engine A, the live Worker, is the only MVP 1 engine.
-  Engine B is backed up privately and parked.
-  Rationale: Engine A is deployed, takes any domain, and already produces
-  profile, ICPs, buyer questions and findings. Engine B covers one test site,
-  runs only on a PC, and its two model runs failed quality.
-  Date/Author: 2026-11-01, Claude Code (Opus 5.5) for Chris.
-- Decision (Proposed): MVP 1 drops the masked-email confirmation step, the
-  PDF, email delivery, retries, the two-hour update email and the Discord
-  alert. The visitor sees the full report on the page after giving an email,
-  and can use the browser's own "Save as PDF".
-  Rationale: none of these tests whether the report is valuable. They are
-  around a week of work, and #27 alone has five failure paths to prove.
-  Date/Author: 2026-11-01, Claude Code (Opus 5.5) for Chris.
-- Decision (Proposed): the email, a required "send me this report" tick and
-  an optional "you may contact me" tick are stored in one new table, so Chris
-  can follow up by hand. Retention, the deletion contact and the privacy
-  wording are decided by Chris in Step 4 before any code.
-  Rationale: an email that goes nowhere tests nothing.
-  Note: the teaser before the email is already approved (Chris, 28 Oct, #71;
-  MVP1-JNY-001). The live page lacks it, so Step 4 builds it; this is not a
-  change of scope.
-  Date/Author: 2026-11-01, Claude Code (Opus 5.5) for Chris.
-- Decision (Proposed): Issues #48–#54 are replaced by Steps 1 and 1b of this
-  plan; #11, #14 and #27 are narrowed or parked as Step 7 describes.
-  Rationale: seven Issues to observe one live run is more process than the
-  product needs.
-  Date/Author: 2026-11-01, Claude Code (Opus 5.5) for Chris.
+- Decision: all MVP 1 work goes into the live website engine (Engine A).
+  The Python Version 1 experiment (Engine B) is backed up and parked.
+  Rationale: Chris, 1 Nov 2026: "focus on the critical path of A function and
+  website working from a user experience perspective." Engine A is the one
+  visitors use; Engine B runs only on Chris's PC and was tested on one site.
+  Date/Author: 2026-11-01, Chris.
+- Decision: the PDF report, delivery emails, the masked-email confirmation
+  step, retries, the two-hour update email and the Discord alert become future
+  requirements. They are not part of this plan.
+  Date/Author: 2026-11-01, Chris.
+- Decision: storing the visitor's email and consent becomes a future
+  requirement. Until then, nothing the visitor types is stored.
+  Date/Author: 2026-11-01, Chris.
+- Decision (already made by Chris, 28 Oct, #71): a teaser comes before any
+  email request (MVP1-JNY-001). Step 5 builds it.
 - Decision (already made by Chris, 11 Oct): the report engine being proved is
   "Version 1"; fan-out analysis and deeper technical checks are "Version 2" and
-  wait until Version 1 is proven. This plan keeps that rule.
+  wait until Version 1 is proven.
+- Open question for Chris (Step 5): with email storage deferred, what reveals
+  the rest of the report after the teaser? (a) keep today's email box, which
+  stores nothing and says so; or (b) a plain "See the full report" button,
+  until email storage is built. Recommendation: (b). Asking for an email that
+  goes nowhere adds a step and tests nothing. Step 5 builds whichever Chris
+  picks.
+- Proposed (needs Chris): Issues #48–#54 are replaced by Steps 1 and 1b.
+  Rationale: seven Issues to observe one live run is more process than the
+  product needs.
 
 ## Outcomes & Retrospective
 
-Not started. At each gate, record what happened and whether the gate passed.
+Not started. At each gate, record what happened, whether the gate passed, and
+whether the "what will have improved" line came true.
 
 ## Context and Orientation
 
@@ -197,9 +199,11 @@ in `src/shortlist/`, and most of `docs/harness/`, `docs/ai/` and
 
 ## Plan of Work
 
-The steps run in order, and each has a gate. Step 7 runs alongside Steps 2–6.
+The steps run in order, and each has a gate. Step 8 runs alongside Steps 2–7.
 
 ### Step 0 — Back up and freeze (30 minutes; Chris confirms before anything is stashed or stopped)
+
+**What will have improved:** your Version 1 experiment is safely backed up on your PC, nothing in it can accidentally become public, and the working copy is clean for the live-site work.
 
 The proof work on Chris's PC, in `/home/chris/ShortList` on branch
 `discovery/core-assessment-proof`, is mostly uncommitted and includes a
@@ -231,6 +235,8 @@ and `git status` on `main` is clean.
 
 ### Step 1 — One live run, with Chris watching (1 hour; Chris approves one run)
 
+**What will have improved:** we know for certain whether a visitor can get a report from the live site today, how long they wait, and what one report costs.
+
 Chris picks the domain (suggested: `successbycs.com`, because it is ours). In
 one terminal, from `apps/web`:
 
@@ -251,12 +257,16 @@ Gate: report appears and replay is instant → Step 2. Anything else → Step 1b
 
 ### Step 1b — Fix only what Step 1 found (one day or less; deploy needs Chris's OK)
 
+**What will have improved:** a visitor who enters their website gets a report instead of an error.
+
 Use the diagnostic phase to find the failing part. Fix only that part, add one
 test that reproduces the failure, run the checks below, deploy with Chris's
 OK and repeat Step 1. If the cause is not found within a day, stop and report
 it to Chris with the evidence.
 
 ### Step 2 — Chris scores three reports (1 hour of Chris's time)
+
+**What will have improved:** we know, in your judgement, whether the report is good enough to put in front of a real business owner, and exactly where it falls short.
 
 Chris chooses three real business websites of different kinds, for example a
 trade, a professional service and a software company. For each, run the
@@ -275,6 +285,8 @@ Gate: all three average 3.5 or more, and none scores 1 on question 1 → Step 4.
 Otherwise → Step 3.
 
 ### Step 3 — Fix report quality (two rounds at most, a day each; spend and deploy need Chris's OK)
+
+**What will have improved:** reports are specific and correct enough that you would be happy to send one to a client, and a business that checks again gets the improved report, not a stale one.
 
 Change prompts and output rules only, in the `geo-assessment-v1` prompt
 package (seeded by `apps/web/migrations/0008_seed_geo_assessment_v1.sql` and
@@ -310,64 +322,59 @@ Then re-run the same three domains, re-score, and record both rounds.
 If the gate still fails after two rounds, stop. Chris decides whether the
 report format, the model or the product question needs to change.
 
-### Step 4 — Teaser, then an email that counts (two parts of one day each; privacy wording and deploy need Chris's OK)
+### Step 4 — The wait, the wording and the errors make sense (one day; deploy needs Chris's OK)
 
-Step 4a is the teaser; Step 4b is storing the email. Each is its own PR and deploy.
+**What will have improved:** on a phone and a laptop, a visitor knows what is
+happening while they wait and roughly how long it will take. The report reads
+in plain English, and if something goes wrong they get a clear, honest message
+and know what to do next.
 
-**Before any code, Chris decides and records in the Decision Log:**
+1. Walk the journey on the live site at phone width (390 px) and desktop width
+   (1440 px), using a domain already in the cache and one new domain. Take
+   screenshots of every screen and note what is confusing, using the wait time
+   measured in Step 1.
+2. Fix, in `journey-screens.tsx` and the journey hook only:
+   - the waiting screen tells the truth: it shows the measured typical wait
+     ("usually about N minutes") and moves through its steps in line with that
+     time; remove "Local context checked", because the assessment is global;
+   - plain wording in place of internal terms: "UTC observation time" becomes
+     "Checked on <date>" (the time is still stored in UTC), and "What the model
+     returned" gets a plain heading;
+   - each failure screen says what happened and what to do, and offers the
+     right button (try again, or try another website);
+   - nothing overflows or needs sideways scrolling at 390 px.
+3. Keep the speed standard: run the website-release lab check, and confirm the
+   layout does not jump on either profile.
 
-- how long emails are kept (suggested: 12 months, then deleted);
-- the contact address for "delete my email" requests;
-- the wording of the privacy note under the email box;
-- what the two ticks mean. "Send me this report" is required and covers only
-  this report. "You may contact me about ShortList" is optional, unticked by
-  default, and is the only basis for any follow-up beyond this report. The
-  requirements call them delivery consent and optional marketing consent.
+Gate: Chris walks the journey on his own phone and laptop and is happy with
+every screen. Before and after screenshots are recorded in Artifacts and
+Notes.
 
-**Step 4a — Teaser (MVP1-JNY-001, decided by Chris on 28 Oct in #71).** After a
-completed or cached assessment, show the business profile and the three ICP
-names with the date of the observation. The buyer questions and findings stay
-blurred until the email step. This is a change to the existing screens and
-journey state, not a new page.
+### Step 5 — Teaser first (one day; deploy needs Chris's OK)
 
-**Step 4b — Storing the email:**
+**What will have improved:** a visitor sees something useful about their own
+business (what their website says they do, and the three kinds of customer it
+appeals to) before being asked for anything. That gives them a reason to read
+on.
 
-- One new migration adds `report_requests`: request ID, assessment run ID,
-  normalised email (trimmed and lower-cased), `report_ok` (always 1),
-  `contact_ok` (0 or 1), created time (UTC). There is no other personal data,
-  and the IP is not stored.
-- A new server function accepts only a run ID that exists and is completed,
-  plus the email and the ticks. It checks the email's format and length, and
-  limits writes with the existing privacy-preserving IP hash: at most 5
-  requests per visitor per UTC day, in a new counter table using the same
-  atomic pattern as `assessment_ip_day_limits`. It returns only "saved" or a
-  plain error. It never returns or logs an email, its own or anyone else's,
-  and diagnostics record only the outcome category.
-- After saving, the full report is revealed. No confirmation step, no emails
-  sent.
-- Add a print stylesheet so the browser's "Save as PDF" gives a clean report.
+Requirement MVP1-JNY-001, decided by Chris on 28 Oct (#71). After a completed
+or cached assessment, show the business overview and the three ideal-customer
+names, with the date checked. The buyer questions and findings stay blurred
+below, with the control Chris picked in the open question above: a plain "See
+the full report" button (recommended), or today's email box, which stores
+nothing. This changes the existing screens and journey state; it is not a new
+page. Nothing the visitor types is stored or sent.
 
-**Tests:** an unknown or unfinished run ID is refused; the sixth request in a
-day is refused; the response and the diagnostic event contain no email; the
-teaser shows the profile and ICPs but not the questions or findings; the
-report is revealed only after saving.
+Tests: the teaser shows the overview and ideal customers but not the questions
+or findings; the full report appears only after the visitor's action; cached
+results take the same path.
 
-**Deleting on request:** Chris runs one documented `DELETE ... WHERE email
-= ?` command and records only the date and "deleted" in a private note, not
-the address.
+Gate: Chris sees the teaser on the live site on phone and laptop, then opens
+the full report.
 
-**Reading the list (operator only).** Chris runs this on his own PC. The
-output contains personal data and is never pasted into an Issue, PR, chat,
-log or this plan:
+### Step 6 — Daily spending cap (half a day; deploy needs Chris's OK)
 
-    npx wrangler d1 execute shortlist-mvp1 --remote --command \
-      "SELECT created_at_utc, email, contact_ok FROM report_requests ORDER BY created_at_utc DESC LIMIT 50"
-
-Gate: on the live site, Chris sees the teaser, submits his own email, sees
-the full report, and finds his row in the list. Record only "row present" in
-this plan.
-
-### Step 5 — Cost and limits for real visitors (half a day; deploy needs Chris's OK)
+**What will have improved:** a busy day, or someone abusing the form, cannot run up an unexpected OpenAI bill. You know the most ShortList can cost in a day, and a visitor who hits a limit is told plainly when to come back.
 
 - **The price assumption.** Take the highest per-run cost measured in Steps
   1–3 and add 50%. Chris approves this figure and a daily budget (suggested:
@@ -395,37 +402,69 @@ after the cap is reached; a failed run does not give its slot back.
 Gate: the tests pass, and after deploy Chris sees the cap figure in the
 Decision Log match the deployed setting.
 
-### Step 6 — Ten real businesses (one to two weeks, led by Chris)
+### Step 7 — Ten real businesses (one to two weeks, led by Chris)
+
+**What will have improved:** ten real business owners have used ShortList, and
+you know from them whether the report is useful, what is wrong with it, and
+whether anyone would pay for more. That tells you what to build next instead
+of guessing.
 
 Chris sends the link personally to ten business owners he knows (first-degree
 contacts; no automation, and no LinkedIn tooling). He asks each three questions
 afterwards:
 
 1. Was anything in it new or useful to you?
-2. Was anything wrong?
+2. Was anything wrong or confusing?
 3. Would you pay for a deeper version, and roughly what would it be worth?
 
 Record each answer in one line in Artifacts and Notes (business type, not
-name). Watch the cost per day.
+name). Watch the daily cost.
 
-Gate (decision for Chris): at least five of ten found it useful and at least
-three would pay for more → plan MVP 2 (paid tier, real PDF, delivery). Fewer →
-change the report or the question before building anything else.
+Gate (decision for Chris): at least five of ten found it useful, and at least
+three would pay for more → choose which future requirements to build first.
+Fewer → change the report or the question before building anything else.
 
-### Step 7 — Tidy the Issues (half a day, alongside Steps 2–6; closing needs Chris's OK)
+### Step 8 — Tidy the Issues and requirements (half a day, alongside Steps 2–7; closing needs Chris's OK)
+
+**What will have improved:** GitHub shows only the work that matters now.
+Anyone opening the repo sees one active plan and a clear future list, not 30
+open Issues and 78 plans.
 
 On successbycs/ShortList, with Chris's approval:
 
-- Close #48–#54 with a comment: "Replaced by the lean MVP 1 reset plan, Steps
-  1 and 1b."
-- Narrow #11 to Step 4; park #27 (PDF and delivery) and #14 (full end-to-end
-  verification) until after Step 6.
-- Leave the marketing Issues (#31–#45) open. Step 6 is their first real input.
+- If Chris approves the Proposed decision above, close #48–#54 with a comment:
+  "Replaced by the lean MVP 1 reset plan, Steps 1 and 1b."
+- Mark #11 (email capture), #27 (PDF and delivery) and #14 (full end-to-end
+  verification) "Future requirement (Chris, 1 Nov 2026)" in a comment, and
+  leave them open.
+- In `docs/product/REQUIREMENTS.md`, mark the affected requirement rows
+  "Future (Chris, 1 Nov 2026)". Do not delete them. This covers the masked-email
+  confirmation (MVP1-JNY-005), the PDF and delivery rows, and email/consent
+  storage.
+- Leave the marketing Issues (#31–#45) open. Step 7 is their first real input.
 - Add one line at the top of `docs/INDEX.md`: "Active plan:
   `.agent/execplans/2026-11-01-lean-mvp1-reset.md`. Symphony, harness and
   governance documents are parked for MVP 1."
 
-No documents are deleted. Parking is enough, and deleting would take longer.
+No documents are deleted. Parking is enough.
+
+## Future requirements (not in this plan)
+
+Recorded so nothing is lost. Each needs its own decision after Step 7.
+
+- **Store the visitor's email and consent** (Chris, 1 Nov): a required "send
+  me this report" tick and an optional "you may contact me" tick. Before
+  building it, Chris decides how long emails are kept, the contact for
+  deletion requests, and the privacy wording. The design must bind each
+  request to a completed run, limit requests per visitor, never return or log
+  an email, and keep the list readable only by Chris.
+- **PDF report and delivery** (Chris, 1 Nov): the PDF, the delivery email,
+  bounded retries, the two-hour update email and the Discord alert (#27).
+- **Masked-email confirmation step** (Chris, 1 Nov; MVP1-JNY-005).
+- **Version 2 report engine**: fan-out analysis and deeper technical checks
+  (Chris, 11 Oct).
+- **Bot protection** (Turnstile), deferred to MVP 3+ (#49).
+- **Paid tier**, MVP 2.
 
 ## Concrete Steps
 
@@ -452,17 +491,19 @@ The plan is complete when all of these are recorded in this file:
 
 - one successful live run, timed and costed (Step 1);
 - three scored reports that pass the Step 2 gate, first time or after Step 3;
-- a live email request visible in `report_requests` (Step 4);
-- a daily cost cap in place and shown working (Step 5);
-- ten business answers and Chris's decision on what comes next (Step 6).
+- before and after screenshots of the journey on phone and laptop, and
+  Chris's sign-off (Step 4);
+- the teaser live and the full report opening after it (Step 5);
+- a daily spending cap in place and shown working (Step 6);
+- ten business answers and Chris's decision on what comes next (Step 7).
 
 ## Idempotence and Recovery
 
 - Steps 1–3 can be repeated. A repeated domain replays from the cache and
   costs nothing. After Step 3's cache change, it is assessed again only when
   the prompt version changes.
-- Migrations are additive: a new table, a new prompt version. Rolling back the
-  Worker leaves an unused table, which is harmless.
+- Migrations are additive: a new prompt version, the daily-cap table. Rolling
+  back the Worker leaves an unused table, which is harmless.
 - Every deploy records the previous Worker version, so `wrangler rollback`
   restores it in one command.
 - The Step 0 backup restores Engine B exactly, if it is ever needed.
@@ -474,7 +515,8 @@ The plan is complete when all of these are recorded in this file:
   box's status.
 - Step 1 run record: (empty)
 - Step 2 scores: (empty)
-- Step 6 answers: (empty)
+- Step 4 screenshots and notes: (empty)
+- Step 7 answers: (empty)
 
 ## Interfaces and Dependencies
 
@@ -483,5 +525,6 @@ The plan is complete when all of these are recorded in this file:
   is unused and stays, per #49.
 - OpenAI: the model ID set by the live configuration (`gpt-6-luna`). No new
   provider.
-- New in this plan: the `report_requests` table (Step 4), a site-wide daily run
-  cap (Step 5) and the print stylesheet (Step 4). Nothing else.
+- New in this plan: a new prompt version and the cache change (Step 3, if
+  needed), journey wording and screens (Steps 4 and 5), and the `site_day_runs`
+  daily-cap table (Step 6). Nothing else.

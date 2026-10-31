@@ -2,7 +2,7 @@
 <html><head><meta charset="utf-8">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { width: 1800px; height: 960px; background: #fff; font-family: "DejaVu Sans", Arial, sans-serif; color: #1f2937; padding: 28px 34px; }
+  body { width: 1800px; height: 1000px; background: #fff; font-family: "DejaVu Sans", Arial, sans-serif; color: #1f2937; padding: 28px 34px; }
   h1 { font-size: 46px; font-weight: 800; letter-spacing: .5px; color: #374151; }
   h1 span { color: #1d6fe0; }
   .sub { font-size: 21px; color: #4b5563; margin-top: 4px; }
@@ -43,7 +43,7 @@
 </div>
 
 <div class="lane">
-  <h2>A · The live website &nbsp;<small>shortlist.successbycs.com · Cloudflare Worker + D1 database · any business, any country</small></h2>
+  <h2>A · The live website engine — <b>the focus</b> &nbsp;<small>shortlist.successbycs.com · Cloudflare Worker + D1 database · any business, any country</small></h2>
   <div class="row">
     <div class="step g2"><div class="num g">1</div><h3>Visitor enters their domain</h3><p>One public page. Loads fast; sitemap live since today.</p><span class="tag g">WORKING</span></div>
     <div class="arrow">→</div>
@@ -64,7 +64,7 @@
 </div>
 
 <div class="lane" style="background:#fbfaf5;border-color:#e7dcc0">
-  <h2>B · "Version 1" report proof &nbsp;<small>Python scripts on Chris's PC only · branch never pushed · one test website · named Version 1 by Chris on 11 Oct</small></h2>
+  <h2>B · Python experiment ("Version 1" proof) — <b>parked</b> &nbsp;<small>Python scripts on Chris's PC only · branch never pushed · one test website · named Version 1 by Chris on 11 Oct</small></h2>
   <div class="row">
     <div class="step g2"><div class="num g">1</div><h3>Crawl with Apify</h3><p>47 pages of one test site captured and frozen.</p><span class="tag g">DONE</span></div>
     <div class="arrow">→</div>
@@ -76,13 +76,15 @@
     <div class="arrow">→</div>
     <div class="step n2"><div class="num n">5</div><h3>PDF report</h3><p>Plan written; nothing built.</p><span class="tag n">NOT BUILT</span></div>
     <div class="arrow" style="width:20px"></div>
-    <div class="step a2" style="flex:1.2;background:#fffbeb"><div class="num a">!</div><h3>Two engines, one job</h3><p>A and B both turn a website into ICPs and buyer answers, with different models, code and languages. MVP needs one.</p><span class="tag a">DECIDE</span></div>
+    <div class="step a2" style="flex:1.2;background:#fffbeb"><div class="num a">!</div><h3>Two engines, one job</h3><p>A and B both turn a website into ICPs and buyer answers. Decided 1 Nov: all effort goes into A; B is backed up and left alone.</p><span class="tag g">DECIDED</span></div>
   </div>
 </div>
 
 <div class="bottom">
-  <div class="box notbuilt"><h2>Not built (MVP 1 requirements)</h2>
-    <ul><li>Teaser before the email (decided 28 Oct)</li><li>Store email + consent</li><li>Masked-email confirmation step</li><li>PDF report + email delivery (#27)</li><li>Retry, 2-hour update email, Discord alert</li><li>Daily spending cap; cost per run unknown</li></ul></div>
+  <div class="box notbuilt"><h2>Next on the critical path (this plan)</h2>
+    <ul><li>Prove one live run; fix what breaks</li><li>Chris scores 3 reports; fix quality</li><li>Honest wait, plain wording, clear errors</li><li>Teaser before anything is asked</li><li>Daily spending cap</li></ul>
+    <h2 style="margin-top:8px">Future requirements</h2>
+    <ul><li>Store email + consent · PDF + delivery email · confirm-email step</li></ul></div>
   <div class="box over"><h2>Over-engineering to park</h2>
     <ul><li>Symphony scheduler, dashboards, WSL fixes: ~40 of 78 ExecPlans</li><li>117 docs, ~9,000 lines: threat model, 9 AI policies, 11 architecture docs</li><li>Python "template" harness and Docker setup beside the real app</li><li>6 Issues (#49–#54) to diagnose one live run</li><li>Model profiles, fan-out design, schema hashes for a report nobody has read yet</li></ul></div>
   <div class="box version"><h2>Which version?</h2>
