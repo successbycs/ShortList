@@ -17,7 +17,7 @@
 | Provider acceptance | The email provider accepted an attachment handoff. It does not prove inbox receipt or reading. |
 | Recipient record | Private data for one email address's consent, attribution, allowance, delivery attempts, and support events. |
 | Report trigger | UTC instant at which report generation and the delivery attempt begin. |
-| Teaser | The concise evidence-based value shown before email capture. MVP 1 end state; the current increment has no teaser (see the open decision in REQUIREMENTS). |
+| Teaser | The concise evidence-based value shown before email capture. MVP 1 end state, confirmed by Chris on 28 Oct 2026 (#71); the current increment has no teaser yet. |
 | Two-hour escalation | At the two-hour deadline without provider acceptance: record `escalated`, make one update-email attempt, alert Chris privately, and stop retries. |
 
 Canonical behavioural definitions live in [REQUIREMENTS.md](REQUIREMENTS.md).

@@ -23,8 +23,8 @@ email capture and useful feedback before any paid offer is introduced.
 **Current increment (not the MVP 1 end state):** today's build shows the
 report on the page after an email entry that stays in the browser. There is
 no teaser, masked-email confirmation, consent or PDF yet (#11, #27). See
-[REQUIREMENTS.md](REQUIREMENTS.md), including its open decision on
-teaser-before-email.
+[REQUIREMENTS.md](REQUIREMENTS.md). Chris confirmed on 28 Oct 2026 that the
+teaser before email stays the MVP 1 end state (#71).
 
 ## Audience and learning focus
 
