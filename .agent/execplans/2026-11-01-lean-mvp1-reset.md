@@ -88,8 +88,11 @@ to it.
   send email or create a delivery record at this stage").
 - Observation: the waiting screen is a set of fixed labels, not real progress,
   and one label says "Local context checked" although the assessment is
-  global. A run makes five OpenAI calls one after another, and each may take
-  up to 45 seconds (`REQUEST_TIMEOUT_MS` in `live-assessment.ts`). The report
+  global. A run makes five OpenAI calls, each allowed up to 45 seconds
+  (`REQUEST_TIMEOUT_MS` in `live-assessment.ts`). Profile, ideal customers and
+  questions run one after another; the two evaluation calls then run in
+  parallel (`Promise.all` in `geo-assessment-runner.ts`). So the worst case is
+  four 45-second waits, about three minutes. The report
   uses internal terms such as "UTC observation time" and "What the model
   returned".
 - Observation: there is no teaser. A completed assessment goes straight to
@@ -343,8 +346,21 @@ and know what to do next.
    - each failure screen says what happened and what to do, and offers the
      right button (try again, or try another website);
    - nothing overflows or needs sideways scrolling at 390 px.
-3. Keep the speed standard: run the website-release lab check, and confirm the
-   layout does not jump on either profile.
+3. Keep the speed standard. The SuccessByCS lab scripts live in the
+   successbycs/marketing-agent repository, not here, and need Playwright, which
+   `cs-revenue-accelerator` has installed. After deploying, run on Chris's PC:
+
+       cd /home/chris/projects/cs-revenue-accelerator
+       S=/home/chris/projects/marketing-agent/.agents/skills/website-release/scripts
+       node $S/perf-check.mjs https://shortlist.successbycs.com/ --runs 3
+
+   It tests a 1440 × 900 desktop and a 390 × 844 slow phone. Pass: every phone
+   run shows LCP (when the main content appears) of 2.5 s or less, and every
+   run on both profiles shows CLS (how much the layout jumps) of 0.05 or less.
+   Record the printed table in Artifacts and Notes. For the screens after
+   submitting a domain, which the script does not reach, check by eye on Chris's
+   phone and laptop: no sideways scrolling, and nothing jumps as results
+   appear.
 
 Gate: Chris walks the journey on his own phone and laptop and is happy with
 every screen. Before and after screenshots are recorded in Artifacts and
