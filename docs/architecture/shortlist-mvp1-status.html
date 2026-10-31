@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1800px; height: 960px; background: #fff; font-family: "DejaVu Sans", Arial, sans-serif; color: #1f2937; padding: 28px 34px; }
+  h1 { font-size: 46px; font-weight: 800; letter-spacing: .5px; color: #374151; }
+  h1 span { color: #1d6fe0; }
+  .sub { font-size: 21px; color: #4b5563; margin-top: 4px; }
+  .legend { position: absolute; top: 34px; right: 34px; display: grid; grid-template-columns: auto auto; gap: 6px 22px; font-size: 15px; }
+  .legend i { display: inline-block; width: 18px; height: 18px; border-radius: 4px; vertical-align: -3px; margin-right: 7px; }
+  .g { background: #16a34a; } .a { background: #f59e0b; } .r { background: #dc2626; } .n { background: #9ca3af; } .p { background: #7c3aed; }
+
+  .lane { position: relative; border: 2px solid #c7d7f5; background: #f5f8ff; border-radius: 14px; padding: 16px 18px 18px; margin-top: 20px; }
+  .lane h2 { font-size: 19px; font-weight: 700; margin-bottom: 12px; }
+  .lane h2 small { font-weight: 400; color: #4b5563; font-size: 16px; }
+  .row { display: flex; align-items: stretch; gap: 0; }
+  .step { flex: 1; background: #fff; border-radius: 12px; border: 2px solid #e5e7eb; padding: 12px 12px 10px; position: relative; min-height: 172px; }
+  .step .num { position: absolute; top: -13px; left: 12px; width: 28px; height: 28px; border-radius: 50%; color: #fff; font-weight: 700; font-size: 16px; text-align: center; line-height: 28px; }
+  .step h3 { font-size: 16.5px; margin: 8px 0 6px; line-height: 1.2; }
+  .step p { font-size: 13.5px; line-height: 1.35; color: #374151; }
+  .tag { display: inline-block; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: #fff; border-radius: 5px; padding: 3px 7px; }
+  .step.g2 { border-color: #16a34a; } .step.a2 { border-color: #f59e0b; } .step.r2 { border-color: #dc2626; } .step.n2 { border-color: #9ca3af; border-style: dashed; background: #f9fafb; } .step.p2 { border-color: #7c3aed; }
+  .arrow { width: 30px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 26px; font-weight: 700; }
+  .ai { background: #fff7ed; border-color: #fdba74; }
+  .ai ul { font-size: 13px; margin: 4px 0 0 16px; line-height: 1.35; }
+
+  .bottom { display: flex; gap: 20px; margin-top: 20px; }
+  .box { border-radius: 14px; padding: 14px 18px; border: 2px solid; }
+  .box h2 { font-size: 18px; margin-bottom: 8px; }
+  .box ul { font-size: 14.5px; line-height: 1.5; margin-left: 18px; }
+  .notbuilt { flex: 1.05; border-color: #9ca3af; border-style: dashed; background: #f9fafb; }
+  .over { flex: 1.25; border-color: #7c3aed; background: #f5f3ff; }
+  .version { flex: .9; border-color: #1d6fe0; background: #eff6ff; }
+  .version p { font-size: 14.5px; line-height: 1.45; margin-bottom: 6px; }
+  .foot { margin-top: 14px; border-top: 2px solid #e5e7eb; padding-top: 10px; text-align: center; font-size: 17px; color: #4b5563; }
+</style></head><body>
+<h1>SHORTLIST / <span>MVP 1</span></h1>
+<div class="sub">What exists today, 1 Nov 2026 — and whether it works</div>
+<div class="legend">
+  <div><i class="g"></i>Working, proven</div><div><i class="a"></i>Built and live, never proven end to end</div>
+  <div><i class="r"></i>Tried, failed</div><div><i class="n"></i>Not built</div>
+  <div><i class="p"></i>Over-engineering to park</div><div></div>
+</div>
+
+<div class="lane">
+  <h2>A · The live website &nbsp;<small>shortlist.successbycs.com · Cloudflare Worker + D1 database · any business, any country</small></h2>
+  <div class="row">
+    <div class="step g2"><div class="num g">1</div><h3>Visitor enters their domain</h3><p>One public page. Loads fast; sitemap live since today.</p><span class="tag g">WORKING</span></div>
+    <div class="arrow">→</div>
+    <div class="step a2"><div class="num a">2</div><h3>Safety gate</h3><p>Domain checks, 1 run per domain, 2 runs at a time, 100 per person per day. Turnstile removed.</p><span class="tag a">LIVE · TESTS PASS</span></div>
+    <div class="arrow">→</div>
+    <div class="step a2"><div class="num a">3</div><h3>Read the website</h3><p>Safe fetch of the public site; keeps a short evidence excerpt.</p><span class="tag a">LIVE · UNPROVEN</span></div>
+    <div class="arrow">→</div>
+    <div class="step a2 ai" style="flex:1.5"><div class="num a">4</div><h3>AI assessment — 5 OpenAI calls (gpt-6-luna)</h3>
+      <ul><li>business profile</li><li>3 ideal-customer guesses (ICPs)</li><li>9 buyer questions</li><li>answers with live web search + from model memory</li></ul>
+      <span class="tag a">LIVE · NO RECORDED SUCCESSFUL RUN</span></div>
+    <div class="arrow">→</div>
+    <div class="step g2"><div class="num g">5</div><h3>Saved in D1</h3><p>All 8 database updates applied. A repeat domain replays the saved result.</p><span class="tag g">APPLIED</span></div>
+    <div class="arrow">→</div>
+    <div class="step a2"><div class="num a">6</div><h3>Teaser, then email box</h3><p>Email stays in the browser: <b>not stored, nothing sent</b>.</p><span class="tag a">LIVE · EMAIL GOES NOWHERE</span></div>
+    <div class="arrow">→</div>
+    <div class="step a2"><div class="num a">7</div><h3>On-page report</h3><p>Profile, ICPs, questions, findings. Quality never reviewed by Chris.</p><span class="tag a">LIVE · UNPROVEN</span></div>
+  </div>
+</div>
+
+<div class="lane" style="background:#fbfaf5;border-color:#e7dcc0">
+  <h2>B · "Version 1" report proof &nbsp;<small>Python scripts on Chris's PC only · branch never pushed · one test website · named Version 1 by Chris on 11 Oct</small></h2>
+  <div class="row">
+    <div class="step g2"><div class="num g">1</div><h3>Crawl with Apify</h3><p>47 pages of one test site captured and frozen.</p><span class="tag g">DONE</span></div>
+    <div class="arrow">→</div>
+    <div class="step g2"><div class="num g">2</div><h3>Extract website copy</h3><p>391 evidence blocks, each with an ID.</p><span class="tag g">DONE</span></div>
+    <div class="arrow">→</div>
+    <div class="step g2"><div class="num g">3</div><h3>Trim to fit the model</h3><p>Repeatable cut-down packet, cost check before any call.</p><span class="tag g">DONE</span></div>
+    <div class="arrow">→</div>
+    <div class="step r2" style="flex:1.3"><div class="num r">4</div><h3>One GPT-4o call writes the whole report</h3><p>Ran twice (about US$0.22 a run). Both answers too thin: one item per section, one bad evidence ID.</p><span class="tag r">FAILED QUALITY</span></div>
+    <div class="arrow">→</div>
+    <div class="step n2"><div class="num n">5</div><h3>PDF report</h3><p>Plan written; nothing built.</p><span class="tag n">NOT BUILT</span></div>
+    <div class="arrow" style="width:20px"></div>
+    <div class="step a2" style="flex:1.2;background:#fffbeb"><div class="num a">!</div><h3>Two engines, one job</h3><p>A and B both turn a website into ICPs and buyer answers, with different models, code and languages. MVP needs one.</p><span class="tag a">DECIDE</span></div>
+  </div>
+</div>
+
+<div class="bottom">
+  <div class="box notbuilt"><h2>Not built (MVP 1 requirements)</h2>
+    <ul><li>Store email + marketing consent</li><li>Masked-email confirmation step</li><li>PDF report + email delivery (#27)</li><li>Retry, 2-hour update email, Discord alert</li><li>Cost per assessment measured</li><li>Payment / paid tier (MVP 2)</li></ul></div>
+  <div class="box over"><h2>Over-engineering to park</h2>
+    <ul><li>Symphony scheduler, dashboards, WSL fixes: ~40 of 78 ExecPlans</li><li>117 docs, ~9,000 lines: threat model, 9 AI policies, 11 architecture docs</li><li>Python "template" harness and Docker setup beside the real app</li><li>6 Issues (#49–#54) to diagnose one live run</li><li>Model profiles, fan-out design, schema hashes for a report nobody has read yet</li></ul></div>
+  <div class="box version"><h2>Which version?</h2>
+    <p><b>Product: MVP 1</b>, a free prototype. Not launched; no customer has used it.</p>
+    <p><b>Report engine: "Version 1"</b>, still unproven. Version 2 (fan-out analysis, deeper technical checks) is parked by Chris's own rule: prove Version 1 first.</p></div>
+</div>
+<div class="foot">Free assessment · no payment · no outreach yet · one public page</div>
+</body></html>
