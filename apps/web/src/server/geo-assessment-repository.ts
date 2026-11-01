@@ -85,7 +85,7 @@ export type RecordPromptExecutionInput = {
 export type RecordWebsiteSourceInput = {
   websiteSourceId: string;
   assessmentId: string;
-  websiteEvidenceId: string;
+  websiteEvidenceId: string | null;
   sourceUrl: string;
   observedAtUtc: string;
   contentType: string;
@@ -94,6 +94,8 @@ export type RecordWebsiteSourceInput = {
   visibleText: string;
   jsonLd: readonly JsonValue[];
   extractionVersion: string;
+  /** Page type from the crawl; omitted for older callers. */
+  pageType?: string;
 };
 
 export type RecordAssessmentConfigurationSnapshotInput = {
@@ -537,8 +539,8 @@ export async function recordWebsiteSource(
       `INSERT INTO website_sources (
         website_source_id, assessment_id, website_evidence_id, source_url,
         observed_at_utc, content_type, page_title, meta_description,
-        visible_text, json_ld_json, extraction_version, created_at_utc
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        visible_text, json_ld_json, extraction_version, created_at_utc, page_type
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       input.websiteSourceId,
@@ -553,6 +555,7 @@ export async function recordWebsiteSource(
       JSON.stringify(input.jsonLd),
       input.extractionVersion,
       input.observedAtUtc,
+      input.pageType ?? null,
     )
     .run();
 

@@ -110,4 +110,24 @@ describe("fetchPublicHtml", () => {
       reasonCode: "unsafe_redirect",
     });
   });
+
+  it("times out a page that sends its headers and then stalls", async () => {
+    const stalled = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode("<h1>Partial"));
+        // Never closes: the site stops sending.
+      },
+    });
+    const transport = fixtureFetch(
+      new Response(stalled, { status: 200, headers: { "content-type": "text/html" } }),
+    );
+
+    const result = await fetchPublicHtml(
+      "https://harbourhandyman.co.nz/",
+      { ...MVP1_SAFE_FETCH_POLICY, pageTimeoutMs: 50, assessmentTimeoutMs: 1_000 },
+      transport,
+    );
+
+    expect(result).toEqual({ kind: "limited", reasonCode: "timeout" });
+  });
 });

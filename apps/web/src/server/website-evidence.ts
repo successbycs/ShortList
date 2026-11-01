@@ -11,7 +11,12 @@ export type WebsiteEvidenceLimits = {
   maxExcerptCharacters: number;
   maxJsonLdBlocks: number;
   maxJsonLdCharacters: number;
+  /** Cleaned text kept for storage; defaults to `maxExcerptCharacters`. */
+  maxTextCharacters?: number;
 };
+
+const MAX_TITLE_CHARACTERS = 200;
+const MAX_DESCRIPTION_CHARACTERS = 500;
 
 export type JsonValue =
   | null
@@ -40,6 +45,8 @@ export type WebsiteEvidenceResult =
       title?: string;
       description?: string;
       excerpt: string;
+      /** The cleaned page text, up to `maxTextCharacters`. */
+      text: string;
       jsonLd: readonly JsonValue[];
     }
   | { kind: "limited"; reasonCode: WebsiteEvidenceReasonCode };
@@ -73,8 +80,8 @@ export function extractBoundedWebsiteEvidence(
     return limited("size_limit_exceeded");
   }
 
-  const title = readTitle(response.html);
-  const description = readMetaDescription(response.html);
+  const title = readTitle(response.html)?.slice(0, MAX_TITLE_CHARACTERS);
+  const description = readMetaDescription(response.html)?.slice(0, MAX_DESCRIPTION_CHARACTERS);
   const jsonLd = readBoundedJsonLd(
     response.html,
     limits.maxJsonLdBlocks,
@@ -93,6 +100,7 @@ export function extractBoundedWebsiteEvidence(
     ...(title === undefined ? {} : { title }),
     ...(description === undefined ? {} : { description }),
     excerpt: text.slice(0, limits.maxExcerptCharacters),
+    text: text.slice(0, limits.maxTextCharacters ?? limits.maxExcerptCharacters),
     jsonLd,
   };
 }
@@ -128,11 +136,32 @@ function readAttribute(tag: string, name: string): string | undefined {
   return match === null ? undefined : (match[1] ?? match[2] ?? match[3]);
 }
 
+/**
+ * Tags whose whole content is not page copy, from the CSP-Directory crawler's
+ * cleaner (`page_text_extractor.py` SKIP_TAGS): scripts and styles, plus the
+ * navigation, footers, side panels and forms repeated on every page.
+ */
+const SKIPPED_TAGS = [
+  "script",
+  "style",
+  "noscript",
+  "template",
+  "svg",
+  "iframe",
+  "nav",
+  "footer",
+  "aside",
+  "form",
+] as const;
+
 function visibleText(html: string): string {
-  const withoutInactiveContent = html
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, " ")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, " ")
-    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript\s*>/gi, " ");
+  let withoutInactiveContent = html;
+  for (const tag of SKIPPED_TAGS) {
+    withoutInactiveContent = withoutInactiveContent.replace(
+      new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?<\\/${tag}\\s*>`, "gi"),
+      " ",
+    );
+  }
   return normaliseText(withoutInactiveContent.replace(/<[^>]*>/g, " ")) ?? "";
 }
 
