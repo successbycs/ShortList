@@ -179,6 +179,21 @@ describe("site crawl: fetching", () => {
     );
   });
 
+  it("never requests a child sitemap on another site", async () => {
+    const fetchImplementation = fakeSite({
+      "/sitemap.xml": () =>
+        page(
+          "<sitemapindex><sitemap><loc>https://unrelated.example/child.xml</loc></sitemap></sitemapindex>",
+          "application/xml",
+        ),
+    });
+
+    await crawlSite(HOME.toString(), "", { fetchImplementation });
+
+    const hosts = fetchImplementation.mock.calls.map(([url]) => url.hostname);
+    expect(hosts).not.toContain("unrelated.example");
+  });
+
   it("never throws, and returns nothing when the crawl itself fails", async () => {
     const fetchImplementation = vi.fn(async () => {
       throw new Error("network down");
@@ -220,6 +235,17 @@ describe("site crawl: the view sent to the AI", () => {
     const view = buildSourceView([source(0, "h".repeat(9_000)), source(1, "p".repeat(9_000))]);
     expect(view[0]?.visibleText).toHaveLength(VIEW_LIMITS.homeTextCharacters);
     expect(view[1]?.visibleText).toHaveLength(VIEW_LIMITS.pageTextCharacters);
+  });
+
+  it("keeps a lone home page under the limit, even with a very long address", () => {
+    const home = {
+      ...source(0, "h".repeat(4_000), [{ blob: "j".repeat(3_900) }]),
+      sourceUrl: `https://example.co.nz/${"a".repeat(50_000)}`,
+    };
+    const view = buildSourceView([home]);
+
+    expect(JSON.stringify(view).length).toBeLessThanOrEqual(VIEW_LIMITS.totalSerialisedCharacters);
+    expect(view[0]?.sourceUrl.length).toBeLessThanOrEqual(VIEW_LIMITS.urlCharacters);
   });
 
   it("keeps the whole input under 45,000 characters: JSON-LD first, then the last pages", () => {

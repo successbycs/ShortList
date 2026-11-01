@@ -49,6 +49,7 @@ export const VIEW_LIMITS = {
   homeTextCharacters: 4_000,
   pageTextCharacters: 3_000,
   totalSerialisedCharacters: 45_000,
+  urlCharacters: 500,
 } as const;
 
 const HTML_TYPES = ["text/html", "application/xhtml+xml"];
@@ -230,6 +231,14 @@ async function safeFetch(
 ): Promise<{ finalUrl: string; contentType: string; body: string } | undefined> {
   const timeLeft = Math.floor(remainingMs);
   if (timeLeft <= 0) return undefined;
+  // Same-site check before the first request, not only on redirects.
+  let target: URL;
+  try {
+    target = new URL(url);
+  } catch {
+    return undefined;
+  }
+  if (!isSameSite(target, home)) return undefined;
   const policy: SafeFetchPolicy = {
     ...MVP1_SAFE_FETCH_POLICY,
     allowedContentTypes,
@@ -496,6 +505,7 @@ export function choosePages(
 export function buildSourceView(sources: readonly GeoEvidenceSource[]): GeoEvidenceSource[] {
   const view = sources.map((source, index) => ({
     ...source,
+    sourceUrl: source.sourceUrl.slice(0, VIEW_LIMITS.urlCharacters),
     visibleText: source.visibleText.slice(
       0,
       index === 0 ? VIEW_LIMITS.homeTextCharacters : VIEW_LIMITS.pageTextCharacters,
@@ -510,5 +520,16 @@ export function buildSourceView(sources: readonly GeoEvidenceSource[]): GeoEvide
     view[index] = { ...view[index]!, jsonLd: [] };
   }
   while (view.length > 1 && size() > VIEW_LIMITS.totalSerialisedCharacters) view.pop();
+  // The home page alone must also fit: drop its JSON-LD, then cut its text.
+  if (size() > VIEW_LIMITS.totalSerialisedCharacters && view[0] !== undefined) {
+    view[0] = { ...view[0], jsonLd: [] };
+    const excess = size() - VIEW_LIMITS.totalSerialisedCharacters;
+    if (excess > 0) {
+      view[0] = {
+        ...view[0],
+        visibleText: view[0].visibleText.slice(0, Math.max(0, view[0].visibleText.length - excess)),
+      };
+    }
+  }
   return view;
 }
