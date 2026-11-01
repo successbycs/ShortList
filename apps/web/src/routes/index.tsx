@@ -7,7 +7,6 @@ import {
   AssessmentResultScreen,
   FailureScreen,
   RefusalScreen,
-  ReportRevealScreen,
 } from "@/components/assessment/journey-screens";
 import { useAssessmentJourney } from "@/hooks/use-assessment-journey";
 
@@ -50,15 +49,6 @@ export function Index() {
         return <RefusalScreen onBack={journey.reset} />;
       case "progress":
         return <AssessmentProgressScreen domain={journey.state.domain} />;
-      case "reveal":
-        return (
-          <ReportRevealScreen
-            email={journey.state.email}
-            setEmail={journey.setEmail}
-            error={journey.state.emailError}
-            onSubmit={journey.revealReport}
-          />
-        );
       case "result":
         return <AssessmentResultScreen result={journey.state.result} onStartOver={journey.reset} />;
       case "failure":
