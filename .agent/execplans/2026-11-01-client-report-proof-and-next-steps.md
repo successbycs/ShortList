@@ -1,6 +1,6 @@
 # Make every client report provable and useful for next steps
 
-**Status:** Active (2026-11-01): Issue #97 remains planning-only; this revision incorporates the independent PR #99 review and no product change is authorised.
+**Status:** Active (2026-11-01): Issue #97 remains planning-only; this revision incorporates Astra's round-2 PR #99 review, including replayable evidence-coverage limits, and no product change is authorised.
 
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
@@ -64,6 +64,12 @@ authorised remote-migration/deployment step.
       (`e58c39d`, PR #96 merged) and Astra's review comment 6555881918;
       revised verdict precedence, all-question action eligibility, and the
       captured-page evidence/persistence contract. Only this plan changed.
+- [x] (2026-11-01 09:14Z) Read Astra's round-2 PR #99 review comment
+      6555950697; added a captured-text coverage contract, a conditional
+      bounded absence inspection, its storage/replay requirements, and the
+      beyond-window fixture. Clarified that character-to-token figures are
+      estimates, while serialized-request token counting enforces the limit.
+      Only this plan changed.
 - [ ] (YYYY-MM-DD HH:MMZ) Chris approves the bounded implementation scope,
       including the revised current-web input-token budget.
 - [ ] (YYYY-MM-DD HH:MMZ) Implement and locally prove the evidence capture,
@@ -104,6 +110,12 @@ authorised remote-migration/deployment step.
   `evaluationInput` without `website_sources`; `geoEvidenceSourceSchema` has
   the captured `sourceId` and `visibleText` at
   `apps/web/src/server/geo-assessment-types.ts:3-13`.
+- Observation: The crawler can retain up to 10,000 characters of a page, but
+  the proposed primary evaluation bundle supplied only its first 3,000. A
+  valid source ID proves the origin of that excerpt, not that the rest of the
+  retained page lacks a fact.
+  Evidence: Astra round-2 review comment 6555950697, checked 2026-11-01;
+  existing capture limits are in `site-crawl.ts` and `website-assessment.ts`.
 - Observation: The page currently presents only `model_knowledge` findings;
   the email renderer on #96 shows a live summary plus a wrongly labelled
   no-web summary. Neither renderer has an exact answer quote or question-level
@@ -159,6 +171,25 @@ authorised remote-migration/deployment step.
   Rationale: The profile is a summary, not the inspection corpus. Persisted
   references make the support judgment and the action based on it replayable.
   Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra review)
+- Decision: Treat a primary 3,000-character page excerpt as partial coverage
+  whenever the retained capture or the original page extraction was longer.
+  A `not_on_site` conclusion and an absence-based action require complete
+  coverage of every deterministically relevant captured page, or a successful
+  bounded absence inspection; otherwise render "Couldn't tell" and produce no
+  absence-based action.
+  Rationale: Source identity cannot turn an uninspected remainder into proof
+  of absence. This preserves a useful bounded first pass while preventing the
+  client-facing claim that a site lacks information it may contain.
+  Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra round-2 review)
+- Decision: Use at most one conditional structured-evaluation re-inspection,
+  with complete stored text for no more than three deterministically relevant
+  pages (30,000 Unicode code units), rather than adding a general third model
+  stage or scanning arbitrary pages.
+  Rationale: It is the leanest way to turn a tentative absence into an
+  inspectable conclusion. If the relevant set is larger, a retained capture is
+  itself truncated, or the request cannot fit the measured budget, the honest
+  result remains "Couldn't tell."
+  Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra round-2 review)
 - Decision: Exclude business-name questions from headline metrics and show
   them in a separate "How AI describes you" section.
   Rationale: A business name embedded in a prompt makes a mention unsurprising;
@@ -264,36 +295,72 @@ and only the sources cited with that answer.
    The structured evaluation contract gains `websiteSupport`
    (`supported`, `contradicted`, `not_on_site`, `unclear`),
    `websiteSupportEvidenceIds`, and a short `websiteCorrection` only for a
-   demonstrated contradiction. `contradicted` and `not_on_site` each require
-   one or more captured-page IDs; `contradicted` also requires a non-empty
-   correction. `supported`/`unclear` must not manufacture an absence or
-   correction. The existing data remains source history; no prior report is
+   demonstrated contradiction. The runner, not the evaluator, adds
+   `websiteEvidenceCoverage`: a per-page record of `{ sourceId,
+   capturedTextCodeUnits, primarySuppliedCodeUnits, captureTruncated,
+   primaryTextComplete }`; `primaryTextComplete` is true only when the
+   supplied text equals a non-truncated retained capture. `contradicted` and
+   `not_on_site` each require one or more captured-page IDs; `contradicted`
+   also requires a non-empty correction. A primary `not_on_site` result is
+   tentative if a deterministically relevant page has
+   `primaryTextComplete=false`. `supported`/`unclear` must not manufacture an
+   absence or correction. The existing data remains source history; no prior report is
    altered. These fields are required only in the current-web result; the
    runner persists null/empty support fields for model-knowledge findings so
    the no-web comparison never claims captured-page support.
 2. Before calling the **current-web** evaluation, build
    `captured_website_evidence` from the assessment's existing
    `GeoEvidenceSource` records, rather than from the profile: stable
-   `{sourceId, sourceUrl, title, pageType, observedAtUtc, visibleText}` entries
-   sorted by source ID, with `visibleText` truncated deterministically to
-   3,000 Unicode code units per page and 24,000 total. Preserve source IDs
-   when truncating and include the page URL/title so the evaluator can state
-   what was inspected. Pass this bundle to both the web-search research call
+   `{sourceId, sourceUrl, title, pageType, observedAtUtc, visibleText,
+   capturedTextCodeUnits, captureTruncated}` entries sorted by source ID, with
+   `visibleText` truncated deterministically to 3,000 Unicode code units per
+   page and 24,000 total. Persist `captureTruncated` at crawl time (rather
+   than inferring it from a length equal to a cap), and calculate
+   `primarySuppliedCodeUnits` after the total-bundle cap; a source omitted by
+   that cap has zero supplied units. Preserve this coverage metadata and page
+   URL/title with the evaluation input, so replay identifies exactly which
+   text was inspected. Pass this bundle to both the web-search research call
    and its structured follow-up; do not send it to the no-web comparison.
-   Record the deterministic truncation rule and actual provider usage. At a
-   conservative four characters per token, this raises current-web input by
-   at most about 6,000 tokens per call, or 12,000 across its existing two
-   calls (plus JSON framing); revise the approved current-web input budget by
-   that amount before release and fail before provider invocation if the
-   bundle cannot fit the declared budget. This is bounded evidence, not raw
-   response retention.
+
+   For a tentative `not_on_site`, derive the relevant source set
+   deterministically from the literal buyer-question category and captured
+   page types (for example, pricing questions consider pricing, product,
+   services and home pages), recording both the rule version and selected IDs.
+   An empty relevant set is `unclear`. If every selected source has complete
+   primary coverage, it may be final. If
+   one to three selected sources are partial but have complete retained
+   captures, make at most one *conditional absence-inspection* invocation of
+   the existing structured evaluator. Its isolated input contains the question,
+   claimed gap, source IDs/coverage records, and the full retained text for
+   those selected pages only; it must return `not_on_site` only after checking
+   that text. It is a bounded re-inspection, not a new report-writing stage.
+   If more than three sources are relevant, any selected capture was truncated
+   at crawl time, a relevant source was omitted from the primary bundle, or
+   the measured request cannot fit, persist `unclear` with the coverage reason
+   instead. Never make a client absence claim from the 3,000-character prefix.
+
+   Record actual provider usage and enforce a request limit with the provider
+   tokenizer over the exact serialized request (instructions, JSON framing,
+   `captured_website_evidence`, and the structured-follow-up notes). The
+   24,000-character primary bundle is approximately 6,000 input tokens per
+   existing call and approximately 12,000 across both; those are estimates,
+   not guaranteed bounds. A conditional inspection adds at most 30,000
+   characters, approximately 7,500 input tokens plus its serialized request
+   framing/notes, and at most one existing-structured-evaluator invocation.
+   Reserve and enforce the measured maximum before every provider call; fail
+   safely rather than relying on a four-characters-per-token estimate. This is
+   bounded evidence, not raw response retention.
 3. Add `0012_...sql` after merged #96's
    `0011_report_email_requests.sql`. Add
    nullable, backwards-compatible fields to `model_question_findings` (the
    current `origin/main` already has #96 migration `0011`, so use `0012`):
    `answer_text` (bounded literal current-web answer), `website_support`,
-   `website_support_evidence_ids_json`, and `website_correction`; retain an
-   optional `answer_excerpt` only if it is separately useful. Keep
+   `website_support_evidence_ids_json`, `website_evidence_coverage_json`,
+   `absence_inspection_json`, and `website_correction`; retain an optional
+   `answer_excerpt` only if it is separately useful. Add
+   `visible_text_truncated` to existing `website_sources` persistence, set it
+   only by the crawler when its 10,000-character capture cap cuts text, and
+   treat legacy rows without a recorded value as coverage-unknown. Keep
    `sources_json` as a per-finding JSON array, now with only direct provider
    citations. The evidence-ID JSON is a non-null array (empty only for
    `supported`/`unclear`) and nullable fields keep old rows loadable. Add no
@@ -317,9 +384,15 @@ and only the sources cited with that answer.
    it into `StoredGeoFinding`. Validate every returned
    `websiteSupportEvidenceIds` against the IDs in the bounded bundle before a
    current-web evaluation is recorded; reject duplicate, unknown, or missing
-   required IDs and reject invalid support/correction combinations. Persist
-   and reload `websiteSupport`, its IDs, and `websiteCorrection` alongside
-   the finding rather than reconstructing them from gaps. Older rows with null
+   required IDs and reject invalid support/correction combinations. Validate
+   and persist the complete coverage record and, when used, the conditional
+   inspection's selected IDs, rule version, serialized-input digest, measured
+   token count, and result. A final `not_on_site` must prove complete coverage
+   for all deterministically relevant sources or a successful inspection; all
+   other tentative absences become `unclear`. Persist and reload
+   `websiteSupport`, its IDs, coverage/inspection evidence, and
+   `websiteCorrection` alongside the finding rather than reconstructing them
+   from gaps. Older rows with null
    `answer_text` load as
    `proofUnavailable`, not as an invented quote. New reports must show an
    explicit "This older report did not retain the original AI answer" notice
@@ -355,19 +428,25 @@ logic split between React and HTML string concatenation.
 3. Map each finding to one client verdict using this complete, mutually
    exclusive decision order and a one-line reason assembled only from stored
    values. A "validated" support value means its persisted page IDs passed the
-   evaluation-input validation above; legacy/null support is not validated:
+   evaluation-input validation above. A validated absence additionally means
+   the persisted coverage proves every deterministically relevant source was
+   complete, or records a successful bounded inspection; legacy/null support
+   and any partial/omitted relevant text are not validated absence evidence:
 
    | Stored evidence | Verdict | Reason pattern |
    | --- | --- | --- |
    | 1. `websiteSupport=contradicted` with valid IDs and correction | Described wrongly | "The answer conflicts with the captured website evidence: [correction]." |
-   | 2. `websiteSupport=not_on_site` with valid IDs | Your site doesn't say | "We could not find this information in the captured pages." |
+   | 2. `websiteSupport=not_on_site` with validated absence coverage and valid IDs | Your site doesn't say | "We could not find this information in the captured pages we fully inspected." |
    | 3. `recommendationFit=appropriate` | Recommended | "The answer named [business] as suitable for this question." |
    | 4. `recommendationFit=uncertain` | Couldn't tell | "The answer did not establish whether it recommends [business] for this question." |
    | 5. `submittedBusinessMention=mentioned` and `recommendationFit` is `not_appropriate` or `not_mentioned` | Mentioned, not recommended | "The answer named [business], but did not recommend it for this question." |
    | 6. `submittedBusinessMention=absent` | Not mentioned | "The answer did not name [business]." |
    | 7. all remaining combinations, including legacy/null support or `submittedBusinessMention=uncertain` | Couldn't tell | "The answer or evidence did not support a clear conclusion." |
 
-   `descriptionAccuracy=inaccurate` and `submittedBusinessMention=contradicted`
+   A tentative or coverage-limited `not_on_site` is normalized to `unclear`
+   before this table, so it reaches row 7: "Couldn't tell." It must not say
+   "Your site doesn't say," even if its first 3,000 characters did not contain
+   the fact. `descriptionAccuracy=inaccurate` and `submittedBusinessMention=contradicted`
    are diagnostic inputs only: neither can produce "Described wrongly" without
    `websiteSupport=contradicted` and its valid correction evidence. Thus missing
    information alone never produces that verdict. The source IDs/evidence
@@ -379,9 +458,11 @@ logic split between React and HTML string concatenation.
    fixed template. Candidate eligibility is independent of the discovery
    headline and the card verdict: inspect **all** current-web findings,
    including business-named questions. A finding contributes only when it has
-   (a) `websiteSupport=not_on_site`, valid evidence IDs, and a non-empty
-   supported content gap, or (b) `websiteSupport=contradicted`, valid IDs, and
-   its stored correction. A mentioned-but-not-recommended card can therefore
+   (a) `websiteSupport=not_on_site`, valid evidence IDs, **validated absence
+   coverage**, and a non-empty supported content gap, or (b)
+   `websiteSupport=contradicted`, valid IDs, and its stored correction. A
+   coverage-limited or `unclear` finding cannot create an absence-based action.
+   A mentioned-but-not-recommended card can therefore
    yield an action, as can a named pricing question; `supported` and `unclear`
    findings cannot create actions. Sort first by the number of buyer questions
    helped, then missing-site-information, then correction, then original
@@ -564,8 +645,11 @@ actual date and concise output in this section when they are run.
   set and one factual reason. A validated captured-page contradiction takes
   priority over all recommendation/mention statuses; a validated captured-page
   absence takes the next priority; `recommendationFit=uncertain` is always
-  "Couldn't tell." Missing website evidence uses "Your site doesn't say" only
-  when the stored evaluation supports that conclusion, and missing information
+  "Couldn't tell." "Your site doesn't say" requires persisted complete
+  coverage of every relevant captured source, or the successful bounded
+  absence inspection. If relevant text was truncated or omitted from the
+  primary bundle, the verdict is "Couldn't tell" and no absence-based action
+  is produced unless that inspection establishes the gap. Missing information
   alone never becomes "Described wrongly." No client sees the phrases
   "Recommendation unclear", "Described you inaccurately", or "From AI's own
   memory."
@@ -583,7 +667,8 @@ actual date and concise output in this section when they are run.
 - Cached/new report replay does not call Claude or the web tool, does not
   regenerate actions, and renders the same view model from D1. A
   persistence/reload fixture proves the stored `websiteSupport`, its evidence
-  IDs, and the resulting action are unchanged after reload. Older rows are
+  IDs, coverage/inspection record, and resulting action are unchanged after
+  reload. Older rows are
   openly marked proof-unavailable; they are not silently upgraded.
 
 ### Test matrix
@@ -591,27 +676,31 @@ actual date and concise output in this section when they are run.
 | Boundary | Test/proof | Pass condition |
 | --- | --- | --- |
 | Claude adapter | Fake `research.content` with labelled text/citations, missing label, duplicate label, unrelated search result, malformed citation | Exact per-question proof emitted only for the valid fixture; incomplete proof rejects safely. |
-| Runner/evaluation input | Fixture with a fact in a captured page's `visibleText` but omitted from `business_profile`; unknown/duplicate/missing support IDs; oversized page set | Current-web evaluator receives the bounded source-ID-bearing page bundle, returns `supported` rather than a false absence for the page fact, rejects invalid IDs, and stays within the declared bundle/token budget. |
-| Runner/execution/D1 | Fake provider plus D1 statement recorder, migration proof, and repository reload | Raw answer/source/support/correction/evidence-ID fields are written/read per finding; no-web source/quote/support stays absent; old null fields load safely; reloading produces byte-for-byte equal support judgment and action input. |
-| Report projection | Pure fixture tests | Correct denominator, complete verdict precedence, deterministic all-question actions/destinations, source grouping, quote-substring invariant. Fixtures cover: mentioned + contradicted; mentioned + `not_on_site`; absent + `not_on_site`; recommended + contradicted; mentioned + `recommendationFit=uncertain`; legacy `descriptionAccuracy=inaccurate` + `websiteSupport=unclear`; a report whose only supported gap is a business-named question; and a mentioned-but-not-recommended finding with a supported gap. |
+| Runner/evaluation input | Fixture with a fact in a captured page's `visibleText` but omitted from `business_profile`; a second fixture places that fact at character 4,000 of a 10,000-character retained page; unknown/duplicate/missing support IDs; oversized page set | Current-web evaluator receives source-ID-bearing text plus coverage metadata, returns `supported` rather than a false absence for the first page fact, and the beyond-3,000 fixture cannot produce `not_on_site` or an absence action from the primary pass. It either passes the bounded full-capture inspection or persists `unclear`; invalid IDs reject safely and every serialized request stays within its measured budget. |
+| Runner/execution/D1 | Fake provider plus D1 statement recorder, migration proof, and repository reload | Raw answer/source/support/correction/evidence-ID/coverage/inspection fields are written/read per finding; no-web source/quote/support stays absent; old null fields load safely; reloading produces byte-for-byte equal support judgment, coverage decision, and action input. |
+| Report projection | Pure fixture tests | Correct denominator, complete verdict precedence, deterministic all-question actions/destinations, source grouping, quote-substring invariant. Fixtures cover: mentioned + contradicted; mentioned + fully covered `not_on_site`; absent + fully covered `not_on_site`; recommended + contradicted; mentioned + `recommendationFit=uncertain`; legacy `descriptionAccuracy=inaccurate` + `websiteSupport=unclear`; a report whose only supported gap is a business-named question; a mentioned-but-not-recommended finding with a supported gap; and a 10,000-character page with the relevant fact at character 4,000, which is "Couldn't tell" with no absence action unless the stored inspection record is successful. |
 | React/email | jsdom and renderer tests | Headings/cards/actions/sources/footers are accessible, escaped, and equivalent in browser/HTML/text. |
 | Build/CI | `npm run types`, `lint`, `test`, `typecheck`, `build`; `uv run python scripts/verify.py` | All exit 0; required `web-quality` and `verify` checks later green. |
 | Fresh real report (operational boundary) | Authorised deployed Worker + new non-cached domain + received email | Browser/email report proves stored quote/source linkage and truthful count. **Unobserved until Chris authorises deploy, remote migration and test.** |
 
 ### Cost, privacy and consent
 
-The recommended path makes **no additional model calls** and does not increase
-the web-search call count. It does add a bounded captured-page bundle to each
-of the existing current-web research and structured calls: at most 24,000
-Unicode code units, conservatively about 6,000 input tokens per call and
-12,000 input tokens per assessment (plus JSON framing). The approved
-current-web input-token limit must be increased/reserved by that worst-case
-amount, and the runner must fail before calling the provider if the formatted
-input would exceed it; usage records and the first authorised new report must
-measure the actual delta before a dollar value is stated. The revised research
-format may add a small number of output tokens for nine headings. It does not
-alter
-`MAX_WEB_SEARCHES`, model selection, `OPENAI_API_KEY`/provider secret handling,
+The recommended path does not increase the web-search call count. It adds a
+bounded captured-page bundle to each existing current-web research and
+structured call: at most 24,000 Unicode code units, approximately 6,000 input
+tokens per call and 12,000 across those two calls, plus serialized JSON and
+structured-follow-up notes. These are estimates, not worst-case token bounds.
+For a tentative absence only, it may make one bounded re-inspection using at
+most three complete retained pages (30,000 Unicode code units, approximately
+7,500 input tokens plus its serialized framing/notes); this is an extra
+conditional invocation, not a new general model stage. The runner must count
+the exact serialized request with the provider tokenizer and reject it before
+invocation if it exceeds the approved per-call/assessment ceiling; no budget
+is established by a four-characters-per-token heuristic. Usage records and
+the first authorised new report must measure the actual delta before a dollar
+value is stated. The revised research format may add a small number of output
+tokens for nine headings. It does not alter `MAX_WEB_SEARCHES`, model
+selection, `OPENAI_API_KEY`/provider secret handling,
 email consent, marketing consent, recipient retention, or the privacy-minimised
 IP-day digest. Raw AI answer text and cited public URLs are stored only with
 the existing assessment record and follow its current retention/access model;
@@ -723,18 +812,27 @@ and no test result is claimed by this plan.
   `captured_website_evidence` builder in
   `apps/web/src/server/geo-assessment-runner.ts`. It accepts existing
   `GeoEvidenceSource` objects and returns no more than 24,000 Unicode code
-  units of source-ID-bearing text, as specified in Milestone 1. Only the
-  current-web evaluator receives it. Its maximum 12,000-token two-call impact
-  becomes part of the approved runtime input budget and usage evidence.
+  units of source-ID-bearing text plus per-source capture/supplied-length and
+  truncation metadata, as specified in Milestone 1. Only the current-web
+  evaluator receives it. The runner persists a versioned relevant-page
+  selection and coverage decision for every attempted absence. It may make one
+  conditional absence inspection of up to three complete retained captures
+  (30,000 code units); a tokenizer count of the exact serialized primary and
+  inspection requests, including follow-up notes, is the enforced budget.
 - **Finding persistence:** add nullable `answerText` and proof-availability,
   plus `websiteSupport: "supported" | "contradicted" | "not_on_site" |
-  "unclear" | null`, `websiteSupportEvidenceIds: readonly string[]`, and
-  `websiteCorrection: string | null` to `StoredGeoFinding` and
+  "unclear" | null`, `websiteSupportEvidenceIds: readonly string[]`, a
+  versioned `websiteEvidenceCoverage` record, an optional
+  `absenceInspection` record (selected IDs, input digest, tokenizer count and
+  result), and `websiteCorrection: string | null` to `StoredGeoFinding` and
   `RecordModelQuestionFindingInput` in
   `apps/web/src/server/geo-assessment-repository.ts`; add matching Zod schema
   fields in `geo-assessment-types.ts` and additive D1 columns
-  `website_support`, `website_support_evidence_ids_json`, and
-  `website_correction`. `recordModelQuestionFinding` writes all fields and
+  `website_support`, `website_support_evidence_ids_json`,
+  `website_evidence_coverage_json`, `absence_inspection_json`, and
+  `website_correction`. It also adds `website_sources.visible_text_truncated`
+  for newly crawled captures; legacy rows are coverage-unknown.
+  `recordModelQuestionFinding` writes all fields and
   `loadLatestCompletedGeoAssessment` selects/parses all fields; it never
   derives support from summary text. Sources remain `{ title, url }[]` and
   become per-question provider citations.
