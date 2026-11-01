@@ -165,6 +165,16 @@ to it.
   now reflects Claude rather than ChatGPT; the site never named ChatGPT.
   Date/Author: 2026-11-01, Chris (Issue #80).
 
+- Decision: visitor location. Report times show in the visitor's own
+  timezone, taken from the browser (Step 5). Visitor IP location is not
+  stored or used otherwise. Localised web search, when built, runs from the
+  business's own country (read from its website), not the visitor's, so a
+  report is the same whoever checks it (Version 2).
+  Rationale: Chris asked for IP location and timezone, then asked for advice;
+  this keeps reports repeatable and avoids storing personal data the trial
+  doesn't need.
+  Date/Author: 2026-11-01, Chris (on Claude Code's advice).
+
 ## Outcomes & Retrospective
 
 Not started. At each gate, record what happened, whether the gate passed, and
@@ -398,8 +408,15 @@ Chris, 1 Nov 2026: display everything on the page for now. In
 `use-assessment-journey.ts`, a `completed` or `cached` result goes straight to
 the `result` screen instead of the `reveal` (email) screen. Remove the email
 box screen from `journey-screens.tsx`; the future email work can rebuild it
-when it is needed. The report screen itself does not change in this step
-(Step 4 handles its wording).
+when it is needed.
+
+Widened by Chris on 1 Nov after reviewing the first live report (#88): the
+report screen also changes in this step. It shows what ShortList found
+(the live-web answers, whether the business was mentioned, described
+accurately and recommended, the sources, and which website page each
+profile fact came from), replaces the repeated "Top findings" with a real
+summary, fixes the report wording listed in Step 4, and shows times in the
+visitor's own timezone from the browser.
 
 Tests: a completed result and a cached result both open the full report with
 no email field on the page; the report shown for a new run equals the report
@@ -513,6 +530,8 @@ Recorded so nothing is lost. Each needs its own decision after Step 7.
     Workers Free plan (10 ms CPU, 50 outside requests per visitor request) or
     Paid, and measure the crawl's CPU on the live site. Upgrade or trim the
     crawl if it nears the limit.
+  - **Localised web search:** run the live-web check from the business's own
+    country (as read from its website), not the visitor's.
   - **Full robots.txt rules:** per-bot groups, wildcards, `$` end markers,
     Allow exceptions and Crawl-delay (RFC 9309). The lean crawl honours
     only `Disallow` prefixes for all bots.
