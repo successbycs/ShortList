@@ -284,27 +284,58 @@ describe("protected prototype reveal journey", () => {
     expect(screen.getByLabelText("Your business website")).toHaveValue("mara-gardens.co.nz");
   });
 
-  it("animates the assessment sequence from yellow clocks to completed checks", () => {
+  it("paces estimated steps to real timings, explains the last step and catches up after a pause", () => {
     vi.useFakeTimers();
     try {
       serverFunction.invoke.mockImplementationOnce(() => new Promise(() => undefined));
-      render(<Index />);
-
+      const view = render(<Index />);
       fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
-      expect(screen.getByText("Buyer profile identified")).toBeInTheDocument();
-      expect(screen.getByText("Questions buyers ask AI")).toBeInTheDocument();
-      expect(screen.getByText("Local context checked")).toBeInTheDocument();
-      expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "active");
-      expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "pending");
+      const stage = (index: number) => screen.getByTestId(`assessment-stage-${index}`);
+      const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
-      act(() => vi.advanceTimersByTime(1_150));
+      expect(screen.queryByText("Local context checked")).not.toBeInTheDocument();
+      expect(stage(0)).toHaveAttribute("data-state", "active");
+      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent(
+        "0:00 elapsed · Estimated steps",
+      );
+      expect(screen.getByRole("status")).toHaveTextContent("It usually takes about a minute.");
 
-      expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "complete");
-      expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "active");
-      act(() => vi.advanceTimersByTime(4_600));
-      expect(screen.getByText("Compiling results for you")).toBeInTheDocument();
-      expect(screen.getByTestId("assessment-stage-5")).toHaveAttribute("data-state", "active");
+      advance(3_000);
+      expect(stage(0)).toHaveAttribute("data-state", "complete");
+      expect(stage(1)).toHaveAttribute("data-state", "active");
+      advance(12_000);
+      expect(stage(2)).toHaveAttribute("data-state", "active");
+      advance(10_000);
+      expect(stage(3)).toHaveAttribute("data-state", "active");
+      advance(12_000);
+      expect(stage(4)).toHaveAttribute("data-state", "active");
+
+      const explanations = [
+        "This step searches the live web",
+        "It also checks what AI already knows",
+        "Then it compares the answers",
+        "Finally it writes a finding",
+        "This step searches the live web",
+      ];
+      for (const explanation of explanations) {
+        expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(explanation);
+        expect(screen.getByRole("status")).toHaveTextContent(explanation);
+        advance(6_000);
+      }
+
+      // 67 s so far. Jump the clock without delivering each interval, as in a
+      // paused tab: the counter catches up and the slow message appears.
+      vi.setSystemTime(Date.now() + 22_000);
+      advance(1_000);
+      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent("1:30 elapsed");
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "This is taking longer than usual. We are still waiting for your report.",
+      );
+      expect(stage(4)).toHaveAttribute("data-state", "active");
+
+      view.unmount();
+      expect(vi.getTimerCount()).toBe(0);
     } finally {
       vi.useRealTimers();
     }

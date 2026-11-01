@@ -42,32 +42,77 @@ export function RefusalScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
+/**
+ * Estimated steps and the second each one starts, paced to measured live runs
+ * (a report takes about a minute). The page receives no progress from the
+ * server, so the steps are labelled as an estimate, and the last step explains
+ * what it involves rather than claiming what is happening now. It stays active
+ * until the result arrives.
+ */
 const stages = [
-  ["Website opened", "Checking that public pages are reachable."],
-  ["Business details checked", "Reading services, proof, and service-area information."],
-  ["Buyer profile identified", "Creating three evidence-led buyer profiles."],
-  ["Questions buyers ask AI", "Identifying the questions those buyers are likely to ask."],
-  [
-    "Local context checked",
-    "Using service-area evidence from the website to set the local context.",
-  ],
-  ["Compiling results for you", "Organising the website assessment into your report."],
+  { title: "Website read", note: "Opening your public home page.", startsAtSecond: 0 },
+  {
+    title: "Business details checked",
+    note: "Reading what your website says about your services, proof and where you work.",
+    startsAtSecond: 3,
+  },
+  {
+    title: "Three buyer profiles",
+    note: "Working out who your website is written to persuade.",
+    startsAtSecond: 15,
+  },
+  {
+    title: "Nine buyer questions",
+    note: "Writing the questions those buyers are likely to ask AI.",
+    startsAtSecond: 25,
+  },
+  {
+    title: "Asking AI your buyers' questions",
+    note: "",
+    startsAtSecond: 37,
+  },
 ] as const;
+
+const finalStepExplanations = [
+  "This step searches the live web for answers to each question.",
+  "It also checks what AI already knows about your business.",
+  "Then it compares the answers with what your website says.",
+  "Finally it writes a finding for each of the nine questions.",
+] as const;
+const UPDATE_EVERY_SECONDS = 6;
+const SLOW_AFTER_SECONDS = 90;
+
+function formatElapsed(seconds: number): string {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
 export function AssessmentProgressScreen({ domain }: { domain: string }) {
-  const [activeStage, setActiveStage] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   useEffect(() => {
+    // Measure from the clock, so a paused or throttled tab catches up.
+    const startedAt = Date.now();
     const timer = window.setInterval(
-      () => setActiveStage((current) => Math.min(current + 1, stages.length - 1)),
-      1_150,
+      () => setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1_000)),
+      1_000,
     );
     return () => window.clearInterval(timer);
   }, []);
+  const activeStage = stages.reduce(
+    (active, stage, index) => (elapsedSeconds >= stage.startsAtSecond ? index : active),
+    0,
+  );
+  const finalStage = stages[stages.length - 1]!;
+  const finalExplanation =
+    finalStepExplanations[
+      Math.floor(Math.max(0, elapsedSeconds - finalStage.startsAtSecond) / UPDATE_EVERY_SECONDS) %
+        finalStepExplanations.length
+    ];
   return (
     <StateShell
       icon={<FileSearch />}
       kicker="Assessment in progress"
       title="Following the public trail."
-      body="Your submitted domain stays visible while secure server-side checks assemble dated public website evidence and LLM findings."
+      body="We read your public website, then ask AI the questions your buyers would ask. It usually takes about a minute."
     >
       <div className="mt-5 flex items-center gap-2 rounded-md border border-border bg-card px-4 py-3 text-sm font-bold">
         <Globe2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
@@ -80,13 +125,14 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
             style={{ width: `${((activeStage + 1) / stages.length) * 100}%` }}
           />
         </div>
-        <ul className="divide-y divide-border" aria-live="polite">
-          {stages.map(([title, note], index) => {
+        <ul className="divide-y divide-border">
+          {stages.map((stage, index) => {
             const complete = index < activeStage;
             const active = index === activeStage;
+            const isFinal = index === stages.length - 1;
             return (
               <li
-                key={title}
+                key={stage.title}
                 data-state={complete ? "complete" : active ? "active" : "pending"}
                 data-testid={`assessment-stage-${index}`}
                 className="grid grid-cols-[auto_minmax(0,1fr)] gap-3 p-4"
@@ -104,16 +150,35 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
                   {complete ? <Check className="size-4" /> : <Clock3 className="size-4" />}
                 </span>
                 <div>
-                  <p className="font-bold">{title}</p>
-                  <p className="text-sm text-muted-foreground">{note}</p>
+                  <p className="font-bold">{stage.title}</p>
+                  <p
+                    className="text-sm text-muted-foreground"
+                    data-testid={isFinal ? "assessment-final-update" : undefined}
+                  >
+                    {isFinal
+                      ? active
+                        ? finalExplanation
+                        : "Searching the web and checking what AI knows."
+                      : stage.note}
+                  </p>
                 </div>
               </li>
             );
           })}
         </ul>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Showing the assessment sequence while your result is prepared.
+      <p className="mt-3 text-xs text-muted-foreground" data-testid="assessment-elapsed">
+        {formatElapsed(elapsedSeconds)} elapsed · Estimated steps; your report appears as soon as it
+        is ready.
+      </p>
+      {/* A steady status region, so screen readers hear the meaningful
+          changes but not the per-second counter. */}
+      <p role="status" className="mt-1 text-xs text-muted-foreground">
+        {elapsedSeconds >= SLOW_AFTER_SECONDS
+          ? "This is taking longer than usual. We are still waiting for your report."
+          : activeStage === stages.length - 1
+            ? finalExplanation
+            : "It usually takes about a minute."}
       </p>
     </StateShell>
   );
