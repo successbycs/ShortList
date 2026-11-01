@@ -284,7 +284,7 @@ describe("protected prototype reveal journey", () => {
     expect(screen.getByLabelText("Your business website")).toHaveValue("mara-gardens.co.nz");
   });
 
-  it("paces estimated steps to real timings, explains the last step and catches up after a pause", () => {
+  it("paces nine estimated steps, explains the last one, and never fills the bar early", () => {
     vi.useFakeTimers();
     try {
       serverFunction.invoke.mockImplementationOnce(() => new Promise(() => undefined));
@@ -293,7 +293,10 @@ describe("protected prototype reveal journey", () => {
 
       const stage = (index: number) => screen.getByTestId(`assessment-stage-${index}`);
       const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
+      const barWidth = () =>
+        Number.parseFloat(screen.getByTestId("assessment-progress").style.width);
 
+      expect(screen.getByText("Finding your key pages")).toBeInTheDocument();
       expect(screen.queryByText("Local context checked")).not.toBeInTheDocument();
       expect(stage(0)).toHaveAttribute("data-state", "active");
       expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent(
@@ -301,22 +304,24 @@ describe("protected prototype reveal journey", () => {
       );
       expect(screen.getByRole("status")).toHaveTextContent("It usually takes about a minute.");
 
-      advance(3_000);
-      expect(stage(0)).toHaveAttribute("data-state", "complete");
-      expect(stage(1)).toHaveAttribute("data-state", "active");
-      advance(12_000);
-      expect(stage(2)).toHaveAttribute("data-state", "active");
-      advance(10_000);
-      expect(stage(3)).toHaveAttribute("data-state", "active");
-      advance(12_000);
-      expect(stage(4)).toHaveAttribute("data-state", "active");
+      // Each step starts at its estimated second, and the bar keeps growing.
+      let elapsed = 0;
+      let lastWidth = barWidth();
+      for (const [index, startsAt] of [3, 7, 16, 28, 38, 48, 58, 66].entries()) {
+        advance((startsAt - elapsed) * 1_000);
+        elapsed = startsAt;
+        expect(stage(index)).toHaveAttribute("data-state", "complete");
+        expect(stage(index + 1)).toHaveAttribute("data-state", "active");
+        expect(barWidth()).toBeGreaterThan(lastWidth);
+        lastWidth = barWidth();
+      }
 
       const explanations = [
-        "This step searches the live web",
-        "It also checks what AI already knows",
-        "Then it compares the answers",
-        "Finally it writes a finding",
-        "This step searches the live web",
+        "compares what AI says",
+        "mentioned, described accurately and recommended",
+        "where your website could say more",
+        "puts your report together",
+        "compares what AI says",
       ];
       for (const explanation of explanations) {
         expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(explanation);
@@ -324,15 +329,21 @@ describe("protected prototype reveal journey", () => {
         advance(6_000);
       }
 
-      // 67 s so far. Jump the clock without delivering each interval, as in a
-      // paused tab: the counter catches up and the slow message appears.
-      vi.setSystemTime(Date.now() + 22_000);
-      advance(1_000);
-      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent("1:30 elapsed");
+      // 96 s: still waiting, so the last step is active and the bar is not full.
+      expect(stage(8)).toHaveAttribute("data-state", "active");
+      expect(screen.getByRole("status")).not.toHaveTextContent("longer than usual");
+      advance(9_000); // 105 s
+      expect(barWidth()).toBeLessThan(100);
+      expect(barWidth()).toBeLessThanOrEqual(95);
       expect(screen.getByRole("status")).toHaveTextContent(
         "This is taking longer than usual. We are still waiting for your report.",
       );
-      expect(stage(4)).toHaveAttribute("data-state", "active");
+
+      // A paused tab catches up from the clock.
+      vi.setSystemTime(Date.now() + 60_000);
+      advance(1_000);
+      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent("2:46 elapsed");
+      expect(barWidth()).toBeLessThanOrEqual(95);
 
       view.unmount();
       expect(vi.getTimerCount()).toBe(0);

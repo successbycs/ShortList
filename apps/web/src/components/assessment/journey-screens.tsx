@@ -50,37 +50,73 @@ export function RefusalScreen({ onBack }: { onBack: () => void }) {
  * until the result arrives.
  */
 const stages = [
-  { title: "Website read", note: "Opening your public home page.", startsAtSecond: 0 },
+  { title: "Opening your home page", note: "Reading your public home page.", startsAtSecond: 0 },
   {
-    title: "Business details checked",
-    note: "Reading what your website says about your services, proof and where you work.",
+    title: "Finding your key pages",
+    note: "Looking through your sitemap and menus for services, pricing, about, review and location pages.",
     startsAtSecond: 3,
+  },
+  {
+    title: "Reading your key pages",
+    note: "Up to five pages, with menus, footers and pop-ups left out.",
+    startsAtSecond: 7,
+  },
+  {
+    title: "Business details",
+    note: "What you offer, where you work and the proof you show.",
+    startsAtSecond: 16,
   },
   {
     title: "Three buyer profiles",
     note: "Working out who your website is written to persuade.",
-    startsAtSecond: 15,
+    startsAtSecond: 28,
   },
   {
     title: "Nine buyer questions",
     note: "Writing the questions those buyers are likely to ask AI.",
-    startsAtSecond: 25,
+    startsAtSecond: 38,
   },
   {
-    title: "Asking AI your buyers' questions",
-    note: "",
-    startsAtSecond: 37,
+    title: "Searching the live web",
+    note: "Looking for what a buyer would find online today for each question.",
+    startsAtSecond: 48,
   },
+  {
+    title: "Checking what AI already knows",
+    note: "Asking AI about your business from what it already knows.",
+    startsAtSecond: 58,
+  },
+  { title: "Writing your findings", note: "", startsAtSecond: 66 },
 ] as const;
 
 const finalStepExplanations = [
-  "This step searches the live web for answers to each question.",
-  "It also checks what AI already knows about your business.",
-  "Then it compares the answers with what your website says.",
-  "Finally it writes a finding for each of the nine questions.",
+  "This step compares what AI says with what your website says.",
+  "It checks whether you're mentioned, described accurately and recommended.",
+  "It notes where your website could say more.",
+  "Then it puts your report together.",
 ] as const;
 const UPDATE_EVERY_SECONDS = 6;
-const SLOW_AFTER_SECONDS = 90;
+// Live runs take 58–93 s with the crawl; only longer waits get the slow message.
+const SLOW_AFTER_SECONDS = 105;
+
+/**
+ * How full the progress bar is. It fills through each step and slows on the
+ * last one, but never passes 95%: only the finished report completes it.
+ */
+export function progressPercent(elapsedSeconds: number): number {
+  const index = stages.reduce(
+    (active, stage, position) => (elapsedSeconds >= stage.startsAtSecond ? position : active),
+    0,
+  );
+  const stage = stages[index]!;
+  const next = stages[index + 1];
+  const intoStage = Math.max(0, elapsedSeconds - stage.startsAtSecond);
+  const withinStage =
+    next === undefined
+      ? 1 - Math.exp(-intoStage / 30)
+      : Math.min(1, intoStage / (next.startsAtSecond - stage.startsAtSecond));
+  return Math.min(95, ((index + withinStage) / stages.length) * 100);
+}
 
 function formatElapsed(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -122,7 +158,8 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
         <div className="h-2 overflow-hidden bg-sun-soft" aria-hidden="true">
           <div
             className="h-full bg-leaf transition-[width] duration-700 ease-out"
-            style={{ width: `${((activeStage + 1) / stages.length) * 100}%` }}
+            data-testid="assessment-progress"
+            style={{ width: `${progressPercent(elapsedSeconds)}%` }}
           />
         </div>
         <ul className="divide-y divide-border">
@@ -158,7 +195,7 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
                     {isFinal
                       ? active
                         ? finalExplanation
-                        : "Searching the web and checking what AI knows."
+                        : "Comparing the answers and writing up what we found."
                       : stage.note}
                   </p>
                 </div>
@@ -173,7 +210,15 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
       </p>
       {/* A steady status region, so screen readers hear the meaningful
           changes but not the per-second counter. */}
-      <p role="status" className="mt-1 text-xs text-muted-foreground">
+      <p
+        role="status"
+        className={cn(
+          "mt-1 text-xs text-muted-foreground",
+          // Screen readers hear every update; sighted visitors already see
+          // them in the steps, so only the slow message is shown here.
+          elapsedSeconds < SLOW_AFTER_SECONDS && "sr-only",
+        )}
+      >
         {elapsedSeconds >= SLOW_AFTER_SECONDS
           ? "This is taking longer than usual. We are still waiting for your report."
           : activeStage === stages.length - 1
@@ -281,9 +326,9 @@ export function AssessmentResultScreen({
         </div>
         <div className="rounded-md bg-ink px-4 py-3 text-sm font-semibold text-primary-foreground">
           <Clock3 className="mr-2 inline size-4" aria-hidden="true" />
-          {formatUtcTime(result.triggeredAtUtc)}
+          {formatLocalTime(result.triggeredAtUtc)}
           <br />
-          <span className="font-normal opacity-80">UTC observation time</span>
+          <span className="font-normal opacity-80">When we checked your website</span>
         </div>
       </div>
       <section className="mt-6 rounded-lg border-2 border-ink bg-card p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
@@ -439,15 +484,19 @@ function StartOver({ onStartOver }: { onStartOver: () => void }) {
 function isGeo(result: StoredAssessmentResult): result is StoredGeoAssessment {
   return "profile" in result && "findings" in result;
 }
-function formatUtcTime(value: string) {
+/**
+ * The check time in the visitor's own timezone, from their browser (for
+ * example NZDT in New Zealand). Visitor location is not used or stored.
+ */
+export function formatLocalTime(value: string, timeZone?: string) {
   return new Intl.DateTimeFormat("en-NZ", {
     year: "numeric",
     month: "long",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "UTC",
     timeZoneName: "short",
+    ...(timeZone ? { timeZone } : {}),
   }).format(new Date(value));
 }
 function failureContent(result: DomainAssessmentSubmissionResult) {
