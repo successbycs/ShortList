@@ -76,7 +76,7 @@ export function createClaudeGeoMessagesProvider(
     async run(request): Promise<StageResult> {
       if (request.mode !== "current_web") {
         const message = await send(structuredRequest(request, request.input, config));
-        return { output: parseJson(message), usage: usageOf([message]) };
+        return { output: toLists(parseJson(message)), usage: usageOf([message]) };
       }
 
       const research = await send({
@@ -101,7 +101,7 @@ export function createClaudeGeoMessagesProvider(
         structuredRequest(request, { ...request.input, current_web_research_notes: notes }, config),
       );
       return {
-        output: parseJson(structured),
+        output: toLists(parseJson(structured)),
         providerSources,
         usage: usageOf([research, structured]),
       };
@@ -123,7 +123,13 @@ function structuredRequest(
     // extraction and judgement tasks, not open-ended research.
     output_config: {
       effort: "low",
-      format: { type: "json_schema", schema: schemaForStage(request.stage) },
+      format: {
+        type: "json_schema",
+        schema: limitEvidenceIds(
+          schemaForStage(request.stage, buyerQuestionIds(input)),
+          websiteSourceIds(input),
+        ),
+      },
     },
   };
 }
@@ -185,6 +191,114 @@ function parseProviderSources(
   return [...sources.values()];
 }
 
+/**
+ * The report needs exactly 3 ideal customers, 9 questions and 9 findings.
+ * Claude's structured output cannot fix a list's length, so each list is
+ * requested as numbered required slots ("question_1" … "question_9") and
+ * turned back into a list here.
+ */
+const ICP_COUNT = 3;
+const QUESTION_COUNT = 9;
+const LIST_FIELDS = ["icps", "questions"] as const;
+
+function numberedSlots(prefix: string, count: number, item: object): Record<string, unknown> {
+  const keys = Array.from({ length: count }, (_, index) => `${prefix}_${index + 1}`);
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: keys,
+    properties: Object.fromEntries(keys.map((key) => [key, item])),
+  };
+}
+
+function toLists(output: unknown): unknown {
+  if (!isRecord(output)) return output;
+  const result: Record<string, unknown> = { ...output };
+  const findings = result["findings"];
+  if (isRecord(findings) && !Array.isArray(findings)) {
+    // Each slot is named by its question ID. Sources are set by the runner
+    // from the provider's own search results, never written by Claude.
+    result["findings"] = Object.entries(findings).map(([questionId, finding]) => ({
+      ...(isRecord(finding) ? finding : {}),
+      questionId,
+      sources: [],
+    }));
+  }
+  for (const field of LIST_FIELDS) {
+    const slots = result[field];
+    if (isRecord(slots) && !Array.isArray(slots)) {
+      result[field] = Object.keys(slots)
+        .sort((a, b) => slotNumber(a) - slotNumber(b))
+        .map((key) => slots[key]);
+    }
+  }
+  return result;
+}
+
+/**
+ * One required finding slot per buyer question, named by the question's ID, so
+ * every question gets exactly one finding. A slot's schema leaves out the
+ * question ID and sources to keep the grammar small enough for Claude.
+ */
+function findingSlots(questionIds: readonly string[]): Record<string, unknown> {
+  const keys =
+    questionIds.length > 0
+      ? [...questionIds]
+      : Array.from({ length: QUESTION_COUNT }, (_, index) => `question_${index + 1}`);
+  return {
+    type: "object",
+    additionalProperties: false,
+    required: keys,
+    properties: Object.fromEntries(keys.map((key) => [key, { $ref: "#/$defs/finding" }])),
+  };
+}
+
+function buyerQuestionIds(input: Record<string, unknown>): string[] {
+  const questions = input["buyer_questions"];
+  if (!Array.isArray(questions)) return [];
+  return questions.flatMap((question) =>
+    isRecord(question) && typeof question["id"] === "string" ? [question["id"]] : [],
+  );
+}
+
+function slotNumber(key: string): number {
+  return Number(key.slice(key.lastIndexOf("_") + 1));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** IDs of the website pages captured for this assessment, from the stage input. */
+function websiteSourceIds(input: Record<string, unknown>): string[] {
+  const sources = input["website_sources"];
+  if (!Array.isArray(sources)) return [];
+  return sources.flatMap((source) =>
+    isRecord(source) && typeof source["sourceId"] === "string" ? [source["sourceId"]] : [],
+  );
+}
+
+/**
+ * Evidence may only cite captured website pages, so every `evidenceIds` list
+ * in the schema is limited to those exact IDs. Claude then cannot cite
+ * evidence that does not exist.
+ */
+function limitEvidenceIds(schema: unknown, allowedIds: readonly string[]): Record<string, unknown> {
+  if (allowedIds.length === 0) return schema as Record<string, unknown>;
+  const limit = (node: unknown): unknown => {
+    if (Array.isArray(node)) return node.map(limit);
+    if (!isRecord(node)) return node;
+    return Object.fromEntries(
+      Object.entries(node).map(([key, value]) =>
+        key === "evidenceIds"
+          ? [key, { type: "array", items: { type: "string", enum: [...allowedIds] } }]
+          : [key, limit(value)],
+      ),
+    );
+  };
+  return limit(schema) as Record<string, unknown>;
+}
+
 const stringArray = { type: "array", items: { type: "string" } } as const;
 const confidence = { type: "string", enum: ["high", "medium", "low"] } as const;
 const evidenceLinkedValue = {
@@ -231,28 +345,19 @@ const buyerQuestion = {
     testedClaim: { type: "string" },
   },
 } as const;
-const source = {
-  type: "object",
-  additionalProperties: false,
-  required: ["title", "url"],
-  properties: { title: { type: "string" }, url: { type: "string" } },
-} as const;
 const finding = {
   type: "object",
   additionalProperties: false,
   required: [
-    "questionId",
     "answerSummary",
     "submittedBusinessMention",
     "descriptionAccuracy",
     "recommendationFit",
-    "sources",
     "websiteContentGaps",
     "limitations",
     "confidence",
   ],
   properties: {
-    questionId: { type: "string" },
     answerSummary: { type: "string" },
     submittedBusinessMention: {
       type: "string",
@@ -266,14 +371,32 @@ const finding = {
       type: "string",
       enum: ["appropriate", "not_appropriate", "uncertain", "not_mentioned"],
     },
-    sources: { type: "array", items: source },
     websiteContentGaps: stringArray,
     limitations: stringArray,
     confidence,
   },
 } as const;
 
-function schemaForStage(stage: GeoModelRequest["stage"]): Record<string, unknown> {
+/**
+ * Each repeated question and finding is defined once and referenced from its
+ * nine slots, which keeps the compiled grammar small.
+ */
+function schemaForStage(
+  stage: GeoModelRequest["stage"],
+  questionIds: readonly string[],
+): Record<string, unknown> {
+  // The ICP schema's root is an anyOf, where Claude does not accept $defs; it
+  // has only three slots, so they are written out in full.
+  const schema = stageSchema(stage, questionIds);
+  if (stage === "questions") return { ...schema, $defs: { buyerQuestion } };
+  if (stage === "evaluation") return { ...schema, $defs: { finding } };
+  return schema;
+}
+
+function stageSchema(
+  stage: GeoModelRequest["stage"],
+  questionIds: readonly string[],
+): Record<string, unknown> {
   switch (stage) {
     case "profile":
       return {
@@ -315,7 +438,7 @@ function schemaForStage(stage: GeoModelRequest["stage"]): Record<string, unknown
             required: ["outcome", "icps"],
             properties: {
               outcome: { type: "string", enum: ["complete"] },
-              icps: { type: "array", items: icp },
+              icps: numberedSlots("icp", ICP_COUNT, icp),
             },
           },
           {
@@ -335,14 +458,16 @@ function schemaForStage(stage: GeoModelRequest["stage"]): Record<string, unknown
         type: "object",
         additionalProperties: false,
         required: ["questions"],
-        properties: { questions: { type: "array", items: buyerQuestion } },
+        properties: {
+          questions: numberedSlots("question", QUESTION_COUNT, { $ref: "#/$defs/buyerQuestion" }),
+        },
       };
     case "evaluation":
       return {
         type: "object",
         additionalProperties: false,
         required: ["findings"],
-        properties: { findings: { type: "array", items: finding } },
+        properties: { findings: findingSlots(questionIds) },
       };
   }
 }

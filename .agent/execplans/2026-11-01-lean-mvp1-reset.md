@@ -556,6 +556,15 @@ The plan is complete when all of these are recorded in this file:
   - 2026-11-01 05:03Z, `successbycs.com`: failed at `d1_cache` after 235 ms
     (missing remote migrations 0005–0008). No website fetch, no AI call, no
     cost. Next: apply the migrations (Chris's OK) and switch to Claude (#80).
+  - 2026-11-01 06:05Z, local proof on Chris's PC (`wrangler dev --local`,
+    fresh local D1 with 0001–0009, Claude Haiku 5.5), `successbycs.com`:
+    report completed in 58 s; 3 ICPs, 9 questions, 18 findings saved. Tokens:
+    67,249 input, 13,332 output (about US$0.01) plus up to 3 web searches
+    (US$0.03): roughly US$0.04 a report. The same domain again replayed in
+    under 3 s with no AI call. Earlier local attempts found and fixed five
+    real-API problems (#83): list lengths not guaranteed, invented evidence
+    IDs, grammar too large, `$defs` not allowed under a root `anyOf`, and the
+    4,000-token output limit.
 - Step 2 scores: (empty)
 - Step 4 screenshots and notes: (empty)
 - Step 7 answers: (empty)
