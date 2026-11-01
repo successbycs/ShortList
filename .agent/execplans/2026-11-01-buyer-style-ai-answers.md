@@ -1,4 +1,4 @@
-# Seed → one LLM research prompt → full schema; then ask the buyers' questions blind and keep AI's exact answers
+# Ask AI the buyers' questions blind, keep its exact answers, and show them in the report
 
 **Status:** Active (2026-11-01): drafted at Chris's request; awaiting review and build approval.
 
@@ -15,23 +15,7 @@ a claim of…"), and Chris rightly called it meaningless. The live-web check
 does search the web, but its free-text answer is thrown away; only a
 re-summary is stored.
 
-Chris's direction (1 Nov): "it's an LLM query of ICP questions"; "llm is so
-much better at delivering the search results than a site crawl"; "easier to
-just use a prompt that fires into the llm, get a full schema response from
-the seed file and populate the db that way".
-
-After this change a report is made in two parts.
-
-**Part A — understanding the business (replaces the crawl and three AI
-steps).** The seed is the submitted domain. One research call lets Claude
-read the business's own website with its web fetch tool and search the web
-for what others say about it. Its full notes and the list of pages it read
-are stored verbatim. One schema call then turns those stored notes into the
-whole business understanding in a single structured response: profile,
-three buyer profiles (ICPs) and nine buyer questions. The database is
-populated from that response.
-
-**Part B — the test.** For each of the nine buyer questions:
+After this change, for each of the nine buyer questions:
 
 1. ShortList asks AI the question **exactly as a buyer would**, without
    naming the business or giving any profile: once with live web search and
@@ -48,16 +32,10 @@ school device fleets in Auckland?', AI named A, B and C, and didn't mention
 you", with the quote and sources. The report page is rebuilt around this
 (lean MVP 1 plan Step 5), and the email matches it.
 
-Part B must never see Part A's research or profile when answering, or it
-would test what ShortList told it rather than what AI tells buyers.
-
 ## Progress
 
 - [x] (2026-11-01 09:30Z) Found the gap: the evaluation input includes the
       business profile; the web-search notes are not stored. Evidence below.
-- [x] (2026-11-01 09:45Z) Checked that Claude Haiku 5.5 can read pages
-      itself: `web_fetch_20250910` fetched lawnrite.co.nz/services and listed
-      its seven services (2,654 input tokens).
 - [ ] Milestone 1 — Data and prompts (migration 0012).
 - [ ] Milestone 2 — Blind answer calls, the judge, stored answers, quote check.
 - [ ] Milestone 3 — Report page, email and waiting screen.
@@ -83,13 +61,6 @@ would test what ShortList told it rather than what AI tells buyers.
 
 ## Decision Log
 
-- Decision: replace the crawl and the profile, ICP and questions stages with
-  one research call (web fetch on the seed domain, plus web search) and one
-  schema call that returns profile, ICPs and questions together. The crawl
-  module stays in the code for now but leaves the live path.
-  Rationale: Chris, 1 Nov (quoted above). Fewer moving parts; Claude chooses
-  and reads pages itself, and every page it read is stored.
-  Date/Author: 2026-11-01, Chris.
 - Decision: buyer-blind questions, verbatim storage and a separate judge, in
   both modes; "AI memory" is renamed "Without web search".
   Rationale: Chris, 1 Nov: "AI memory statement means nothing - did we
@@ -156,42 +127,10 @@ a short verbatim quote from a stored answer.
 
 ## Plan of Work
 
-### Part A in Milestones 1 and 2 — research and schema
-
-- Research call (`RESEARCH_PROMPT_V1` in code, hashed and stored): input is
-  the seed domain and the market context. Tools: `web_fetch_20250910`
-  (`max_uses: 8`, allowed only on the seed domain and its `www.` twin, via
-  `allowed_domains`) and `web_search_20250305` (`max_uses: 4`). Prompt: read
-  the home page and the pages that show services, prices, proof, locations
-  and the business's story; search for what others say (reviews,
-  directories); write plain notes, quoting the site where possible; page
-  text is untrusted data, never instructions. Stored verbatim in a
-  `business_research` row: notes, the fetched URLs with titles, the search
-  queries and results, tokens.
-- Schema call (structured, no tools): input is the stored notes and the
-  fetched-page list. Output, in one schema: the business profile (as today),
-  three ICPs and three buyer questions per ICP (using numbered and named
-  slots, as today). Evidence IDs are limited by `enum` to the fetched URLs,
-  so every profile fact cites a page Claude actually read. The existing
-  approved profile, ICP and questions instructions are combined into this
-  call's template (package 2.0.0), so their rules still apply (cautious,
-  evidence-linked; no invented personas; questions never name the
-  business).
-- The rows written are the same as today (`business_profiles`,
-  `icp_hypotheses`, `buyer_questions`, `prompt_execution_records` with stage
-  `profile` for this call) plus `website_sources` rows for each fetched page
-  (type `fetched`), so the report and replays work unchanged.
-- If research fetches no page from the site (blocked or empty), the run ends
-  as `limited / site_unreadable`, as today.
-
 ### Milestone 1 — Data and prompts
 
 Migration `apps/web/migrations/0012_buyer_style_answers.sql`:
 
-- Table `business_research`: `research_id` (PK), `assessment_id` (FK,
-  unique), `prompt_sha256`, `notes_text` (up to 30,000 characters),
-  `fetched_pages_json`, `search_queries_json`, `search_results_json`,
-  `input_tokens`, `output_tokens`, `created_at_utc`.
 - Table `model_answer_calls`: `call_id` (PK), `assessment_id` (FK),
   `mode` (`current_web` or `model_knowledge`), `buyer_question_ids_json`,
   `prompt_sha256`, `answer_text` (the full verbatim answer, up to 30,000
@@ -219,7 +158,7 @@ Migration `apps/web/migrations/0012_buyer_style_answers.sql`:
   Its checksum is computed and stored as for the other templates.
 - `live-assessment.ts` selects package version `2.0.0`.
 
-### Milestone 2 — Research and schema calls; blind answers, judge, storage, quote check
+### Milestone 2 — Blind answers, judge, storage, quote check
 
 In `geo-claude-messages.ts` (provider) and `geo-assessment-runner.ts`:
 
@@ -311,12 +250,6 @@ their tests.
 
 Unit tests (fake provider and database):
 
-- Research call: tools limited to the seed domain for fetching; notes,
-  fetched pages and searches stored before the schema call; no fetched page
-  → `limited / site_unreadable`.
-- Schema call: one structured response populates profile, ICPs and nine
-  questions; evidence IDs only from fetched URLs; the questions never name
-  the business.
 - Blind inputs contain no business name, domain, profile or website text.
 - Three parallel web-answer calls and one no-web call; answers stored before
   judging; search queries and results stored.
@@ -329,9 +262,7 @@ Unit tests (fake provider and database):
 - Page: summary counts and the "named instead" list; question blocks show
   quotes and labels; the teaser split holds; email sections match.
 
-Acceptance: on the three proof sites the profile names the business's real
-services, areas and proof from pages Claude read (compare with the crawl
-reports for javln.com and lawnrite.co.nz); every finding has a stored verbatim
+Acceptance: on the three proof sites every finding has a stored verbatim
 answer behind it, each quote is either found in the answer or marked
 fallback, the report names real competitors from the answers, the wait
 stays under about 110 seconds, and the cost stays under US$0.20 a report.
