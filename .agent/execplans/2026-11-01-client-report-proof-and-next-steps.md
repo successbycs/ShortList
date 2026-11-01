@@ -70,6 +70,18 @@ authorised remote-migration/deployment step.
       beyond-window fixture. Clarified that character-to-token figures are
       estimates, while serialized-request token counting enforces the limit.
       Only this plan changed.
+- [x] (2026-11-01 09:45Z) Read Astra's latest PR #99 review comment
+      6556033867; made the persisted coverage-limited-absence override an
+      explicit verdict guard before recommendation/mention rows, and expanded
+      the beyond-window regression fixture to conflicting recommendation and
+      mention states plus an omitted relevant page. Only this plan changed.
+- [x] (2026-11-01 09:46Z) Validated this plan-only revision: `git diff --check`
+      and `UV_CACHE_DIR=/tmp/shortlist-uv-cache uv run python scripts/verify.py`
+      passed (Ruff, 40 pytest tests, and Markdown links). `npm run lint` in
+      `apps/web` could not run because the local dependency is absent
+      (`sh: 1: eslint: not found`); no dependency installation is authorised
+      for this plan-only revision. The tracked worktree contains only this
+      ExecPlan change.
 - [ ] (YYYY-MM-DD HH:MMZ) Chris approves the bounded implementation scope,
       including the revised current-web input-token budget.
 - [ ] (YYYY-MM-DD HH:MMZ) Implement and locally prove the evidence capture,
@@ -181,6 +193,13 @@ authorised remote-migration/deployment step.
   of absence. This preserves a useful bounded first pass while preventing the
   client-facing claim that a site lacks information it may contain.
   Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra round-2 review)
+- Decision: Give a persisted unresolved-absence coverage reason precedence
+  over recommendation and mention statuses in the client verdict projection.
+  Rationale: Normalising a tentative `not_on_site` to `unclear` alone lets a
+  later recommendation/mention row incorrectly describe an uninspected site.
+  The stored reason makes the conservative override survive a D1 reload; a
+  completed inspection remains eligible for the normal validated-absence row.
+  Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra review)
 - Decision: Use at most one conditional structured-evaluation re-inspection,
   with complete stored text for no more than three deterministically relevant
   pages (30,000 Unicode code units), rather than adding a general third model
@@ -205,8 +224,11 @@ authorised remote-migration/deployment step.
 
 Planning outcome: a single implementation path is defined, including why the
 existing saved data cannot meet the proof promise and how the new report stays
-within MVP scope. Implementation, customer review, independent code review,
-CI, remote migration, deployment, and a real new-report proof are pending.
+within MVP scope. The verdict order now persists and prioritises an unresolved
+absence-coverage reason, preventing later recommendation/mention states from
+overriding "Couldn't tell." Implementation, customer review, independent code
+review, CI, remote migration, deployment, and a real new-report proof are
+pending.
 
 ## Context and Orientation
 
@@ -298,8 +320,13 @@ and only the sources cited with that answer.
    demonstrated contradiction. The runner, not the evaluator, adds
    `websiteEvidenceCoverage`: a per-page record of `{ sourceId,
    capturedTextCodeUnits, primarySuppliedCodeUnits, captureTruncated,
-   primaryTextComplete }`; `primaryTextComplete` is true only when the
-   supplied text equals a non-truncated retained capture. `contradicted` and
+   primaryTextComplete }` and an `absenceCoverageReason`. The reason is null
+   unless an absence was considered; otherwise it is one of `complete`,
+   `inspection_succeeded`, `partial_relevant_page`, `omitted_relevant_page`,
+   `truncated_relevant_capture`, `relevant_set_over_limit`,
+   `request_over_budget`, or `no_relevant_pages`. `primaryTextComplete` is
+   true only when the supplied text equals a non-truncated retained capture.
+   `contradicted` and
    `not_on_site` each require one or more captured-page IDs; `contradicted`
    also requires a non-empty correction. A primary `not_on_site` result is
    tentative if a deterministically relevant page has
@@ -387,7 +414,8 @@ and only the sources cited with that answer.
    required IDs and reject invalid support/correction combinations. Validate
    and persist the complete coverage record and, when used, the conditional
    inspection's selected IDs, rule version, serialized-input digest, measured
-   token count, and result. A final `not_on_site` must prove complete coverage
+   token count, result, and `absenceCoverageReason`. A final `not_on_site`
+   must prove complete coverage
    for all deterministically relevant sources or a successful inspection; all
    other tentative absences become `unclear`. Persist and reload
    `websiteSupport`, its IDs, coverage/inspection evidence, and
@@ -437,16 +465,21 @@ logic split between React and HTML string concatenation.
    | --- | --- | --- |
    | 1. `websiteSupport=contradicted` with valid IDs and correction | Described wrongly | "The answer conflicts with the captured website evidence: [correction]." |
    | 2. `websiteSupport=not_on_site` with validated absence coverage and valid IDs | Your site doesn't say | "We could not find this information in the captured pages we fully inspected." |
-   | 3. `recommendationFit=appropriate` | Recommended | "The answer named [business] as suitable for this question." |
-   | 4. `recommendationFit=uncertain` | Couldn't tell | "The answer did not establish whether it recommends [business] for this question." |
-   | 5. `submittedBusinessMention=mentioned` and `recommendationFit` is `not_appropriate` or `not_mentioned` | Mentioned, not recommended | "The answer named [business], but did not recommend it for this question." |
-   | 6. `submittedBusinessMention=absent` | Not mentioned | "The answer did not name [business]." |
-   | 7. all remaining combinations, including legacy/null support or `submittedBusinessMention=uncertain` | Couldn't tell | "The answer or evidence did not support a clear conclusion." |
+   | 3. An unresolved absence: `websiteSupport=unclear` and persisted `absenceCoverageReason` is any value except `complete` or `inspection_succeeded` | Couldn't tell | "We could not fully inspect the relevant captured pages, so we couldn't tell whether your site covers this." |
+   | 4. `recommendationFit=appropriate` | Recommended | "The answer named [business] as suitable for this question." |
+   | 5. `recommendationFit=uncertain` | Couldn't tell | "The answer did not establish whether it recommends [business] for this question." |
+   | 6. `submittedBusinessMention=mentioned` and `recommendationFit` is `not_appropriate` or `not_mentioned` | Mentioned, not recommended | "The answer named [business], but did not recommend it for this question." |
+   | 7. `submittedBusinessMention=absent` | Not mentioned | "The answer did not name [business]." |
+   | 8. all remaining combinations, including legacy/null support or `submittedBusinessMention=uncertain` | Couldn't tell | "The answer or evidence did not support a clear conclusion." |
 
-   A tentative or coverage-limited `not_on_site` is normalized to `unclear`
-   before this table, so it reaches row 7: "Couldn't tell." It must not say
-   "Your site doesn't say," even if its first 3,000 characters did not contain
-   the fact. `descriptionAccuracy=inaccurate` and `submittedBusinessMention=contradicted`
+   When primary coverage is incomplete, the runner persists `websiteSupport=unclear`
+   and its non-final `absenceCoverageReason`; row 3 is deliberately before all
+   recommendation/mention rows. It therefore renders "Couldn't tell" even for
+   `recommendationFit=appropriate`, a mentioned/not-appropriate answer, or an
+   absent/not-mentioned answer. It must not say "Your site doesn't say," even
+   if its first 3,000 characters did not contain the fact. A successful bounded
+   inspection persists `websiteSupport=not_on_site` with
+   `absenceCoverageReason=inspection_succeeded`, so it uses row 2. `descriptionAccuracy=inaccurate` and `submittedBusinessMention=contradicted`
    are diagnostic inputs only: neither can produce "Described wrongly" without
    `websiteSupport=contradicted` and its valid correction evidence. Thus missing
    information alone never produces that verdict. The source IDs/evidence
@@ -570,6 +603,18 @@ All implementation commands run from the repository root unless a command
 explicitly changes directory. The following are planned commands; record their
 actual date and concise output in this section when they are run.
 
+For this plan-only revision, these checks actually ran on 2026-11-01:
+
+    git diff --check
+    UV_CACHE_DIR=/tmp/shortlist-uv-cache uv run python scripts/verify.py
+    cd apps/web && npm run lint
+
+`git diff --check` was silent (success). The repository verifier passed Ruff
+lint/format, `40 passed` pytest tests, and Markdown links. Web lint could not
+start because this worktree has no local `eslint` executable (`sh: 1: eslint:
+not found`). No package installation was performed, so that pre-existing
+environment dependency remains an honest outstanding verification prerequisite.
+
 1. Confirm the integration base and migration sequence before editing:
 
        git status --short --branch
@@ -644,8 +689,10 @@ actual date and concise output in this section when they are run.
 - Every question has exactly one verdict from the documented plain-language
   set and one factual reason. A validated captured-page contradiction takes
   priority over all recommendation/mention statuses; a validated captured-page
-  absence takes the next priority; `recommendationFit=uncertain` is always
-  "Couldn't tell." "Your site doesn't say" requires persisted complete
+  absence takes the next priority; an unresolved persisted absence-coverage
+  reason takes priority over every recommendation/mention row and renders
+  "Couldn't tell." `recommendationFit=uncertain` is always "Couldn't tell."
+  "Your site doesn't say" requires persisted complete
   coverage of every relevant captured source, or the successful bounded
   absence inspection. If relevant text was truncated or omitted from the
   primary bundle, the verdict is "Couldn't tell" and no absence-based action
@@ -676,9 +723,9 @@ actual date and concise output in this section when they are run.
 | Boundary | Test/proof | Pass condition |
 | --- | --- | --- |
 | Claude adapter | Fake `research.content` with labelled text/citations, missing label, duplicate label, unrelated search result, malformed citation | Exact per-question proof emitted only for the valid fixture; incomplete proof rejects safely. |
-| Runner/evaluation input | Fixture with a fact in a captured page's `visibleText` but omitted from `business_profile`; a second fixture places that fact at character 4,000 of a 10,000-character retained page; unknown/duplicate/missing support IDs; oversized page set | Current-web evaluator receives source-ID-bearing text plus coverage metadata, returns `supported` rather than a false absence for the first page fact, and the beyond-3,000 fixture cannot produce `not_on_site` or an absence action from the primary pass. It either passes the bounded full-capture inspection or persists `unclear`; invalid IDs reject safely and every serialized request stays within its measured budget. |
+| Runner/evaluation input | Fixture with a fact in a captured page's `visibleText` but omitted from `business_profile`; a second fixture places that fact at character 4,000 of a 10,000-character retained page; an omitted relevant-page case; unknown/duplicate/missing support IDs; oversized page set | Current-web evaluator receives source-ID-bearing text plus coverage metadata, returns `supported` rather than a false absence for the first page fact, and the beyond-3,000 and omitted-page fixtures cannot produce `not_on_site` or an absence action from the primary pass. Each persists `unclear` with its coverage reason unless the bounded full-capture inspection succeeds; invalid IDs reject safely and every serialized request stays within its measured budget. |
 | Runner/execution/D1 | Fake provider plus D1 statement recorder, migration proof, and repository reload | Raw answer/source/support/correction/evidence-ID/coverage/inspection fields are written/read per finding; no-web source/quote/support stays absent; old null fields load safely; reloading produces byte-for-byte equal support judgment, coverage decision, and action input. |
-| Report projection | Pure fixture tests | Correct denominator, complete verdict precedence, deterministic all-question actions/destinations, source grouping, quote-substring invariant. Fixtures cover: mentioned + contradicted; mentioned + fully covered `not_on_site`; absent + fully covered `not_on_site`; recommended + contradicted; mentioned + `recommendationFit=uncertain`; legacy `descriptionAccuracy=inaccurate` + `websiteSupport=unclear`; a report whose only supported gap is a business-named question; a mentioned-but-not-recommended finding with a supported gap; and a 10,000-character page with the relevant fact at character 4,000, which is "Couldn't tell" with no absence action unless the stored inspection record is successful. |
+| Report projection | Pure fixture tests | Correct denominator, complete verdict precedence, deterministic all-question actions/destinations, source grouping, quote-substring invariant. Fixtures cover: mentioned + contradicted; mentioned + fully covered `not_on_site`; absent + fully covered `not_on_site`; recommended + contradicted; mentioned + `recommendationFit=uncertain`; legacy `descriptionAccuracy=inaccurate` + `websiteSupport=unclear`; a report whose only supported gap is a business-named question; and a mentioned-but-not-recommended finding with a supported gap. The beyond-window fixture at character 4,000 and the omitted-page fixture each run with (a) `recommendationFit=appropriate`, (b) `submittedBusinessMention=mentioned` + `recommendationFit=not_appropriate`, and (c) `submittedBusinessMention=absent` + `recommendationFit=not_mentioned`: every unresolved absence is "Couldn't tell" with no absence action. A successful stored inspection may instead produce the validated `not_on_site` verdict and action. |
 | React/email | jsdom and renderer tests | Headings/cards/actions/sources/footers are accessible, escaped, and equivalent in browser/HTML/text. |
 | Build/CI | `npm run types`, `lint`, `test`, `typecheck`, `build`; `uv run python scripts/verify.py` | All exit 0; required `web-quality` and `verify` checks later green. |
 | Fresh real report (operational boundary) | Authorised deployed Worker + new non-cached domain + received email | Browser/email report proves stored quote/source linkage and truthful count. **Unobserved until Chris authorises deploy, remote migration and test.** |
@@ -822,7 +869,8 @@ and no test result is claimed by this plan.
 - **Finding persistence:** add nullable `answerText` and proof-availability,
   plus `websiteSupport: "supported" | "contradicted" | "not_on_site" |
   "unclear" | null`, `websiteSupportEvidenceIds: readonly string[]`, a
-  versioned `websiteEvidenceCoverage` record, an optional
+  versioned `websiteEvidenceCoverage` record with a persisted
+  `absenceCoverageReason`, an optional
   `absenceInspection` record (selected IDs, input digest, tokenizer count and
   result), and `websiteCorrection: string | null` to `StoredGeoFinding` and
   `RecordModelQuestionFindingInput` in
