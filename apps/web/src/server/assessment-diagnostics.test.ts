@@ -108,4 +108,21 @@ describe("assessment diagnostics", () => {
     ]);
     expect(runLiveAssessment).not.toHaveBeenCalled();
   });
+
+  it("passes the configured model profile to the live assessment", async () => {
+    const runLiveAssessment = vi.fn().mockResolvedValue({ kind: "invalid_input", reasonCode: "x" });
+    const base = dependencies();
+    await runAssessmentSubmission(
+      "example.co.nz",
+      dependencies({
+        runtime: { ...base.runtime, SHORTLIST_MODEL_PROFILE: "claude-sonnet-5-5" },
+        runLiveAssessment,
+      }),
+    );
+
+    expect(runLiveAssessment).toHaveBeenCalledWith(
+      "example.co.nz",
+      expect.objectContaining({ apiKey: "test-key", modelProfileKey: "claude-sonnet-5-5" }),
+    );
+  });
 });

@@ -26,9 +26,10 @@ const MAX_WEB_SEARCHES = 3;
 // Used when the Worker's SHORTLIST_MODEL_PROFILE setting is missing.
 export const DEFAULT_MODEL_PROFILE = "claude-haiku-5-5";
 const GEO_RUN_TOKEN_LIMITS = {
-  // Five bounded stages: profile, ICP, questions and two evaluations.
-  maxInputTokens: MAX_INPUT_TOKENS * 5,
-  maxOutputTokens: MAX_OUTPUT_TOKENS * 5,
+  // Six bounded calls: profile, ICP, questions, the model-knowledge evaluation,
+  // and the current-web evaluation's research and structured calls.
+  maxInputTokens: MAX_INPUT_TOKENS * 6,
+  maxOutputTokens: MAX_OUTPUT_TOKENS * 6,
 } as const;
 
 export type StoredAssessmentResult = LegacyComparableBusinessAssessment | StoredGeoAssessment;

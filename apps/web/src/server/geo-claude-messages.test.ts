@@ -21,6 +21,31 @@ function claudeResponse(content: Block[], extra: Record<string, unknown> = {}) {
   );
 }
 
+const searchResult = {
+  type: "web_search_result",
+  title: "Example source",
+  url: "https://example.test/source",
+  encrypted_content: "abc",
+  page_age: null,
+};
+
+/** A research reply: a search, its results (one duplicated) and plain notes. */
+function researchResponse(extra: Record<string, unknown> = {}) {
+  return claudeResponse(
+    [
+      { type: "text", text: "I'll search for that." },
+      { type: "server_tool_use", id: "srvtoolu_1", name: "web_search", input: { query: "x" } },
+      {
+        type: "web_search_tool_result",
+        tool_use_id: "srvtoolu_1",
+        content: [searchResult, searchResult],
+      },
+      { type: "text", text: "Notes: Example Co is recommended." },
+    ],
+    extra,
+  );
+}
+
 function provider(fetchImplementation: typeof fetch) {
   return createClaudeGeoMessagesProvider({
     apiKey: "test-key",
@@ -37,11 +62,20 @@ function sentBody(fetchImplementation: ReturnType<typeof vi.fn>, call: number) {
   return JSON.parse(String(init?.body));
 }
 
+type Schema = Record<string, unknown>;
+
 const profileRequest = {
   stage: "profile",
   mode: null,
   instructions: "Return JSON.",
   input: {},
+} as const;
+
+const currentWebRequest = {
+  stage: "evaluation",
+  mode: "current_web",
+  instructions: "Evaluate.",
+  input: { buyer_questions: ["same-question"] },
 } as const;
 
 describe("Claude GEO Messages provider", () => {
@@ -50,115 +84,97 @@ describe("Claude GEO Messages provider", () => {
   beforeEach(() => vi.stubGlobal("window", undefined));
   afterEach(() => vi.unstubAllGlobals());
 
-  it("uses structured output and attaches web search only to current-web evaluation", async () => {
+  it.each([
+    ["profile", (schema: Schema) => expect(schema["required"]).toContain("businessName")],
+    ["icp", (schema: Schema) => expect(schema["anyOf"]).toHaveLength(2)],
+    ["questions", (schema: Schema) => expect(schema["required"]).toEqual(["questions"])],
+    ["evaluation", (schema: Schema) => expect(schema["required"]).toEqual(["findings"])],
+  ] as const)(
+    "sends the %s stage its own schema in one call, without tools",
+    async (stage, check) => {
+      const fetchImplementation = vi
+        .fn()
+        .mockResolvedValue(claudeResponse([{ type: "text", text: "{}" }]));
+
+      await provider(fetchImplementation).run({
+        stage,
+        mode: stage === "evaluation" ? "model_knowledge" : null,
+        instructions: "Return JSON.",
+        input: { a: 1 },
+      });
+
+      expect(fetchImplementation).toHaveBeenCalledTimes(1);
+      const body = sentBody(fetchImplementation, 0);
+      expect(body.model).toBe("claude-haiku-5-5");
+      expect(body.system).toBe("Return JSON.");
+      expect(body.messages).toEqual([{ role: "user", content: '{"a":1}' }]);
+      expect(body.output_config.format.type).toBe("json_schema");
+      check(body.output_config.format.schema);
+      expect(body.tools).toBeUndefined();
+      expect(JSON.stringify(body)).not.toContain("test-key");
+    },
+  );
+
+  it("researches with web search first, then writes structured findings without tools", async () => {
     const fetchImplementation = vi
       .fn()
-      .mockResolvedValueOnce(claudeResponse([{ type: "text", text: '{"findings":[]}' }]))
+      .mockResolvedValueOnce(
+        researchResponse({
+          usage: { input_tokens: 900, cache_read_input_tokens: 10, output_tokens: 50 },
+        }),
+      )
       .mockResolvedValueOnce(claudeResponse([{ type: "text", text: '{"findings":[]}' }]));
-    const geo = provider(fetchImplementation);
 
-    await geo.run({
-      stage: "evaluation",
-      mode: "current_web",
-      instructions: "Return JSON.",
-      input: { buyer_questions: ["same-question"] },
-    });
-    await geo.run({
-      stage: "evaluation",
-      mode: "model_knowledge",
-      instructions: "Return JSON.",
-      input: { buyer_questions: ["same-question"] },
-    });
+    const result = await provider(fetchImplementation).run(currentWebRequest);
 
-    const currentWeb = sentBody(fetchImplementation, 0);
-    const modelKnowledge = sentBody(fetchImplementation, 1);
-    expect(currentWeb.model).toBe("claude-haiku-5-5");
-    expect(currentWeb.system).toBe("Return JSON.");
-    expect(currentWeb.output_config.format.type).toBe("json_schema");
-    expect(currentWeb.output_config.format.schema.required).toEqual(["findings"]);
-    expect(currentWeb.tools).toEqual([
+    const research = sentBody(fetchImplementation, 0);
+    expect(research.tools).toEqual([
       { type: "web_search_20250305", name: "web_search", max_uses: 3 },
     ]);
-    expect(modelKnowledge.tools).toBeUndefined();
-    expect(currentWeb.messages).toEqual(modelKnowledge.messages);
-    expect(JSON.stringify(currentWeb)).not.toContain("test-key");
-  });
+    expect(research.output_config.format).toBeUndefined();
+    expect(research.system).toContain("Evaluate.");
+    expect(research.system).toContain("use the web_search tool");
 
-  it("returns the final JSON, de-duplicated search sources and token usage", async () => {
-    const fetchImplementation = vi.fn().mockResolvedValue(
-      claudeResponse(
-        [
-          { type: "text", text: "I'll search for that." },
-          { type: "server_tool_use", id: "srvtoolu_1", name: "web_search", input: { query: "x" } },
-          {
-            type: "web_search_tool_result",
-            tool_use_id: "srvtoolu_1",
-            content: [
-              {
-                type: "web_search_result",
-                title: "Example source",
-                url: "https://example.test/source",
-                encrypted_content: "abc",
-                page_age: null,
-              },
-              {
-                type: "web_search_result",
-                title: "Example source",
-                url: "https://example.test/source",
-                encrypted_content: "abc",
-                page_age: null,
-              },
-            ],
-          },
-          { type: "text", text: '{"findings":' },
-          { type: "text", text: "[]}" },
-        ],
-        {
-          usage: {
-            input_tokens: 100,
-            cache_read_input_tokens: 20,
-            cache_creation_input_tokens: 3,
-            output_tokens: 45,
-          },
-        },
-      ),
-    );
+    const structured = sentBody(fetchImplementation, 1);
+    expect(structured.tools).toBeUndefined();
+    expect(structured.system).toBe("Evaluate.");
+    expect(structured.output_config.format.schema.required).toEqual(["findings"]);
+    expect(JSON.parse(structured.messages[0].content)).toEqual({
+      buyer_questions: ["same-question"],
+      current_web_research_notes: "Notes: Example Co is recommended.",
+    });
 
-    await expect(
-      provider(fetchImplementation).run({
-        stage: "evaluation",
-        mode: "current_web",
-        instructions: "Return JSON.",
-        input: {},
-      }),
-    ).resolves.toEqual({
+    expect(result).toEqual({
       output: { findings: [] },
       providerSources: [{ title: "Example source", url: "https://example.test/source" }],
-      usage: { inputTokens: 123, outputTokens: 45 },
+      usage: { inputTokens: 1_010, outputTokens: 70 },
     });
   });
 
-  it("ignores a failed web search instead of inventing sources", async () => {
-    const fetchImplementation = vi.fn().mockResolvedValue(
-      claudeResponse([
+  it.each([
+    ["skipped", [{ type: "text", text: "From memory: Example Co." }]],
+    [
+      "failed",
+      [
         {
           type: "web_search_tool_result",
           tool_use_id: "srvtoolu_1",
           content: { type: "web_search_tool_result_error", error_code: "unavailable" },
         },
-        { type: "text", text: '{"findings":[]}' },
-      ]),
-    );
+        { type: "text", text: "Notes." },
+      ],
+    ],
+  ] as const)(
+    "fails the current-web evaluation when the web search was %s",
+    async (_case, content) => {
+      const fetchImplementation = vi.fn().mockResolvedValue(claudeResponse([...content]));
 
-    await expect(
-      provider(fetchImplementation).run({
-        stage: "evaluation",
-        mode: "current_web",
-        instructions: "Return JSON.",
-        input: {},
-      }),
-    ).resolves.toMatchObject({ providerSources: [] });
-  });
+      await expect(provider(fetchImplementation).run(currentWebRequest)).rejects.toThrow(
+        "no web search results",
+      );
+      expect(fetchImplementation).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it.each(["refusal", "max_tokens", "pause_turn"])(
     "fails clearly when Claude stops early (%s)",

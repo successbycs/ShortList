@@ -18,10 +18,31 @@ export type ClaudeGeoMessagesProviderConfig = {
 };
 
 /**
+ * Added to the approved evaluation instructions for the research call only.
+ * It asks for searching and plain notes; the structured answer comes later.
+ */
+const RESEARCH_INSTRUCTION = [
+  "Research step: use the web_search tool to look up each buyer question on the live web",
+  "before answering. Then write short plain-text notes answering each question from what the",
+  "searches found, naming the businesses and sources that appear. Do not write JSON yet.",
+].join(" ");
+
+type StageResult = {
+  output: unknown;
+  providerSources?: readonly GeoProviderSource[];
+  usage?: GeoProviderUsage;
+};
+
+/**
  * Server-only Claude Messages boundary for the four-stage GEO package. The
  * caller supplies approved instructions and safe typed input; this adapter
  * owns only transport, timeout, the structured-output request shape and the
  * current-web tool distinction.
+ *
+ * Claude's web search always returns citations, and structured output cannot
+ * be combined with citations. So the current-web evaluation is two calls: a
+ * research call with web search and plain-text notes, then a structured call
+ * without tools that turns those notes into the evaluation JSON.
  */
 export function createClaudeGeoMessagesProvider(
   config: ClaudeGeoMessagesProviderConfig,
@@ -33,80 +54,106 @@ export function createClaudeGeoMessagesProvider(
     maxRetries: 0,
     ...(config.fetchImplementation ? { fetch: config.fetchImplementation } : {}),
   });
-  return {
-    async run(request): Promise<unknown> {
-      let message: Anthropic.Message;
-      try {
-        message = await client.messages.create(createMessageRequest(request, config));
-      } catch (error) {
-        if (error instanceof Anthropic.APIConnectionTimeoutError) {
-          throw new Error("The GEO provider request timed out.");
-        }
-        throw new Error("The GEO provider request failed.");
+
+  async function send(params: Anthropic.MessageCreateParamsNonStreaming) {
+    let message: Anthropic.Message;
+    try {
+      message = await client.messages.create(params);
+    } catch (error) {
+      if (error instanceof Anthropic.APIConnectionTimeoutError) {
+        throw new Error("The GEO provider request timed out.");
       }
-      return parseMessage(message);
+      throw new Error("The GEO provider request failed.");
+    }
+    if (message.stop_reason !== "end_turn") {
+      // refusal, max_tokens or pause_turn: the answer is not complete.
+      throw new Error(`The GEO provider stopped early (${String(message.stop_reason)}).`);
+    }
+    return message;
+  }
+
+  return {
+    async run(request): Promise<StageResult> {
+      if (request.mode !== "current_web") {
+        const message = await send(structuredRequest(request, request.input, config));
+        return { output: parseJson(message), usage: usageOf([message]) };
+      }
+
+      const research = await send({
+        model: config.modelId,
+        max_tokens: config.maxOutputTokens,
+        system: `${request.instructions}\n\n${RESEARCH_INSTRUCTION}`,
+        messages: [{ role: "user", content: JSON.stringify(request.input) }],
+        output_config: { effort: "low" },
+        tools: [
+          { type: "web_search_20250305", name: "web_search", max_uses: config.maxWebSearches },
+        ],
+      });
+      const providerSources = parseProviderSources(research.content);
+      if (providerSources.length === 0) {
+        // Never present a memory-only answer as live-web evidence.
+        throw new Error("The current-web evaluation returned no web search results.");
+      }
+      const notes = finalText(research.content);
+      if (notes === undefined) throw new Error("The GEO provider returned no research notes.");
+
+      const structured = await send(
+        structuredRequest(request, { ...request.input, current_web_research_notes: notes }, config),
+      );
+      return {
+        output: parseJson(structured),
+        providerSources,
+        usage: usageOf([research, structured]),
+      };
     },
   };
 }
 
-function createMessageRequest(
+function structuredRequest(
   request: GeoModelRequest,
+  input: Record<string, unknown>,
   config: ClaudeGeoMessagesProviderConfig,
 ): Anthropic.MessageCreateParamsNonStreaming {
   return {
     model: config.modelId,
     max_tokens: config.maxOutputTokens,
     system: request.instructions,
-    messages: [{ role: "user", content: JSON.stringify(request.input) }],
+    messages: [{ role: "user", content: JSON.stringify(input) }],
     // Low effort keeps each stage quick and cheap; the stages are bounded
     // extraction and judgement tasks, not open-ended research.
     output_config: {
       effort: "low",
       format: { type: "json_schema", schema: schemaForStage(request.stage) },
     },
-    ...(request.mode === "current_web"
-      ? {
-          tools: [
-            { type: "web_search_20250305", name: "web_search", max_uses: config.maxWebSearches },
-          ],
-        }
-      : {}),
   };
 }
 
-function parseMessage(message: Anthropic.Message): {
-  output: unknown;
-  providerSources?: readonly GeoProviderSource[];
-  usage?: GeoProviderUsage;
-} {
-  if (message.stop_reason !== "end_turn") {
-    // refusal, max_tokens or pause_turn: the structured output is not complete.
-    throw new Error(`The GEO provider stopped early (${String(message.stop_reason)}).`);
-  }
+function parseJson(message: Anthropic.Message): unknown {
   const text = finalText(message.content);
   if (text === undefined) throw new Error("The GEO provider returned no structured text.");
-  let output: unknown;
   try {
-    output = JSON.parse(text);
+    return JSON.parse(text);
   } catch {
     throw new Error("The GEO provider returned malformed JSON.");
   }
-  return {
-    output,
-    providerSources: parseProviderSources(message.content),
-    usage: {
-      inputTokens:
-        message.usage.input_tokens +
-        (message.usage.cache_creation_input_tokens ?? 0) +
-        (message.usage.cache_read_input_tokens ?? 0),
-      outputTokens: message.usage.output_tokens,
-    },
-  };
+}
+
+function usageOf(messages: readonly Anthropic.Message[]): GeoProviderUsage {
+  let inputTokens = 0;
+  let outputTokens = 0;
+  for (const { usage } of messages) {
+    inputTokens +=
+      usage.input_tokens +
+      (usage.cache_creation_input_tokens ?? 0) +
+      (usage.cache_read_input_tokens ?? 0);
+    outputTokens += usage.output_tokens;
+  }
+  return { inputTokens, outputTokens };
 }
 
 /**
- * The structured answer is the text written after the last tool result. Text
- * before a web search ("I'll search for…") is not part of it.
+ * The answer is the text written after the last tool result. Text before a
+ * web search ("I'll search for…") is not part of it.
  */
 function finalText(content: readonly Anthropic.ContentBlock[]): string | undefined {
   let lastToolIndex = -1;
