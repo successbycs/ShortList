@@ -5,7 +5,7 @@ export type SmtpConfig = {
   port: number;
   username: string;
   password: string;
-  /** For example "ShortList by SuccessByCS <reports@successbycs.com>". */
+  /** For example "ShortList by SuccessByCS <shortlist@successbycs.com>". */
   from: string;
   replyTo: string;
 };
