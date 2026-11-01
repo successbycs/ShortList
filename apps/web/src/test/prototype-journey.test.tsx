@@ -284,42 +284,58 @@ describe("protected prototype reveal journey", () => {
     expect(screen.getByLabelText("Your business website")).toHaveValue("mara-gardens.co.nz");
   });
 
-  it("paces the steps to real timings and keeps the visitor updated in the last step", () => {
+  it("paces estimated steps to real timings, explains the last step and catches up after a pause", () => {
     vi.useFakeTimers();
     try {
       serverFunction.invoke.mockImplementationOnce(() => new Promise(() => undefined));
-      render(<Index />);
-
+      const view = render(<Index />);
       fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
-      expect(screen.getByText("Three buyer profiles")).toBeInTheDocument();
+      const stage = (index: number) => screen.getByTestId(`assessment-stage-${index}`);
+      const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
+
       expect(screen.queryByText("Local context checked")).not.toBeInTheDocument();
-      expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "active");
+      expect(stage(0)).toHaveAttribute("data-state", "active");
       expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent(
-        "0:00 elapsed · usually about a minute",
+        "0:00 elapsed · Estimated steps",
       );
+      expect(screen.getByRole("status")).toHaveTextContent("It usually takes about a minute.");
 
-      act(() => vi.advanceTimersByTime(10_000));
-      expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "complete");
-      expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "active");
-      expect(screen.getByTestId("assessment-stage-4")).toHaveAttribute("data-state", "pending");
+      advance(3_000);
+      expect(stage(0)).toHaveAttribute("data-state", "complete");
+      expect(stage(1)).toHaveAttribute("data-state", "active");
+      advance(12_000);
+      expect(stage(2)).toHaveAttribute("data-state", "active");
+      advance(10_000);
+      expect(stage(3)).toHaveAttribute("data-state", "active");
+      advance(12_000);
+      expect(stage(4)).toHaveAttribute("data-state", "active");
 
-      act(() => vi.advanceTimersByTime(27_000));
-      expect(screen.getByTestId("assessment-stage-4")).toHaveAttribute("data-state", "active");
-      expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(
-        "Searching the live web",
+      const explanations = [
+        "This step searches the live web",
+        "It also checks what AI already knows",
+        "Then it compares the answers",
+        "Finally it writes a finding",
+        "This step searches the live web",
+      ];
+      for (const explanation of explanations) {
+        expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(explanation);
+        expect(screen.getByRole("status")).toHaveTextContent(explanation);
+        advance(6_000);
+      }
+
+      // 67 s so far. Jump the clock without delivering each interval, as in a
+      // paused tab: the counter catches up and the slow message appears.
+      vi.setSystemTime(Date.now() + 22_000);
+      advance(1_000);
+      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent("1:30 elapsed");
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "This is taking longer than usual. We are still waiting for your report.",
       );
+      expect(stage(4)).toHaveAttribute("data-state", "active");
 
-      act(() => vi.advanceTimersByTime(6_000));
-      expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(
-        "Checking what AI already knows",
-      );
-
-      act(() => vi.advanceTimersByTime(60_000));
-      expect(screen.getByTestId("assessment-stage-4")).toHaveAttribute("data-state", "active");
-      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent(
-        "1:43 elapsed · Taking a little longer than usual. Still working.",
-      );
+      view.unmount();
+      expect(vi.getTimerCount()).toBe(0);
     } finally {
       vi.useRealTimers();
     }

@@ -43,9 +43,11 @@ export function RefusalScreen({ onBack }: { onBack: () => void }) {
 }
 
 /**
- * Steps and the second each one starts, paced to measured live runs (a report
- * takes about a minute). The last step stays active until the result arrives,
- * with plain updates on what is happening during the longest part.
+ * Estimated steps and the second each one starts, paced to measured live runs
+ * (a report takes about a minute). The page receives no progress from the
+ * server, so the steps are labelled as an estimate, and the last step explains
+ * what it involves rather than claiming what is happening now. It stays active
+ * until the result arrives.
  */
 const stages = [
   { title: "Website read", note: "Opening your public home page.", startsAtSecond: 0 },
@@ -71,11 +73,11 @@ const stages = [
   },
 ] as const;
 
-const finalStepUpdates = [
-  "Searching the live web for answers to each question…",
-  "Checking what AI already knows about your business…",
-  "Comparing the answers with what your website says…",
-  "Writing a finding for each of the nine questions…",
+const finalStepExplanations = [
+  "This step searches the live web for answers to each question.",
+  "It also checks what AI already knows about your business.",
+  "Then it compares the answers with what your website says.",
+  "Finally it writes a finding for each of the nine questions.",
 ] as const;
 const UPDATE_EVERY_SECONDS = 6;
 const SLOW_AFTER_SECONDS = 90;
@@ -87,7 +89,12 @@ function formatElapsed(seconds: number): string {
 export function AssessmentProgressScreen({ domain }: { domain: string }) {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   useEffect(() => {
-    const timer = window.setInterval(() => setElapsedSeconds((current) => current + 1), 1_000);
+    // Measure from the clock, so a paused or throttled tab catches up.
+    const startedAt = Date.now();
+    const timer = window.setInterval(
+      () => setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1_000)),
+      1_000,
+    );
     return () => window.clearInterval(timer);
   }, []);
   const activeStage = stages.reduce(
@@ -95,10 +102,10 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
     0,
   );
   const finalStage = stages[stages.length - 1]!;
-  const finalUpdate =
-    finalStepUpdates[
+  const finalExplanation =
+    finalStepExplanations[
       Math.floor(Math.max(0, elapsedSeconds - finalStage.startsAtSecond) / UPDATE_EVERY_SECONDS) %
-        finalStepUpdates.length
+        finalStepExplanations.length
     ];
   return (
     <StateShell
@@ -147,11 +154,10 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
                   <p
                     className="text-sm text-muted-foreground"
                     data-testid={isFinal ? "assessment-final-update" : undefined}
-                    aria-live={isFinal && active ? "polite" : undefined}
                   >
                     {isFinal
                       ? active
-                        ? finalUpdate
+                        ? finalExplanation
                         : "Searching the web and checking what AI knows."
                       : stage.note}
                   </p>
@@ -162,10 +168,17 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
         </ul>
       </div>
       <p className="mt-3 text-xs text-muted-foreground" data-testid="assessment-elapsed">
-        {formatElapsed(elapsedSeconds)} elapsed ·{" "}
+        {formatElapsed(elapsedSeconds)} elapsed · Estimated steps; your report appears as soon as it
+        is ready.
+      </p>
+      {/* A steady status region, so screen readers hear the meaningful
+          changes but not the per-second counter. */}
+      <p role="status" className="mt-1 text-xs text-muted-foreground">
         {elapsedSeconds >= SLOW_AFTER_SECONDS
-          ? "Taking a little longer than usual. Still working."
-          : "usually about a minute"}
+          ? "This is taking longer than usual. We are still waiting for your report."
+          : activeStage === stages.length - 1
+            ? finalExplanation
+            : "It usually takes about a minute."}
       </p>
     </StateShell>
   );
