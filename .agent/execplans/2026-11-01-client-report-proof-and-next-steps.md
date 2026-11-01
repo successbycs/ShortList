@@ -1,6 +1,6 @@
 # Make every client report provable and useful for next steps
 
-**Status:** Active (2026-11-01): Issue #97 is planned from the javln.com report; Chris has requested planning only, so no product change is authorised.
+**Status:** Active (2026-11-01): Issue #97 remains planning-only; this revision incorporates the independent PR #99 review and no product change is authorised.
 
 This ExecPlan is a living document and must be maintained under `.agent/PLANS.md`.
 
@@ -42,11 +42,10 @@ Recommend a lean, evidence-first implementation:
    structured assessment of supplied material the model's "memory". A later
    separately approved experiment may expose a real no-live-web answer as
    "AI without live web search", with its freshness limitation and no sources.
-4. Integrate this report projection with Issue #96 rather than maintaining two
-   renderers. #96's `report-email.ts` is present in commit `d02547f` / branch
-   `issue/96-email-teaser`, but is not in this worktree or `main`; merge or
-   rebase that work first, then make both renderers consume the shared view
-   model.
+4. Integrate this report projection with merged Issue #96 rather than
+   maintaining two renderers. `origin/main` commit `e58c39d` contains
+   `report-email.ts` and migration `0011`; make both existing renderers
+   consume the shared view model.
 
 This changes no consent, address, IP-digest, retention, provider-secret, or
 deployment policy. A new D1 migration and an approved prompt-package version
@@ -61,8 +60,12 @@ authorised remote-migration/deployment step.
 - [x] (2026-11-01 09:00Z) Wrote the Issue #97 implementation plan only in
       this file; no application file, migration, prompt, Issue, PR, commit, or
       remote resource changed.
-- [ ] (YYYY-MM-DD HH:MMZ) Chris approves the bounded implementation scope and
-      the merge/order decision with Issue #96.
+- [x] (2026-11-01 10:20Z) Rechecked the plan against local `origin/main`
+      (`e58c39d`, PR #96 merged) and Astra's review comment 6555881918;
+      revised verdict precedence, all-question action eligibility, and the
+      captured-page evidence/persistence contract. Only this plan changed.
+- [ ] (YYYY-MM-DD HH:MMZ) Chris approves the bounded implementation scope,
+      including the revised current-web input-token budget.
 - [ ] (YYYY-MM-DD HH:MMZ) Implement and locally prove the evidence capture,
       report projection, on-page report, and email renderers; update this plan
       at each milestone.
@@ -74,9 +77,10 @@ authorised remote-migration/deployment step.
 ## Surprises & Discoveries
 
 - Observation: The requested `apps/web/src/server/report-email.ts` is not in
-  this worktree. It exists only in unmerged Issue #96 commit `d02547f`.
-  Evidence: `git log --all -- apps/web/src/server/report-email.ts` returns
-  `d02547f`; `git ls-tree -r HEAD` has no report-email path.
+  the original planning base, but it is now merged on `origin/main` by PR #96.
+  Evidence: local `origin/main` resolves to `e58c39d` ("Merge pull request
+  #98 from successbycs/issue/96-email-teaser") and includes
+  `apps/web/src/server/report-email.ts` and migration `0011`.
 - Observation: `prompt_execution_records.output_json` does retain each
   validated structured stage output, but it does not retain the current-web
   research response. The temporary research notes are passed to the second,
@@ -92,6 +96,14 @@ authorised remote-migration/deployment step.
   Evidence: `apps/web/src/server/geo-claude-messages.ts:178-191` collects all
   sources; `apps/web/src/server/geo-assessment-runner.ts:271-277` applies that
   same list to every finding.
+- Observation: Evaluation receives the lossy `business_profile`, ICPs,
+  questions, and market context, but no captured page text or source IDs.
+  Therefore it cannot distinguish a fact omitted by the profile from one not
+  present in the pages it was asked to assess.
+  Evidence: `apps/web/src/server/geo-assessment-runner.ts:135-156` constructs
+  `evaluationInput` without `website_sources`; `geoEvidenceSourceSchema` has
+  the captured `sourceId` and `visibleText` at
+  `apps/web/src/server/geo-assessment-types.ts:3-13`.
 - Observation: The page currently presents only `model_knowledge` findings;
   the email renderer on #96 shows a live summary plus a wrongly labelled
   no-web summary. Neither renderer has an exact answer quote or question-level
@@ -125,6 +137,28 @@ authorised remote-migration/deployment step.
   and captured page. It avoids marginal report cost and avoids ungrounded
   action-copy. The model already supplies the findings used by the rules.
   Date/Author: 2026-11-01 / Codex Terra (recommendation awaiting Chris approval)
+- Decision: Verdicts first use a validated captured-page contradiction, then a
+  validated captured-page absence, then recommendation/mention evidence; an
+  uncertain recommendation always renders "Couldn't tell" rather than a
+  negative recommendation claim.
+  Rationale: A missing fact and a demonstrated false description are different
+  claims. This order prevents absent information from becoming "Described
+  wrongly" and prevents `recommendationFit=uncertain` from being phrased as
+  "did not recommend".
+  Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra review)
+- Decision: Generate action candidates from every current-web finding with a
+  validated gap or correction, including business-named questions, separately
+  from headline counting and card badge selection.
+  Rationale: Naming a business makes a discovery metric uninformative, but it
+  does not make an evidenced pricing, migration, or correction need less
+  useful to the client.
+  Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra review)
+- Decision: Supply a bounded, source-ID-bearing page-evidence bundle to the
+  current-web evaluation and persist its resulting support decision and page
+  references with each finding.
+  Rationale: The profile is a summary, not the inspection corpus. Persisted
+  references make the support judgment and the action based on it replayable.
+  Date/Author: 2026-11-01 / Codex Terra (revision responding to Astra review)
 - Decision: Exclude business-name questions from headline metrics and show
   them in a separate "How AI describes you" section.
   Rationale: A business name embedded in a prompt makes a mention unsurprising;
@@ -178,8 +212,8 @@ Important current paths and facts are:
 - `apps/web/src/components/assessment/journey-screens.tsx` is the current
   on-page report. It renders the no-web finding summaries in three unlabeled
   grid cards, not a reader-verifiable live-web report.
-- Issue #96 implements `apps/web/src/server/report-email.ts` on an unmerged
-  branch. It counts all nine questions, renders the global source list once,
+- Merged Issue #96 provides `apps/web/src/server/report-email.ts`. It counts
+  all nine questions, renders the global source list once,
   exposes the three confusing label sets, and calls a second structured
   summary "From AI's own memory." This plan makes that code a dependent
   integration target, not a source to copy.
@@ -189,8 +223,10 @@ The report data boundary after this work is:
 ```text
 Claude current-web research blocks + provider citation annotations
   -> validate 9 labelled answers / per-answer citations
-  -> bounded raw answer and exact display excerpt in each stored current-web finding
-  -> stored assessment + captured website page metadata
+  -> evaluate against bounded captured-page text with validated source IDs
+  -> bounded raw answer, support judgment, support IDs, and exact display excerpt
+     in each stored current-web finding
+  -> stored assessment + captured website page metadata; reload unchanged
   -> deterministic ClientReportViewModel (metrics, verdicts, actions, sources)
   -> on-page cards, HTML email, plain-text email
 ```
@@ -225,35 +261,66 @@ and only the sources cited with that answer.
    short blocks, one headed with the immutable buyer-question ID, each with a
    direct answer and citation-bearing text. It must say not to use a business
    name in a question as evidence that the business was found or recommended.
-   The structured evaluation contract gains only the fields necessary for an
-   honest verdict: `websiteSupport` (`supported`, `not_on_site`, `unclear`) and
-   evidence IDs for a `not_on_site` conclusion where available. The existing
-   data remains source history; no prior report is altered.
-2. Add a new numbered D1 migration after the already-merged migration sequence
-   is known. If #96's `0011_report_email_requests.sql` is merged first, this
-   change is `0012_...sql`; otherwise resolve the collision before any PR. Add
-   nullable, backwards-compatible fields to `model_question_findings`:
-   `answer_text` (bounded literal current-web answer) and, if distinct from
-   the raw answer is preferred for storage, `answer_excerpt`. Keep
+   The structured evaluation contract gains `websiteSupport`
+   (`supported`, `contradicted`, `not_on_site`, `unclear`),
+   `websiteSupportEvidenceIds`, and a short `websiteCorrection` only for a
+   demonstrated contradiction. `contradicted` and `not_on_site` each require
+   one or more captured-page IDs; `contradicted` also requires a non-empty
+   correction. `supported`/`unclear` must not manufacture an absence or
+   correction. The existing data remains source history; no prior report is
+   altered. These fields are required only in the current-web result; the
+   runner persists null/empty support fields for model-knowledge findings so
+   the no-web comparison never claims captured-page support.
+2. Before calling the **current-web** evaluation, build
+   `captured_website_evidence` from the assessment's existing
+   `GeoEvidenceSource` records, rather than from the profile: stable
+   `{sourceId, sourceUrl, title, pageType, observedAtUtc, visibleText}` entries
+   sorted by source ID, with `visibleText` truncated deterministically to
+   3,000 Unicode code units per page and 24,000 total. Preserve source IDs
+   when truncating and include the page URL/title so the evaluator can state
+   what was inspected. Pass this bundle to both the web-search research call
+   and its structured follow-up; do not send it to the no-web comparison.
+   Record the deterministic truncation rule and actual provider usage. At a
+   conservative four characters per token, this raises current-web input by
+   at most about 6,000 tokens per call, or 12,000 across its existing two
+   calls (plus JSON framing); revise the approved current-web input budget by
+   that amount before release and fail before provider invocation if the
+   bundle cannot fit the declared budget. This is bounded evidence, not raw
+   response retention.
+3. Add `0012_...sql` after merged #96's
+   `0011_report_email_requests.sql`. Add
+   nullable, backwards-compatible fields to `model_question_findings` (the
+   current `origin/main` already has #96 migration `0011`, so use `0012`):
+   `answer_text` (bounded literal current-web answer), `website_support`,
+   `website_support_evidence_ids_json`, and `website_correction`; retain an
+   optional `answer_excerpt` only if it is separately useful. Keep
    `sources_json` as a per-finding JSON array, now with only direct provider
-   citations. Add no recipient, consent, secret, or raw-IP columns.
-3. In `geo-claude-messages.ts`, preserve the research content blocks before
+   citations. The evidence-ID JSON is a non-null array (empty only for
+   `supported`/`unclear`) and nullable fields keep old rows loadable. Add no
+   recipient, consent, secret, or raw-IP columns.
+4. In `geo-claude-messages.ts`, preserve the research content blocks before
    creating the second structured request. Parse provider text/citation
    annotations into nine `{ questionId, answerText, sources }` proof records;
    validate IDs, exactly one block per question, non-empty answer text, valid
    URLs/titles, bounded size, and no duplicate question. Do not infer a source
    from a search tool result if it was not cited in the text. Pass this as
    explicit provider metadata, separate from the structured JSON.
-4. Extend `GeoStageExecution` / `GeoModelProvider` in
+5. Extend `GeoStageExecution` / `GeoModelProvider` in
    `geo-assessment-runner.ts` so provider-specific proof metadata remains
    associated with the `current_web` execution. Match it by question ID during
    `withProviderSources`; reject a completed current-web result with missing
    proof instead of silently populating a global source list. The no-web mode
    continues to save no citations and gets no client quote.
-5. Extend schemas and persistence in `geo-assessment-types.ts`,
+6. Extend schemas and persistence in `geo-assessment-types.ts`,
    `geo-assessment-execution.ts`, and `geo-assessment-repository.ts`. Save the
    bounded literal answer plus source list with each current-web finding; load
-   it into `StoredGeoFinding`. Older rows with null `answer_text` load as
+   it into `StoredGeoFinding`. Validate every returned
+   `websiteSupportEvidenceIds` against the IDs in the bounded bundle before a
+   current-web evaluation is recorded; reject duplicate, unknown, or missing
+   required IDs and reject invalid support/correction combinations. Persist
+   and reload `websiteSupport`, its IDs, and `websiteCorrection` alongside
+   the finding rather than reconstructing them from gaps. Older rows with null
+   `answer_text` load as
    `proofUnavailable`, not as an invented quote. New reports must show an
    explicit "This older report did not retain the original AI answer" notice
    rather than substitute a summary.
@@ -285,29 +352,40 @@ logic split between React and HTML string concatenation.
    this value is false. The named findings appear under **How AI describes
    you**, with an explanation that their wording names the business and so is
    excluded from discovery metrics.
-3. Map each finding to one client verdict using this precedence and a one-line
-   reason assembled only from stored values:
+3. Map each finding to one client verdict using this complete, mutually
+   exclusive decision order and a one-line reason assembled only from stored
+   values. A "validated" support value means its persisted page IDs passed the
+   evaluation-input validation above; legacy/null support is not validated:
 
    | Stored evidence | Verdict | Reason pattern |
    | --- | --- | --- |
-   | `recommendationFit=appropriate` | Recommended | "The answer named [business] as suitable for this question." |
-   | `submittedBusinessMention=mentioned` and not recommended | Mentioned, not recommended | "The answer named [business], but did not recommend it for this question." |
-   | `submittedBusinessMention=absent` | Not mentioned | "The answer did not name [business]." |
-   | `submittedBusinessMention=contradicted` or `descriptionAccuracy=inaccurate` | Described wrongly | "The answer conflicts with the website evidence captured for this report." |
-   | `websiteSupport=not_on_site` | Your site doesn't say | "We could not find this information in the captured pages." |
-   | otherwise | Couldn't tell | "The answer or evidence did not support a clear conclusion." |
+   | 1. `websiteSupport=contradicted` with valid IDs and correction | Described wrongly | "The answer conflicts with the captured website evidence: [correction]." |
+   | 2. `websiteSupport=not_on_site` with valid IDs | Your site doesn't say | "We could not find this information in the captured pages." |
+   | 3. `recommendationFit=appropriate` | Recommended | "The answer named [business] as suitable for this question." |
+   | 4. `recommendationFit=uncertain` | Couldn't tell | "The answer did not establish whether it recommends [business] for this question." |
+   | 5. `submittedBusinessMention=mentioned` and `recommendationFit` is `not_appropriate` or `not_mentioned` | Mentioned, not recommended | "The answer named [business], but did not recommend it for this question." |
+   | 6. `submittedBusinessMention=absent` | Not mentioned | "The answer did not name [business]." |
+   | 7. all remaining combinations, including legacy/null support or `submittedBusinessMention=uncertain` | Couldn't tell | "The answer or evidence did not support a clear conclusion." |
 
-   A contradictory/incorrect answer wins over a generic missing-information
-   label; a clearly `not_on_site` answer wins over an `uncertain`
-   recommendation label. The source IDs/evidence required for "Your site
-   doesn't say" must be stored and exposed to the action builder. Do not render
+   `descriptionAccuracy=inaccurate` and `submittedBusinessMention=contradicted`
+   are diagnostic inputs only: neither can produce "Described wrongly" without
+   `websiteSupport=contradicted` and its valid correction evidence. Thus missing
+   information alone never produces that verdict. The source IDs/evidence
+   required for absence or contradiction must be stored and exposed to the
+   action builder. Do not render
    internal enum terms, confidence codes, "Recommendation unclear", or
    "Described you inaccurately".
 4. Derive three to five actions by priority score, deduplication key, and a
-   fixed template. Candidates come only from unnamed current-web findings with
-   `Not mentioned`, `Described wrongly`, or `Your site doesn't say`; sort first
-   by the number of buyer questions helped, then missing-site-information,
-   then wrong description, then original ICP/question order. Group candidates
+   fixed template. Candidate eligibility is independent of the discovery
+   headline and the card verdict: inspect **all** current-web findings,
+   including business-named questions. A finding contributes only when it has
+   (a) `websiteSupport=not_on_site`, valid evidence IDs, and a non-empty
+   supported content gap, or (b) `websiteSupport=contradicted`, valid IDs, and
+   its stored correction. A mentioned-but-not-recommended card can therefore
+   yield an action, as can a named pricing question; `supported` and `unclear`
+   findings cannot create actions. Sort first by the number of buyer questions
+   helped, then missing-site-information, then correction, then original
+   ICP/question order. Group candidates
    only when they share the same tested claim/gap and proposed destination.
    Use captured `website_sources.page_type`, title, and URL to choose a real
    destination: pricing question -> captured pricing page -> services/product
@@ -356,7 +434,7 @@ can inspect every claim in either delivery format.
    badge; its one-line reason; and a modest "Why this matters" link to any
    action that helps it. For a legacy row with no proof, show its finding only
    as an older report notice, never a quote or a source claim.
-3. After #96 is merged/rebased, replace `renderReportEmail`'s duplicate
+3. Replace merged #96's `renderReportEmail` duplicate
    classification/count/action logic with the same view model. Use email-safe
    semantic headings and escaped text/URLs. The text rendering must be a true
    plain-text equivalent: no HTML, every source URL appears after the related
@@ -418,10 +496,10 @@ actual date and concise output in this section when they are run.
        git log --all --oneline -- apps/web/src/server/report-email.ts
        ls apps/web/migrations | sort
 
-   Expected: an otherwise clean `issue/97-report-plan` worktree; #96 is either
-   merged into the selected base or named as a dependency; the next migration
-   number is unambiguous. Stop and resolve the order if two branches both add
-   `0011`.
+   Expected: an otherwise clean `issue/97-report-plan` worktree; verified
+   `origin/main` already contains #96 and `0011`; the new migration is `0012`
+   and no migration-number collision remains. Stop if the selected implementation
+   base differs from that verified main ref.
 
 2. Implement each milestone above and run focused tests while editing:
 
@@ -483,12 +561,19 @@ actual date and concise output in this section when they are run.
   visibly grouped under "How AI describes you" and excluded from all discovery
   mention/recommendation counts.
 - Every question has exactly one verdict from the documented plain-language
-  set and one factual reason. Missing website evidence uses "Your site doesn't
-  say" only when the stored evaluation supports that conclusion; it is not
-  labelled "Described wrongly." No client sees the phrases "Recommendation
-  unclear", "Described you inaccurately", or "From AI's own memory."
+  set and one factual reason. A validated captured-page contradiction takes
+  priority over all recommendation/mention statuses; a validated captured-page
+  absence takes the next priority; `recommendationFit=uncertain` is always
+  "Couldn't tell." Missing website evidence uses "Your site doesn't say" only
+  when the stored evaluation supports that conclusion, and missing information
+  alone never becomes "Described wrongly." No client sees the phrases
+  "Recommendation unclear", "Described you inaccurately", or "From AI's own
+  memory."
 - The report contains three to five actions when the evidence supports that
-  many, otherwise fewer. Every action names an existing captured destination
+  many, otherwise fewer. Its eligible evidence is every current-web finding
+  with a validated supported gap or correction, including a finding whose
+  question names the business and a mentioned-but-not-recommended finding;
+  headline eligibility and badge text do not filter actions. Every action names an existing captured destination
   page or says to create a page, names the buyer question(s) it helps, links to
   the contributing findings/page evidence, and uses no guaranteed effect.
 - Browser, HTML email and plain-text email contain the same stored data in the
@@ -496,7 +581,9 @@ actual date and concise output in this section when they are run.
   steps; sources; unchanged appropriate footer. All untrusted model/site text,
   source title, URL and domain output remains escaped.
 - Cached/new report replay does not call Claude or the web tool, does not
-  regenerate actions, and renders the same view model from D1. Older rows are
+  regenerate actions, and renders the same view model from D1. A
+  persistence/reload fixture proves the stored `websiteSupport`, its evidence
+  IDs, and the resulting action are unchanged after reload. Older rows are
   openly marked proof-unavailable; they are not silently upgraded.
 
 ### Test matrix
@@ -504,20 +591,26 @@ actual date and concise output in this section when they are run.
 | Boundary | Test/proof | Pass condition |
 | --- | --- | --- |
 | Claude adapter | Fake `research.content` with labelled text/citations, missing label, duplicate label, unrelated search result, malformed citation | Exact per-question proof emitted only for the valid fixture; incomplete proof rejects safely. |
-| Runner/execution/D1 | Fake provider plus D1 statement recorder and migration proof | Raw answer/source fields are written/read per finding; no-web source/quote stays absent; old null fields load safely. |
-| Report projection | Pure fixture tests | Correct denominator, verdict precedence, deterministic actions/destinations, source grouping, quote-substring invariant. |
+| Runner/evaluation input | Fixture with a fact in a captured page's `visibleText` but omitted from `business_profile`; unknown/duplicate/missing support IDs; oversized page set | Current-web evaluator receives the bounded source-ID-bearing page bundle, returns `supported` rather than a false absence for the page fact, rejects invalid IDs, and stays within the declared bundle/token budget. |
+| Runner/execution/D1 | Fake provider plus D1 statement recorder, migration proof, and repository reload | Raw answer/source/support/correction/evidence-ID fields are written/read per finding; no-web source/quote/support stays absent; old null fields load safely; reloading produces byte-for-byte equal support judgment and action input. |
+| Report projection | Pure fixture tests | Correct denominator, complete verdict precedence, deterministic all-question actions/destinations, source grouping, quote-substring invariant. Fixtures cover: mentioned + contradicted; mentioned + `not_on_site`; absent + `not_on_site`; recommended + contradicted; mentioned + `recommendationFit=uncertain`; legacy `descriptionAccuracy=inaccurate` + `websiteSupport=unclear`; a report whose only supported gap is a business-named question; and a mentioned-but-not-recommended finding with a supported gap. |
 | React/email | jsdom and renderer tests | Headings/cards/actions/sources/footers are accessible, escaped, and equivalent in browser/HTML/text. |
 | Build/CI | `npm run types`, `lint`, `test`, `typecheck`, `build`; `uv run python scripts/verify.py` | All exit 0; required `web-quality` and `verify` checks later green. |
 | Fresh real report (operational boundary) | Authorised deployed Worker + new non-cached domain + received email | Browser/email report proves stored quote/source linkage and truthful count. **Unobserved until Chris authorises deploy, remote migration and test.** |
 
 ### Cost, privacy and consent
 
-The recommended path makes **no additional model calls**. It retains a bounded
-portion of the current-web research response already obtained in the existing
-two-call current-web path, so input/output token use and web-search call count
-do not increase by design. The revised research format may add a small number
-of output tokens for nine headings; measure real usage in the first authorised
-new report before stating a dollar value. It does not alter
+The recommended path makes **no additional model calls** and does not increase
+the web-search call count. It does add a bounded captured-page bundle to each
+of the existing current-web research and structured calls: at most 24,000
+Unicode code units, conservatively about 6,000 input tokens per call and
+12,000 input tokens per assessment (plus JSON framing). The approved
+current-web input-token limit must be increased/reserved by that worst-case
+amount, and the runner must fail before calling the provider if the formatted
+input would exceed it; usage records and the first authorised new report must
+measure the actual delta before a dollar value is stated. The revised research
+format may add a small number of output tokens for nine headings. It does not
+alter
 `MAX_WEB_SEARCHES`, model selection, `OPENAI_API_KEY`/provider secret handling,
 email consent, marketing consent, recipient retention, or the privacy-minimised
 IP-day digest. Raw AI answer text and cited public URLs are stored only with
@@ -537,8 +630,8 @@ re-deploy the prior Worker only with Chris's authority; do not delete or edit
 assessment evidence. The release handoff must state that reports made before
 the new capture remain proof-unavailable.
 
-If #96 has not merged, do not independently create a second email renderer or
-choose a conflicting migration number. Rebase/merge in the agreed order, run
+Because #96 is merged on the verified base, do not create a second email
+renderer or reuse migration `0011`; use a conflict-free `0012` migration, run
 the combined test suite, and make one shared projection the dependency. A
 provider response that cannot be parsed into every required answer/citation
 pair is a safe assessment/report failure, with the existing generic error
@@ -626,25 +719,39 @@ and no test result is claimed by this plan.
   readonly GeoProviderSource[] }[]`. `createClaudeGeoMessagesProvider` is its
   sole producer. The runner validates it against the existing nine question
   IDs before persistence.
-- **Finding persistence:** add nullable `answerText` and a proof-availability
-  value to `StoredGeoFinding` and `RecordModelQuestionFindingInput` in
-  `apps/web/src/server/geo-assessment-repository.ts`; add matching schema
-  fields in `geo-assessment-types.ts` and an additive D1 migration. Sources
-  remain `{ title, url }[]` and become per-question provider citations.
+- **Evaluation page-evidence input:** add a deterministic
+  `captured_website_evidence` builder in
+  `apps/web/src/server/geo-assessment-runner.ts`. It accepts existing
+  `GeoEvidenceSource` objects and returns no more than 24,000 Unicode code
+  units of source-ID-bearing text, as specified in Milestone 1. Only the
+  current-web evaluator receives it. Its maximum 12,000-token two-call impact
+  becomes part of the approved runtime input budget and usage evidence.
+- **Finding persistence:** add nullable `answerText` and proof-availability,
+  plus `websiteSupport: "supported" | "contradicted" | "not_on_site" |
+  "unclear" | null`, `websiteSupportEvidenceIds: readonly string[]`, and
+  `websiteCorrection: string | null` to `StoredGeoFinding` and
+  `RecordModelQuestionFindingInput` in
+  `apps/web/src/server/geo-assessment-repository.ts`; add matching Zod schema
+  fields in `geo-assessment-types.ts` and additive D1 columns
+  `website_support`, `website_support_evidence_ids_json`, and
+  `website_correction`. `recordModelQuestionFinding` writes all fields and
+  `loadLatestCompletedGeoAssessment` selects/parses all fields; it never
+  derives support from summary text. Sources remain `{ title, url }[]` and
+  become per-question provider citations.
 - **Website-page metadata:** extend the report repository query/input with
   read-only `{ sourceId, sourceUrl, title, pageType }` records from existing
   `website_sources` (including `page_type` introduced by migration `0010`).
-  This is evidence for placement only, distinct from external citations.
+  These records validate each persisted support evidence ID and choose action
+  placement; they are distinct from external citations.
 - **Report projection:** introduce a typed `ClientReportViewModel` and pure
   `buildClientReport(...)` shared by the on-page component and #96's
   `renderReportEmail`. It defines headline metrics, named-question grouping,
   `ClientVerdict`, `ClientAction`, question proof, source index and footer
   inputs. It has no model/provider/D1 side effect.
-- **Issue #96 dependency:** `d02547f` changes `report-email.ts`, email
-  transport, migration `0011`, the reveal screen and tests. The eventual #97
-  PR must state whether it follows a merged #96 or includes an agreed
-  conflict-free integration; it must not duplicate mail transport, consent or
-  delivery behaviour.
+- **Issue #96 integration:** `origin/main` `e58c39d` (PR #96) already changes
+  `report-email.ts`, email transport, migration `0011`, the reveal screen and
+  tests. The #97 migration follows `0011`; the #97 PR reuses, rather than
+  duplicates, mail transport, consent, or delivery behaviour.
 - **Dependencies:** no new npm package is proposed. Use the installed
   Anthropic SDK's typed content/citation objects after checking the locked
   version at implementation time. If its current response type cannot supply
