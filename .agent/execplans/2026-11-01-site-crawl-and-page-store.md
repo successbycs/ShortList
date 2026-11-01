@@ -84,6 +84,12 @@ All new code goes in `apps/web/src/server/site-crawl.ts` with its tests.
    twin. Drop query strings, fragments, files (pdf, images, documents) and
    copies under a language or region prefix (`/nz/`, `/au/`, `/en/` and so
    on) when the same page exists without it.
+   Discovery fetches (robots.txt, the sitemap and at most one child sitemap)
+   use the same safe fetch as pages: public-target check and manual redirect
+   checks on every hop, a redirect to another site rejected before it is
+   requested, a 1 MiB byte limit, a timeout that covers the body, and text or
+   XML content types. They count towards the 20-second limit below. If
+   discovery fails, the crawl carries on with the home page's links.
 2. **Respect robots.txt, simply.** Read `/robots.txt` once. Skip any page
    matched by a `Disallow` path prefix in the `User-agent: *` group. If the
    file is missing or unreadable, carry on (the home page is fetched today
@@ -105,15 +111,19 @@ All new code goes in `apps/web/src/server/site-crawl.ts` with its tests.
    page is skipped. Fix the body-read timeout gap in `fetchPublicHtml`.
 5. **Clean** each page with the existing extractor, extended to drop the
    content of `nav`, `header`, `footer`, `aside` and `form` elements (CSP's
-   skip list), and to keep up to 10,000 characters of text. JSON-LD is capped
-   at 4,000 characters per page.
+   skip list), and to keep up to 10,000 characters of text. Title is capped
+   at 200 characters, meta description at 500, and JSON-LD at 4,000 per page.
 6. **Store** each page as a `website_sources` row with a new `page_type`
    column (migration `0010_website_source_page_type.sql`, one `ALTER TABLE ...
    ADD COLUMN page_type TEXT`). The home page keeps feeding
    `website_evidence.bounded_excerpt` as today.
 7. **Send** the profile and ICP stages every stored page, each cut to 3,000
-   characters of text (the home page 4,000): at most about 19,000
-   characters. Evidence IDs already limit citations to these pages.
+   characters of text (the home page 4,000): at most about 19,000 characters
+   of visible text. Before each call, the whole serialised website-source
+   input (text, title, description, URLs and JSON-LD) is checked against a
+   45,000-character limit; if it is over, JSON-LD is dropped from the
+   extra pages first, then the lowest-priority pages. Evidence IDs already
+   limit citations to these pages.
 
 Wiring: `website-assessment.ts` calls `crawlSite` after the home page
 succeeds; `live-assessment.ts` passes all sources; `recordWebsiteSource`
@@ -137,7 +147,9 @@ Then submit javln.com and lawnrite.co.nz on `main` (before) and on the branch
 ## Validation and Acceptance
 
 Tests with a fake fetch: same-site rule; language/region copy collapse; page
-typing and choice order (stable when input order changes); robots
+typing and choice order (stable when input order changes); a stalled
+sitemap and an unsafe discovery redirect; oversized title and description,
+and the 45,000-character input limit; robots
 `Disallow`; a failed page doesn't fail the assessment; the 20-second stop;
 nav/header/footer/aside/form removed; text and JSON-LD caps; a stalled body
 times out; repeat visits still make no fetch or AI call.
