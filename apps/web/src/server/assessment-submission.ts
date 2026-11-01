@@ -23,7 +23,8 @@ export type AssessmentUnavailableResult = {
 
 type Runtime = {
   SHORTLIST_DB?: D1DatabaseLike;
-  OPENAI_API_KEY?: string;
+  ANTHROPIC_API_KEY?: string;
+  SHORTLIST_MODEL_PROFILE?: string;
   ASSESSMENT_IP_HASH_SECRET?: string;
 };
 
@@ -32,6 +33,7 @@ type RunLiveAssessment = (
   dependencies: {
     database: D1DatabaseLike;
     apiKey: string;
+    modelProfileKey?: string;
     ipDayHmac: string;
     onPhase: (phase: AssessmentDiagnosticPhase) => void;
   },
@@ -86,12 +88,15 @@ export async function runAssessmentSubmission(
       dependencies.ipAddress,
       dependencies.runtime.ASSESSMENT_IP_HASH_SECRET,
     );
-    if (!dependencies.runtime.OPENAI_API_KEY || !ipDayHmac) {
+    if (!dependencies.runtime.ANTHROPIC_API_KEY || !ipDayHmac) {
       return unavailable("missing_runtime_configuration");
     }
     return await dependencies.runLiveAssessment(domain, {
       database: dependencies.runtime.SHORTLIST_DB,
-      apiKey: dependencies.runtime.OPENAI_API_KEY,
+      apiKey: dependencies.runtime.ANTHROPIC_API_KEY,
+      ...(dependencies.runtime.SHORTLIST_MODEL_PROFILE
+        ? { modelProfileKey: dependencies.runtime.SHORTLIST_MODEL_PROFILE }
+        : {}),
       ipDayHmac,
       onPhase(nextPhase) {
         phase = nextPhase;

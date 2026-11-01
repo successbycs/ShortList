@@ -13,7 +13,7 @@ function dependencies(overrides: Partial<Parameters<typeof runAssessmentSubmissi
   return {
     runtime: {
       SHORTLIST_DB: {} as D1Database,
-      OPENAI_API_KEY: "test-key",
+      ANTHROPIC_API_KEY: "test-key",
       ASSESSMENT_IP_HASH_SECRET: "hash-key",
     },
     ipAddress: "203.0.113.19",
@@ -92,7 +92,7 @@ describe("assessment diagnostics", () => {
     const result = await runAssessmentSubmission(
       "example.co.nz",
       dependencies({
-        runtime: { OPENAI_API_KEY: "test-key" },
+        runtime: { ANTHROPIC_API_KEY: "test-key" },
         runLiveAssessment,
         emitDiagnostic: (event) => events.push(event),
       }),

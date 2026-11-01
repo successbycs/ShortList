@@ -1,3 +1,5 @@
+import Anthropic from "@anthropic-ai/sdk";
+
 import type {
   GeoModelProvider,
   GeoModelRequest,
@@ -5,157 +7,131 @@ import type {
   GeoProviderUsage,
 } from "./geo-assessment-runner";
 
-type FetchImplementation = typeof fetch;
-
-export type OpenAiGeoResponsesProviderConfig = {
+export type ClaudeGeoMessagesProviderConfig = {
   apiKey: string;
   modelId: string;
   timeoutMs: number;
   maxOutputTokens: number;
-  storeResponses: boolean;
-  endpoint?: string;
-  fetchImplementation?: FetchImplementation;
+  /** Most web searches Claude may run in one current-web evaluation. */
+  maxWebSearches: number;
+  fetchImplementation?: typeof fetch;
 };
 
-const RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses";
-
 /**
- * Server-only OpenAI Responses boundary for the four-stage GEO package. The
+ * Server-only Claude Messages boundary for the four-stage GEO package. The
  * caller supplies approved instructions and safe typed input; this adapter
- * owns only transport, timeout, structured-output request shape, and the
+ * owns only transport, timeout, the structured-output request shape and the
  * current-web tool distinction.
  */
-export function createOpenAiGeoResponsesProvider(
-  config: OpenAiGeoResponsesProviderConfig,
+export function createClaudeGeoMessagesProvider(
+  config: ClaudeGeoMessagesProviderConfig,
 ): GeoModelProvider {
+  const client = new Anthropic({
+    apiKey: config.apiKey,
+    timeout: config.timeoutMs,
+    // One attempt only: a retry would double the visitor's wait.
+    maxRetries: 0,
+    ...(config.fetchImplementation ? { fetch: config.fetchImplementation } : {}),
+  });
   return {
     async run(request): Promise<unknown> {
-      const abortController = new AbortController();
-      const timeout = setTimeout(() => abortController.abort(), config.timeoutMs);
+      let message: Anthropic.Message;
       try {
-        const response = await (config.fetchImplementation ?? fetch)(
-          config.endpoint ?? RESPONSES_ENDPOINT,
-          {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-              authorization: `Bearer ${config.apiKey}`,
-            },
-            body: JSON.stringify(createResponseRequest(request, config)),
-            signal: abortController.signal,
-          },
-        );
-        if (!response.ok) throw new Error("The GEO provider request failed.");
-        return parseResponse(await response.json());
+        message = await client.messages.create(createMessageRequest(request, config));
       } catch (error) {
-        if (isAbortError(error)) throw new Error("The GEO provider request timed out.");
-        throw error;
-      } finally {
-        clearTimeout(timeout);
+        if (error instanceof Anthropic.APIConnectionTimeoutError) {
+          throw new Error("The GEO provider request timed out.");
+        }
+        throw new Error("The GEO provider request failed.");
       }
+      return parseMessage(message);
     },
   };
 }
 
-function createResponseRequest(
+function createMessageRequest(
   request: GeoModelRequest,
-  config: OpenAiGeoResponsesProviderConfig,
-): Record<string, unknown> {
-  const body: Record<string, unknown> = {
+  config: ClaudeGeoMessagesProviderConfig,
+): Anthropic.MessageCreateParamsNonStreaming {
+  return {
     model: config.modelId,
-    store: config.storeResponses,
-    instructions: request.instructions,
-    input: JSON.stringify(request.input),
-    max_output_tokens: config.maxOutputTokens,
-    text: {
-      format: {
-        type: "json_schema",
-        name: `shortlist_geo_${request.stage}`,
-        strict: true,
-        schema: schemaForStage(request.stage),
-      },
+    max_tokens: config.maxOutputTokens,
+    system: request.instructions,
+    messages: [{ role: "user", content: JSON.stringify(request.input) }],
+    // Low effort keeps each stage quick and cheap; the stages are bounded
+    // extraction and judgement tasks, not open-ended research.
+    output_config: {
+      effort: "low",
+      format: { type: "json_schema", schema: schemaForStage(request.stage) },
     },
+    ...(request.mode === "current_web"
+      ? {
+          tools: [
+            { type: "web_search_20250305", name: "web_search", max_uses: config.maxWebSearches },
+          ],
+        }
+      : {}),
   };
-  if (request.mode === "current_web") {
-    body["tools"] = [{ type: "web_search", search_context_size: "low" }];
-    body["tool_choice"] = "required";
-    body["include"] = ["web_search_call.action.sources"];
-  }
-  return body;
 }
 
-function parseResponse(payload: unknown): {
+function parseMessage(message: Anthropic.Message): {
   output: unknown;
   providerSources?: readonly GeoProviderSource[];
   usage?: GeoProviderUsage;
 } {
-  if (!isRecord(payload) || !Array.isArray(payload["output"])) {
-    throw new Error("The GEO provider returned an invalid response.");
+  if (message.stop_reason !== "end_turn") {
+    // refusal, max_tokens or pause_turn: the structured output is not complete.
+    throw new Error(`The GEO provider stopped early (${String(message.stop_reason)}).`);
   }
-  for (const output of payload["output"]) {
-    if (!isRecord(output) || output["type"] !== "message" || !Array.isArray(output["content"])) {
-      continue;
-    }
-    for (const content of output["content"]) {
-      if (
-        isRecord(content) &&
-        content["type"] === "output_text" &&
-        typeof content["text"] === "string"
-      ) {
-        let parsedOutput: unknown;
-        try {
-          parsedOutput = JSON.parse(content["text"]);
-        } catch {
-          throw new Error("The GEO provider returned malformed JSON.");
-        }
-        const usage = parseUsage(payload["usage"]);
-        return {
-          output: parsedOutput,
-          providerSources: parseProviderSources(payload["output"]),
-          ...(usage === undefined ? {} : { usage }),
-        };
-      }
-    }
-  }
-  throw new Error("The GEO provider returned no structured text.");
-}
-
-function parseUsage(value: unknown): GeoProviderUsage | undefined {
-  if (value === undefined || value === null) return undefined;
-  if (
-    !isRecord(value) ||
-    !Number.isSafeInteger(value["input_tokens"]) ||
-    !Number.isSafeInteger(value["output_tokens"]) ||
-    (value["input_tokens"] as number) < 0 ||
-    (value["output_tokens"] as number) < 0
-  ) {
-    throw new Error("The GEO provider returned invalid usage metadata.");
+  const text = finalText(message.content);
+  if (text === undefined) throw new Error("The GEO provider returned no structured text.");
+  let output: unknown;
+  try {
+    output = JSON.parse(text);
+  } catch {
+    throw new Error("The GEO provider returned malformed JSON.");
   }
   return {
-    inputTokens: value["input_tokens"] as number,
-    outputTokens: value["output_tokens"] as number,
+    output,
+    providerSources: parseProviderSources(message.content),
+    usage: {
+      inputTokens:
+        message.usage.input_tokens +
+        (message.usage.cache_creation_input_tokens ?? 0) +
+        (message.usage.cache_read_input_tokens ?? 0),
+      outputTokens: message.usage.output_tokens,
+    },
   };
 }
 
-/** Provider metadata is the only source of current-web citations. */
-function parseProviderSources(value: unknown): readonly GeoProviderSource[] {
-  if (!Array.isArray(value)) return [];
+/**
+ * The structured answer is the text written after the last tool result. Text
+ * before a web search ("I'll search for…") is not part of it.
+ */
+function finalText(content: readonly Anthropic.ContentBlock[]): string | undefined {
+  let lastToolIndex = -1;
+  content.forEach((block, index) => {
+    if (block.type !== "text" && block.type !== "thinking" && block.type !== "redacted_thinking") {
+      lastToolIndex = index;
+    }
+  });
+  const text = content
+    .slice(lastToolIndex + 1)
+    .flatMap((block) => (block.type === "text" ? [block.text] : []))
+    .join("");
+  return text.trim().length > 0 ? text : undefined;
+}
+
+/** Claude's own web search results are the only source of current-web citations. */
+function parseProviderSources(
+  content: readonly Anthropic.ContentBlock[],
+): readonly GeoProviderSource[] {
   const sources = new Map<string, GeoProviderSource>();
-  for (const item of value) {
-    if (!isRecord(item) || item["type"] !== "web_search_call") continue;
-    const action = item["action"];
-    if (!isRecord(action) || !Array.isArray(action["sources"])) continue;
-    for (const candidate of action["sources"]) {
-      if (!isRecord(candidate)) continue;
-      const url = candidate["url"];
-      const title = candidate["title"];
-      if (
-        typeof url === "string" &&
-        typeof title === "string" &&
-        url.length > 0 &&
-        title.length > 0
-      ) {
-        sources.set(url, { title, url });
+  for (const block of content) {
+    if (block.type !== "web_search_tool_result" || !Array.isArray(block.content)) continue;
+    for (const result of block.content) {
+      if (result.url.length > 0 && result.title.length > 0) {
+        sources.set(result.url, { title: result.title, url: result.url });
       }
     }
   }
@@ -322,12 +298,4 @@ function schemaForStage(stage: GeoModelRequest["stage"]): Record<string, unknown
         properties: { findings: { type: "array", items: finding } },
       };
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
 }

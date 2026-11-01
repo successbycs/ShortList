@@ -1,7 +1,8 @@
 {
 	// This file deliberately contains no account, route, secret, object storage,
-	// queue, or environment binding. The D1 entry identifies an empty MVP 1
-	// database only; it does not deploy the Worker or apply its schema.
+	// queue, or environment binding; its only variable names the model profile.
+	// The D1 entry identifies the MVP 1 database only; it does not deploy the
+	// Worker or apply its schema.
 	"name": "shortlist-web",
 	"main": ".output/server/index.mjs",
 	"compatibility_date": "2026-10-05",
@@ -22,6 +23,11 @@
 			]
 		}
 	],
+	"vars": {
+		// The approved model profile (a row in model_test_profiles) that writes
+		// every report. Change it to switch model; the profile must be approved.
+		"SHORTLIST_MODEL_PROFILE": "claude-haiku-5-5"
+	},
 	"d1_databases": [
 		{
 			"binding": "SHORTLIST_DB",

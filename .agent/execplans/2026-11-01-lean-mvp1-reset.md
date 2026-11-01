@@ -66,8 +66,13 @@ to it.
       migrations and the unpushed proof branch; drew the status picture.
 - [x] (2026-11-01) Chris set the scope: the critical path of the live website,
       with email storage, PDF and delivery as future requirements.
-- [ ] Step 0 — Back up the Version 1 experiment and freeze.
-- [ ] Step 1 — One live run, with Chris watching.
+- [x] (2026-11-01) Step 0 — Back up the Version 1 experiment and freeze.
+      Backup 439 MB with `data/core-proof-runs/`; local stash only; `main` clean;
+      no Symphony process running.
+- [ ] Step 1 — One live run, with Chris watching. First attempt (2026-11-01
+      05:03Z) failed in 0.2 s at `d1_cache`: see Surprises. No AI call, no cost.
+- [ ] Step 1c — Switch the report engine to Claude (Issue #80), then repeat
+      Step 1 on Claude.
 - [ ] Step 1b — Fix only the failure Step 1 found (if any).
 - [ ] Step 2 — Chris scores three reports.
 - [ ] Step 3 — Fix report quality (only if Step 2 fails its gate).
@@ -79,12 +84,15 @@ to it.
 
 ## Surprises & Discoveries
 
-- Observation: the live site already runs the full GEO assessment, not the
-  older prototype. Database migrations `0001`–`0008` are applied to the remote
-  `shortlist-mvp1` database, and the Worker was last deployed on 11 Oct (plus
-  today's sitemap-only deploy).
-  Evidence: `npx wrangler d1 migrations list shortlist-mvp1 --remote` shows
-  no pending migrations; `npx wrangler deployments list --name shortlist-web`.
+- Observation (corrected 2026-11-01 after Step 1): the live Worker runs the
+  full GEO assessment code, but the remote `shortlist-mvp1` database has only
+  migrations `0001`–`0004`. `0005`–`0008` (the report tables, the UTC rate
+  limit and the approved prompts) were never applied, so every new assessment
+  fails at the saved-report lookup. The earlier note here said `0001`–`0008`
+  were applied; that was wrong.
+  Evidence: support reference `sl-1d087ead-…`, phase `d1_cache`, 235 ms;
+  `npx wrangler d1 migrations list shortlist-mvp1 --remote` lists 0005–0008
+  as pending; remote `sqlite_master` has no `business_profiles` table.
 - Observation: no Issue or plan records a successful live assessment. The last
   recorded production attempt (#50) failed on a code defect that was fixed
   locally afterwards.
@@ -148,6 +156,14 @@ to it.
   Rationale: seven Issues to observe one live run is more process than the
   product needs.
   Date/Author: 2026-11-01, Chris ("close them").
+- Decision: the report engine moves from OpenAI to the Claude API (official
+  `@anthropic-ai/sdk`), paid from the existing Claude API credit. The model is
+  set by configuration: the Worker variable `SHORTLIST_MODEL_PROFILE` names an
+  approved row in `model_test_profiles`, starting with Claude Haiku 5.5.
+  Rationale: use the US$100 Claude credit; a cheap model first, and a switch
+  to Sonnet or Opus later is a configuration change. The "AI search check"
+  now reflects Claude rather than ChatGPT; the site never named ChatGPT.
+  Date/Author: 2026-11-01, Chris (Issue #80).
 
 ## Outcomes & Retrospective
 
@@ -536,7 +552,10 @@ The plan is complete when all of these are recorded in this file:
 - Status picture: `docs/architecture/shortlist-mvp1-status.png` (source:
   `shortlist-mvp1-status.html` beside it). Redraw it when a step changes a
   box's status.
-- Step 1 run record: (empty)
+- Step 1 run record:
+  - 2026-11-01 05:03Z, `successbycs.com`: failed at `d1_cache` after 235 ms
+    (missing remote migrations 0005–0008). No website fetch, no AI call, no
+    cost. Next: apply the migrations (Chris's OK) and switch to Claude (#80).
 - Step 2 scores: (empty)
 - Step 4 screenshots and notes: (empty)
 - Step 7 answers: (empty)
