@@ -43,6 +43,11 @@ export type SafeFetchReasonCode =
 
 export type FetchImplementation = (input: URL, init: RequestInit) => Promise<Response>;
 
+export type SafeFetchOptions = {
+  /** Extra check on every redirect target, run before it is requested. */
+  isAllowedRedirect?: (url: URL) => boolean;
+};
+
 /**
  * Fetches one public HTML page under the approved MVP 1 controls.
  *
@@ -54,6 +59,7 @@ export async function fetchPublicHtml(
   startUrl: string,
   policy: SafeFetchPolicy = MVP1_SAFE_FETCH_POLICY,
   fetchImplementation: FetchImplementation = fetch,
+  options: SafeFetchOptions = {},
 ): Promise<SafeFetchResult> {
   if (!isValidPolicy(policy)) {
     return limited("content_rejected");
@@ -83,12 +89,14 @@ export async function fetchPublicHtml(
       currentUrl,
       Math.min(policy.pageTimeoutMs, remainingMs),
       fetchImplementation,
+      policy.allowedContentTypes.join(", "),
     );
     if (result.kind === "limited") {
       return result;
     }
 
     if (isRedirectStatus(result.response.status)) {
+      result.release();
       if (redirectCount >= policy.maxRedirects) {
         return limited("unsafe_redirect");
       }
@@ -105,7 +113,11 @@ export async function fetchPublicHtml(
         return limited("unsafe_redirect");
       }
 
-      if (admitPublicDomain(redirectUrl.toString()).kind !== "accepted") {
+      if (
+        admitPublicDomain(redirectUrl.toString()).kind !== "accepted" ||
+        (options.isAllowedRedirect !== undefined && !options.isAllowedRedirect(redirectUrl))
+      ) {
+        result.release();
         return limited("unsafe_redirect");
       }
 
@@ -115,15 +127,27 @@ export async function fetchPublicHtml(
     }
 
     if (!result.response.ok) {
+      result.release();
       return limited("site_unreadable");
     }
 
     const contentType = normaliseContentType(result.response.headers.get("content-type"));
     if (contentType === undefined || !policy.allowedContentTypes.includes(contentType)) {
+      result.release();
       return limited("content_rejected");
     }
 
-    const body = await readBoundedText(result.response, policy.maxHtmlBytesPerPage);
+    // The page timeout stays armed while the body is read, so a site that
+    // sends headers and then stalls cannot hold the assessment open.
+    let body: Awaited<ReturnType<typeof readBoundedText>>;
+    try {
+      body = await readBoundedText(result.response, policy.maxHtmlBytesPerPage, result.signal);
+    } finally {
+      result.release();
+    }
+    if (result.timedOut()) {
+      return limited("timeout");
+    }
     if (body.kind === "limited") {
       return body;
     }
@@ -142,11 +166,20 @@ async function fetchOne(
   url: URL,
   timeoutMs: number,
   fetchImplementation: FetchImplementation,
+  accept: string,
 ): Promise<
-  { kind: "response"; response: Response } | { kind: "limited"; reasonCode: SafeFetchReasonCode }
+  | {
+      kind: "response";
+      response: Response;
+      signal: AbortSignal;
+      release: () => void;
+      timedOut: () => boolean;
+    }
+  | { kind: "limited"; reasonCode: SafeFetchReasonCode }
 > {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const release = () => clearTimeout(timer);
 
   try {
     const response = await fetchImplementation(url, {
@@ -154,32 +187,42 @@ async function fetchOne(
       redirect: "manual",
       cache: "no-store",
       headers: {
-        Accept: "text/html, application/xhtml+xml",
+        Accept: accept,
         // Use a fixed, transparent service identity. Never forward a visitor's
         // user agent, cookies, or other request credentials to their website.
         "User-Agent": SHORTLIST_FETCH_USER_AGENT,
       },
       signal: controller.signal,
     });
-    return { kind: "response", response };
+    return {
+      kind: "response",
+      response,
+      signal: controller.signal,
+      release,
+      timedOut: () => controller.signal.aborted,
+    };
   } catch (error) {
+    release();
     return limited(
       isAbortError(error) || controller.signal.aborted ? "timeout" : "site_unreadable",
     );
-  } finally {
-    clearTimeout(timer);
   }
 }
 
 async function readBoundedText(
   response: Response,
   maxBytes: number,
+  signal?: AbortSignal,
 ): Promise<{ kind: "html"; html: string } | { kind: "limited"; reasonCode: SafeFetchReasonCode }> {
   if (response.body === null) {
     return limited("site_unreadable");
   }
 
   const reader = response.body.getReader();
+  // Stop reading as soon as the page time runs out, even mid-download.
+  signal?.addEventListener("abort", () => void reader.cancel().catch(() => undefined), {
+    once: true,
+  });
   const chunks: Uint8Array[] = [];
   let receivedBytes = 0;
 

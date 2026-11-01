@@ -3,6 +3,8 @@ import { z } from "zod";
 export const geoEvidenceSourceSchema = z.object({
   sourceId: z.string().min(1),
   sourceUrl: z.string().url(),
+  /** Page type from the crawl (home, services, pricing, about, proof, locations, other). */
+  pageType: z.string().optional(),
   observedAtUtc: z.string().datetime(),
   title: z.string().nullable(),
   description: z.string().nullable(),

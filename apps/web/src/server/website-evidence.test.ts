@@ -40,6 +40,7 @@ describe("extractBoundedWebsiteEvidence", () => {
       title: "Harbour Handywork",
       description: "Auckland & North Shore repairs",
       excerpt: "Harbour Handywork Reliable home repairs Book a local handyman.",
+      text: "Harbour Handywork Reliable home repairs Book a local handyman.",
       jsonLd: [
         {
           "@context": "https://schema.org",
@@ -88,5 +89,45 @@ describe("extractBoundedWebsiteEvidence", () => {
       kind: "captured",
       jsonLd: [{ "@type": "LocalBusiness", name: "Example" }],
     });
+  });
+
+  it("drops navigation, footers, side panels and forms (CSP skip list) and keeps the copy", () => {
+    const result = extractBoundedWebsiteEvidence(
+      {
+        ...VALID_RESPONSE,
+        html: `<header><h1>Hedge trimming in Whangarei</h1></header>
+          <nav><a href="/">Home</a><a href="/about">About us</a></nav>
+          <main><p>We trim hedges up to four metres.</p></main>
+          <aside>Subscribe to our newsletter</aside>
+          <form><input name="email">Get a quote</form>
+          <footer>Copyright 2026 All rights reserved</footer>`,
+      },
+      { ...LIMITS, maxHtmlBytes: 5_000, maxTextCharacters: 1_000 },
+    );
+
+    expect(result).toMatchObject({
+      kind: "captured",
+      text: "Hedge trimming in Whangarei We trim hedges up to four metres.",
+    });
+  });
+
+  it("caps the title and description, and keeps longer text than the excerpt", () => {
+    const result = extractBoundedWebsiteEvidence(
+      {
+        ...VALID_RESPONSE,
+        html: `<title>${"T".repeat(400)}</title>
+          <meta name="description" content="${"D".repeat(900)}">
+          <p>${"word ".repeat(100)}</p>`,
+      },
+      { ...LIMITS, maxHtmlBytes: 5_000, maxExcerptCharacters: 20, maxTextCharacters: 300 },
+    );
+
+    expect(result.kind).toBe("captured");
+    if (result.kind !== "captured") return;
+    expect(result.title).toHaveLength(200);
+    expect(result.description).toHaveLength(500);
+    expect(result.excerpt.length).toBeLessThanOrEqual(20);
+    expect(result.text.length).toBeGreaterThan(20);
+    expect(result.text.length).toBeLessThanOrEqual(300);
   });
 });

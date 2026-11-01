@@ -14,6 +14,8 @@ import {
   type FetchImplementation,
   type SafeFetchPolicy,
 } from "./safe-website-fetch";
+import type { GeoEvidenceSource } from "./geo-assessment-types";
+import { crawlSite, CRAWL_LIMITS } from "./site-crawl";
 import { extractBoundedWebsiteEvidence } from "./website-evidence";
 import type { JsonValue } from "./website-evidence";
 import type { AssessmentDiagnosticPhase } from "./assessment-diagnostics";
@@ -31,6 +33,8 @@ export type WebsiteAssessmentResult =
         title: string | null;
         description: string | null;
         jsonLd: readonly JsonValue[];
+        /** The home page first, then the crawled pages, as stored. */
+        sources: readonly GeoEvidenceSource[];
       };
     }
   | { kind: "limited"; assessment: AssessmentAdmissionRecord; reasonCode: string };
@@ -121,8 +125,9 @@ export async function runWebsiteAssessment(
       allowedContentTypes: safeFetchPolicy.allowedContentTypes,
       maxHtmlBytes: safeFetchPolicy.maxHtmlBytesPerPage,
       maxExcerptCharacters: 1_500,
+      maxTextCharacters: CRAWL_LIMITS.storedTextCharacters,
       maxJsonLdBlocks: 10,
-      maxJsonLdCharacters: 20_000,
+      maxJsonLdCharacters: CRAWL_LIMITS.jsonLdCharactersPerPage,
     },
   );
 
@@ -170,10 +175,57 @@ export async function runWebsiteAssessment(
     contentType: extracted.contentType,
     title: extracted.title ?? null,
     description: extracted.description ?? null,
-    visibleText: extracted.excerpt,
+    visibleText: extracted.text,
     jsonLd: extracted.jsonLd,
-    extractionVersion: "website-evidence-v2",
+    extractionVersion: "website-evidence-v3",
+    pageType: "home",
   });
+  const sources: GeoEvidenceSource[] = [
+    {
+      sourceId: websiteSourceId,
+      sourceUrl: extracted.sourceUrl,
+      pageType: "home",
+      observedAtUtc,
+      title: extracted.title ?? null,
+      description: extracted.description ?? null,
+      visibleText: extracted.text,
+      jsonLd: [...extracted.jsonLd],
+    },
+  ];
+
+  // Read a few more key pages (services, pricing, about, proof, locations).
+  // The crawl never throws; a site that can't be crawled keeps its home page.
+  const crawled = await crawlSite(fetched.finalUrl, fetched.html, {
+    fetchImplementation: dependencies.fetchImplementation,
+    now,
+  });
+  for (const page of crawled) {
+    const sourceId = createId();
+    await recordWebsiteSource(dependencies.database, {
+      websiteSourceId: sourceId,
+      assessmentId: assessment.assessmentId,
+      websiteEvidenceId: null,
+      sourceUrl: page.url,
+      observedAtUtc: page.observedAtUtc,
+      contentType: page.contentType,
+      title: page.title,
+      description: page.description,
+      visibleText: page.text,
+      jsonLd: page.jsonLd,
+      extractionVersion: "website-evidence-v3",
+      pageType: page.pageType,
+    });
+    sources.push({
+      sourceId,
+      sourceUrl: page.url,
+      pageType: page.pageType,
+      observedAtUtc: page.observedAtUtc,
+      title: page.title,
+      description: page.description,
+      visibleText: page.text,
+      jsonLd: [...page.jsonLd],
+    });
+  }
   dependencies.onPhase?.("result_persist");
   await completeAssessmentRun(dependencies.database, {
     assessmentId: assessment.assessmentId,
@@ -192,6 +244,7 @@ export async function runWebsiteAssessment(
       title: extracted.title ?? null,
       description: extracted.description ?? null,
       jsonLd: extracted.jsonLd,
+      sources,
     },
   };
 }

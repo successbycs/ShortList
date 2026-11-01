@@ -8,6 +8,7 @@ import {
   type StoredGeoAssessment,
 } from "./geo-assessment-repository";
 import { createClaudeGeoMessagesProvider } from "./geo-claude-messages";
+import { buildSourceView } from "./site-crawl";
 import { runWebsiteAssessment } from "./website-assessment";
 import { admitAssessmentStart } from "./assessment-admission";
 import type { AssessmentDiagnosticPhase } from "./assessment-diagnostics";
@@ -20,7 +21,10 @@ const REQUEST_TIMEOUT_MS = 45_000;
 // Room for nine structured findings; Claude stops early (and the run fails
 // clearly) rather than returning a cut-off answer.
 const MAX_OUTPUT_TOKENS = 12_000;
-const MAX_INPUT_TOKENS = 16_000;
+// The profile and buyer-profile steps now read several website pages, and
+// the web-search step reads search results, so a report's input is larger.
+// Haiku input costs US$0.10 a million tokens; 6 × 40,000 is about 2.4 cents.
+const MAX_INPUT_TOKENS = 40_000;
 // Each current-web evaluation may search the web at most this many times.
 const MAX_WEB_SEARCHES = 3;
 // Used when the Worker's SHORTLIST_MODEL_PROFILE setting is missing.
@@ -137,17 +141,8 @@ export async function runLiveAssessment(
           executedAtUtc: website.assessment.triggeredAtUtc,
           normalisedDomain: website.assessment.normalisedDomain,
           marketContext: configuration.marketContext,
-          websiteSources: [
-            {
-              sourceId: website.evidence.websiteSourceId,
-              sourceUrl: website.evidence.sourceUrl,
-              observedAtUtc: website.assessment.triggeredAtUtc,
-              title: website.evidence.title,
-              description: website.evidence.description,
-              visibleText: website.evidence.excerpt,
-              jsonLd: [...website.evidence.jsonLd],
-            },
-          ],
+          // The home page and crawled pages, within the view's size limits.
+          websiteSources: buildSourceView(website.evidence.sources),
         },
         configuration,
         createId,

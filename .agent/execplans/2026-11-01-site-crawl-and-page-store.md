@@ -28,8 +28,8 @@ characters instead of 1,500.
 - [x] (2026-11-01 08:40Z) Scope cut to MVP after Chris's direction; the
       earlier enterprise-style draft (AI page picker, full robots engine, crawl
       table, parser dependency, boilerplate statistics) is dropped.
-- [ ] Build (one PR): discovery, choice, fetch, clean, store, view, tests.
-- [ ] Proof: javln.com and lawnrite.co.nz before and after, locally.
+- [x] (2026-11-01 08:30Z) Build (one PR, #89): discovery, choice, fetch, clean, store, view, tests (157 pass).
+- [x] (2026-11-01 09:00Z) Proof: javln.com and lawnrite.co.nz before and after (see Artifacts).
 - [ ] Deploy with Chris's OK.
 
 ## Surprises & Discoveries
@@ -59,7 +59,15 @@ characters instead of 1,500.
 
 ## Outcomes & Retrospective
 
-(Empty until the build is proven.)
+The crawl works on both test sites and the profiles are clearly richer: named
+testimonials and case studies, compliance and pricing details, and 22 named
+towns for lawnrite instead of two regions. Cost rose by under one US cent a
+report. Two problems found and fixed during the proof: the aggregate input
+cap (6 × 16,000 tokens) was too small once more pages were read, raised to
+6 × 40,000; and link text could mislabel a page, so the address now decides
+the type and link text is used only when the address says nothing.
+Deviation from the plan: `<header>` is kept, matching CSP's cleaner, because
+many sites put their main headline inside it.
 
 ## Context and Orientation
 
@@ -164,6 +172,17 @@ Migration 0010 adds one nullable column. To undo the crawl, revert the PR and
 deploy; the column can stay.
 
 ## Artifacts and Notes
+
+Proof on 2026-11-01 (local Worker, fresh local D1, Claude Haiku 5.5). Before =
+the live home-page-only reports from earlier the same day.
+
+| | javln.com before → after | lawnrite.co.nz before → after |
+|---|---|---|
+| Pages read | 1 → 6 (home, pricing, about, clients, platform, officetech) | 1 → 6 (home, services, about, our-locations, lawn-mowing, one more) |
+| Profile services / areas / proof | 2 / 2 / 3 → 4 / 2 / 4 | 7 / 2 / 0 → 7 / 22 / 5 |
+| Tokens in / out | 59,302 / 15,294 → 97,928 / 18,834 | 59,566 / 16,539 → 89,507 / 13,855 |
+| AI tokens cost (excl. searches) | ~US$0.014 → ~US$0.019 | ~US$0.014 → ~US$0.016 |
+| Wait | 62 s (live) → 77 s (local) | 71 s (live) → 58 s (local) |
 
     javln.com: visible text 5,388 chars (kept today 1,500 = 27%), sitemap 217 URLs
     lawnrite.co.nz: visible text 4,820 chars (kept today 1,500 = 31%), sitemap 197 URLs
