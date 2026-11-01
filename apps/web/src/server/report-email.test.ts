@@ -71,43 +71,79 @@ const storedReport: StoredGeoAssessment = {
   },
 };
 
-type Recorded = { query: string; values: unknown[] };
+type Row = { requestId: string; assessmentId: string; ip: string; outcome: string };
 
-function fakeDatabase(options: { domain?: string | null; counts?: [number, number] } = {}) {
-  const recorded: Recorded[] = [];
-  let countCall = 0;
+/**
+ * A small in-memory stand-in for D1. Each statement runs on its own, as in
+ * D1, so the reservation's limit check and insert happen together.
+ */
+function fakeDatabase(
+  options: { domain?: string | null; rows?: Row[]; failReservation?: boolean } = {},
+) {
+  const rows: Row[] = [...(options.rows ?? [])];
+  const inserts: unknown[][] = [];
+  let queries = 0;
   const database: D1DatabaseLike = {
     prepare(query) {
-      const entry: Recorded = { query, values: [] };
-      recorded.push(entry);
+      queries += 1;
+      let values: unknown[] = [];
       const statement: D1StatementLike = {
-        bind(...values) {
-          entry.values = values;
+        bind(...bound) {
+          values = bound;
           return statement;
         },
         async first<T>() {
-          if (query.includes("FROM assessment_runs")) {
-            return (
-              options.domain === null
-                ? null
-                : { normalised_domain: options.domain ?? "example.co.nz" }
-            ) as T | null;
-          }
-          const counts = options.counts ?? [0, 0];
-          return { requests: counts[countCall++ % 2] } as T;
+          return (
+            options.domain === null
+              ? null
+              : { normalised_domain: options.domain ?? "example.co.nz" }
+          ) as T | null;
         },
         async all<T>() {
           return { results: [] as T[] };
         },
         async run() {
+          if (query.includes("INSERT INTO report_email_requests")) {
+            if (options.failReservation) return { success: false };
+            inserts.push(values);
+            const [id, assessmentId, , , , ip, , , perReport, , perVisitor] = values as [
+              string,
+              string,
+              string,
+              number,
+              string,
+              string,
+              string,
+              string,
+              number,
+              string,
+              number,
+            ];
+            const forReport = rows.filter((row) => row.assessmentId === assessmentId).length;
+            const forVisitor = rows.filter((row) => row.ip === ip).length;
+            if (forReport >= perReport || forVisitor >= perVisitor) {
+              return { success: true, meta: { changes: 0 } };
+            }
+            rows.push({ requestId: id, assessmentId, ip, outcome: "pending" });
+            return { success: true, meta: { changes: 1 } };
+          }
+          if (query.startsWith("UPDATE report_email_requests")) {
+            const [outcome, id] = values as [string, string];
+            const row = rows.find((candidate) => candidate.requestId === id);
+            if (row) row.outcome = outcome;
+            return { success: true, meta: { changes: row ? 1 : 0 } };
+          }
           return { success: true };
         },
       };
       return statement;
     },
   };
-  return { database, recorded };
+  return { database, rows, inserts, queryCount: () => queries };
 }
+
+let nextId = 0;
+const createId = () => `req-${++nextId}`;
 
 const request = {
   assessmentId: "run-1",
@@ -136,9 +172,11 @@ describe("report email", () => {
     expect(normaliseEmail(`${"a".repeat(250)}@x.nz`)).toBeUndefined();
   });
 
-  it("sends the report, stores the request with consent choices, and returns no address", async () => {
-    const { database, recorded } = fakeDatabase();
-    const sendMail = vi.fn(async () => undefined);
+  it("reserves the request with consent first, then sends, then records the outcome", async () => {
+    const { database, rows, inserts } = fakeDatabase();
+    const sendMail = vi.fn(async () => {
+      expect(rows[0]?.outcome).toBe("pending"); // reserved before sending
+    });
 
     const result = await requestReportEmail(
       { ...request, marketingConsent: true },
@@ -159,10 +197,7 @@ describe("report email", () => {
         subject: "Your ShortList report for example.co.nz",
       }),
     );
-    const insert = recorded.find((entry) =>
-      entry.query.includes("INSERT INTO report_email_requests"),
-    );
-    expect(insert?.values).toEqual([
+    expect(inserts[0]?.slice(0, 7)).toEqual([
       "req-1",
       "run-1",
       "mara@example.co.nz",
@@ -170,21 +205,28 @@ describe("report email", () => {
       CONSENT_WORDING_VERSION,
       "ip-day",
       "2026-11-01T09:00:00.000Z",
-      "sent",
+    ]);
+    expect(rows).toEqual([
+      { requestId: "req-1", assessmentId: "run-1", ip: "ip-day", outcome: "sent" },
     ]);
   });
 
-  it("records a failed send and says so, without throwing", async () => {
-    const { database, recorded } = fakeDatabase();
+  it("records a failed send and says so, without logging the error", async () => {
+    const { database, rows } = fakeDatabase();
     const sendMail = vi.fn(async () => {
       throw new Error("535 bad credentials for mara@example.co.nz");
     });
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    const result = await requestReportEmail(request, { database, ipDayHmac: "ip", sendMail });
+    const result = await requestReportEmail(request, {
+      database,
+      ipDayHmac: "ip",
+      sendMail,
+      createId,
+    });
 
     expect(result).toEqual({ kind: "send_failed" });
-    expect(recorded.at(-1)?.values.at(-1)).toBe("failed");
+    expect(rows[0]?.outcome).toBe("failed");
     expect(log).not.toHaveBeenCalled();
     log.mockRestore();
   });
@@ -193,14 +235,14 @@ describe("report email", () => {
     [{ email: "not-an-email" }, "invalid_email"],
     [{ deliveryConsent: false }, "consent_required"],
   ] as const)("refuses %o before any lookup or send (%s)", async (change, kind) => {
-    const { database, recorded } = fakeDatabase();
+    const { database, queryCount } = fakeDatabase();
     const sendMail = vi.fn();
     const result = await requestReportEmail(
       { ...request, ...change },
       { database, ipDayHmac: "ip", sendMail },
     );
     expect(result).toEqual({ kind });
-    expect(recorded).toHaveLength(0);
+    expect(queryCount()).toBe(0);
     expect(sendMail).not.toHaveBeenCalled();
   });
 
@@ -225,14 +267,54 @@ describe("report email", () => {
   });
 
   it.each([
-    [[REPORT_EMAIL_LIMITS.perReport, 0]],
-    [[0, REPORT_EMAIL_LIMITS.perVisitorDay]],
-  ] as const)("stops at the per-report and per-visitor limits (%o)", async (counts) => {
-    const { database } = fakeDatabase({ counts: [...counts] as [number, number] });
+    [
+      "per report",
+      Array.from({ length: REPORT_EMAIL_LIMITS.perReport }, (_, i) => ({
+        requestId: `old-${i}`,
+        assessmentId: "run-1",
+        ip: `other-${i}`,
+        outcome: "sent",
+      })),
+    ],
+    [
+      "per visitor per day",
+      Array.from({ length: REPORT_EMAIL_LIMITS.perVisitorDay }, (_, i) => ({
+        requestId: `old-${i}`,
+        assessmentId: `run-${i + 10}`,
+        ip: "ip",
+        outcome: "failed",
+      })),
+    ],
+  ])("stops at the %s limit, counting failed and pending attempts too", async (_label, rows) => {
+    const { database } = fakeDatabase({ rows });
     const sendMail = vi.fn();
-    expect(await requestReportEmail(request, { database, ipDayHmac: "ip", sendMail })).toEqual({
-      kind: "limited",
-    });
+    expect(
+      await requestReportEmail(request, { database, ipDayHmac: "ip", sendMail, createId }),
+    ).toEqual({ kind: "limited" });
+    expect(sendMail).not.toHaveBeenCalled();
+  });
+
+  it("lets only three of a burst of twelve simultaneous requests through", async () => {
+    const { database, rows } = fakeDatabase();
+    const sendMail = vi.fn(async () => undefined);
+
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () =>
+        requestReportEmail(request, { database, ipDayHmac: "ip", sendMail, createId }),
+      ),
+    );
+
+    expect(sendMail).toHaveBeenCalledTimes(REPORT_EMAIL_LIMITS.perReport);
+    expect(rows).toHaveLength(REPORT_EMAIL_LIMITS.perReport);
+    expect(results.filter((result) => result.kind === "limited")).toHaveLength(9);
+  });
+
+  it("sends nothing when the request can't be stored", async () => {
+    const { database } = fakeDatabase({ failReservation: true });
+    const sendMail = vi.fn();
+    await expect(
+      requestReportEmail(request, { database, ipDayHmac: "ip", sendMail, createId }),
+    ).rejects.toThrow("Could not store");
     expect(sendMail).not.toHaveBeenCalled();
   });
 

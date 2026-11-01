@@ -14,7 +14,8 @@ CREATE TABLE report_email_requests (
   consent_wording_version TEXT NOT NULL,
   ip_day_hmac TEXT NOT NULL,
   requested_at_utc TEXT NOT NULL,
-  outcome TEXT NOT NULL CHECK (outcome IN ('sent', 'failed'))
+  -- 'pending' is written before sending, so limits count every attempt.
+  outcome TEXT NOT NULL CHECK (outcome IN ('pending', 'sent', 'failed'))
 );
 
 CREATE INDEX report_email_requests_assessment_idx

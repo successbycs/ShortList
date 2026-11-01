@@ -70,16 +70,36 @@ export async function requestReportEmail(
   const report = await findReport(dependencies.database, request.assessmentId);
   if (report === undefined) return { kind: "not_found" };
 
-  const [forReport, forVisitor] = await Promise.all([
-    countRequests(dependencies.database, "assessment_id", request.assessmentId),
-    countRequests(dependencies.database, "ip_day_hmac", dependencies.ipDayHmac),
-  ]);
-  if (
-    forReport >= REPORT_EMAIL_LIMITS.perReport ||
-    forVisitor >= REPORT_EMAIL_LIMITS.perVisitorDay
-  ) {
-    return { kind: "limited" };
-  }
+  // Reserve the request and record consent first, in one statement that
+  // also enforces both limits, so a burst of requests cannot slip past them.
+  const now = (dependencies.now ?? (() => new Date()))();
+  const requestId = (dependencies.createId ?? (() => crypto.randomUUID()))();
+  const reservation = await dependencies.database
+    .prepare(
+      `INSERT INTO report_email_requests (
+        request_id, assessment_id, email_normalised, delivery_consent, marketing_consent,
+        consent_wording_version, ip_day_hmac, requested_at_utc, outcome
+      )
+      SELECT ?, ?, ?, 1, ?, ?, ?, ?, 'pending'
+      WHERE (SELECT count(*) FROM report_email_requests WHERE assessment_id = ?) < ?
+        AND (SELECT count(*) FROM report_email_requests WHERE ip_day_hmac = ?) < ?`,
+    )
+    .bind(
+      requestId,
+      request.assessmentId,
+      email,
+      request.marketingConsent ? 1 : 0,
+      CONSENT_WORDING_VERSION,
+      dependencies.ipDayHmac,
+      now.toISOString(),
+      request.assessmentId,
+      REPORT_EMAIL_LIMITS.perReport,
+      dependencies.ipDayHmac,
+      REPORT_EMAIL_LIMITS.perVisitorDay,
+    )
+    .run();
+  if (!reservation.success) throw new Error("Could not store the report email request.");
+  if ((reservation.meta?.changes ?? 0) !== 1) return { kind: "limited" };
 
   const message = renderReportEmail(
     report,
@@ -93,26 +113,14 @@ export async function requestReportEmail(
     outcome = "failed";
   }
 
-  const now = (dependencies.now ?? (() => new Date()))();
-  const result = await dependencies.database
-    .prepare(
-      `INSERT INTO report_email_requests (
-        request_id, assessment_id, email_normalised, delivery_consent, marketing_consent,
-        consent_wording_version, ip_day_hmac, requested_at_utc, outcome
-      ) VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)`,
-    )
-    .bind(
-      (dependencies.createId ?? (() => crypto.randomUUID()))(),
-      request.assessmentId,
-      email,
-      request.marketingConsent ? 1 : 0,
-      CONSENT_WORDING_VERSION,
-      dependencies.ipDayHmac,
-      now.toISOString(),
-      outcome,
-    )
-    .run();
-  if (!result.success) throw new Error("Could not store the report email request.");
+  try {
+    await dependencies.database
+      .prepare(`UPDATE report_email_requests SET outcome = ? WHERE request_id = ?`)
+      .bind(outcome, requestId)
+      .run();
+  } catch {
+    // The reserved row stays 'pending' and still counts towards the limits.
+  }
 
   return outcome === "sent" ? { kind: "sent" } : { kind: "send_failed" };
 }
@@ -134,18 +142,6 @@ async function findReport(
   if (row === null) return undefined;
   const report = await findStoredGeoAssessment(database, row.normalised_domain);
   return report?.assessmentId === assessmentId ? report : undefined;
-}
-
-async function countRequests(
-  database: D1DatabaseLike,
-  column: "assessment_id" | "ip_day_hmac",
-  value: string,
-): Promise<number> {
-  const row = await database
-    .prepare(`SELECT count(*) AS requests FROM report_email_requests WHERE ${column} = ?`)
-    .bind(value)
-    .first<{ requests: number }>();
-  return row?.requests ?? 0;
 }
 
 const MENTION: Record<StoredGeoFinding["submittedBusinessMention"], string> = {
