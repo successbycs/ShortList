@@ -32,7 +32,7 @@
 		// SMTP_PASS are Worker secrets, never values in this file.
 		"SMTP_HOST": "smtp.gmail.com",
 		"SMTP_PORT": "465",
-		"REPORT_EMAIL_FROM": "ShortList by SuccessByCS <reports@successbycs.com>",
+		"REPORT_EMAIL_FROM": "ShortList by SuccessByCS <shortlist@successbycs.com>",
 		"REPORT_EMAIL_REPLY_TO": "chris@successbycs.com"
 	},
 	"d1_databases": [
