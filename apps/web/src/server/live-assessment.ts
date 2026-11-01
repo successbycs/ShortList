@@ -7,7 +7,7 @@ import {
   loadApprovedGeoRuntimeConfiguration,
   type StoredGeoAssessment,
 } from "./geo-assessment-repository";
-import { createOpenAiGeoResponsesProvider } from "./geo-openai-responses";
+import { createClaudeGeoMessagesProvider } from "./geo-claude-messages";
 import { runWebsiteAssessment } from "./website-assessment";
 import { admitAssessmentStart } from "./assessment-admission";
 import type { AssessmentDiagnosticPhase } from "./assessment-diagnostics";
@@ -17,12 +17,19 @@ import {
 } from "./legacy-ai-search";
 
 const REQUEST_TIMEOUT_MS = 45_000;
-const MAX_OUTPUT_TOKENS = 600;
+// Room for nine structured findings; Claude stops early (and the run fails
+// clearly) rather than returning a cut-off answer.
+const MAX_OUTPUT_TOKENS = 4_000;
 const MAX_INPUT_TOKENS = 16_000;
+// Each current-web evaluation may search the web at most this many times.
+const MAX_WEB_SEARCHES = 3;
+// Used when the Worker's SHORTLIST_MODEL_PROFILE setting is missing.
+export const DEFAULT_MODEL_PROFILE = "claude-haiku-5-5";
 const GEO_RUN_TOKEN_LIMITS = {
-  // Five bounded stages: profile, ICP, questions and two evaluations.
-  maxInputTokens: MAX_INPUT_TOKENS * 5,
-  maxOutputTokens: MAX_OUTPUT_TOKENS * 5,
+  // Six bounded calls: profile, ICP, questions, the model-knowledge evaluation,
+  // and the current-web evaluation's research and structured calls.
+  maxInputTokens: MAX_INPUT_TOKENS * 6,
+  maxOutputTokens: MAX_OUTPUT_TOKENS * 6,
 } as const;
 
 export type StoredAssessmentResult = LegacyComparableBusinessAssessment | StoredGeoAssessment;
@@ -44,6 +51,8 @@ export type LiveAssessmentResult =
 export type LiveAssessmentDependencies = {
   database: D1DatabaseLike;
   apiKey: string;
+  /** Approved model profile key; defaults to DEFAULT_MODEL_PROFILE. */
+  modelProfileKey?: string;
   ipDayHmac: string;
   fetchImplementation?: typeof fetch;
   now?: () => Date;
@@ -104,17 +113,17 @@ export async function runLiveAssessment(
     const configuration = await loadApprovedGeoRuntimeConfiguration(dependencies.database, {
       packageKey: "geo-assessment-v1",
       packageVersionLabel: "1.0.0",
-      modelProfileKey: "openai-gpt-6-luna",
+      modelProfileKey: dependencies.modelProfileKey ?? DEFAULT_MODEL_PROFILE,
       modelProfileVersionLabel: "1.0.0",
       marketKey: "global",
       marketVersionLabel: "1.0.0",
     });
-    const provider = createOpenAiGeoResponsesProvider({
+    const provider = createClaudeGeoMessagesProvider({
       apiKey: dependencies.apiKey,
       modelId: configuration.modelId,
       timeoutMs: REQUEST_TIMEOUT_MS,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
-      storeResponses: false,
+      maxWebSearches: MAX_WEB_SEARCHES,
       ...(dependencies.fetchImplementation
         ? { fetchImplementation: dependencies.fetchImplementation }
         : {}),

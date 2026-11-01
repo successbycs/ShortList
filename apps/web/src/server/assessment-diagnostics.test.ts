@@ -13,7 +13,7 @@ function dependencies(overrides: Partial<Parameters<typeof runAssessmentSubmissi
   return {
     runtime: {
       SHORTLIST_DB: {} as D1Database,
-      OPENAI_API_KEY: "test-key",
+      ANTHROPIC_API_KEY: "test-key",
       ASSESSMENT_IP_HASH_SECRET: "hash-key",
     },
     ipAddress: "203.0.113.19",
@@ -92,7 +92,7 @@ describe("assessment diagnostics", () => {
     const result = await runAssessmentSubmission(
       "example.co.nz",
       dependencies({
-        runtime: { OPENAI_API_KEY: "test-key" },
+        runtime: { ANTHROPIC_API_KEY: "test-key" },
         runLiveAssessment,
         emitDiagnostic: (event) => events.push(event),
       }),
@@ -107,5 +107,22 @@ describe("assessment diagnostics", () => {
       expect.objectContaining({ phase: "runtime", category: "missing_runtime_binding" }),
     ]);
     expect(runLiveAssessment).not.toHaveBeenCalled();
+  });
+
+  it("passes the configured model profile to the live assessment", async () => {
+    const runLiveAssessment = vi.fn().mockResolvedValue({ kind: "invalid_input", reasonCode: "x" });
+    const base = dependencies();
+    await runAssessmentSubmission(
+      "example.co.nz",
+      dependencies({
+        runtime: { ...base.runtime, SHORTLIST_MODEL_PROFILE: "claude-sonnet-5-5" },
+        runLiveAssessment,
+      }),
+    );
+
+    expect(runLiveAssessment).toHaveBeenCalledWith(
+      "example.co.nz",
+      expect.objectContaining({ apiKey: "test-key", modelProfileKey: "claude-sonnet-5-5" }),
+    );
   });
 });

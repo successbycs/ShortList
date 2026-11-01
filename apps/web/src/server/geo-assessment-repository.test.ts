@@ -4,6 +4,7 @@ import type { D1DatabaseLike, D1StatementLike } from "./assessment-repository";
 import {
   findStoredGeoAssessment,
   loadApprovedGeoPromptPackage,
+  loadApprovedGeoRuntimeConfiguration,
   recordPromptExecution,
   recordWebsiteSource,
 } from "./geo-assessment-repository";
@@ -219,6 +220,83 @@ describe("GEO assessment repository", () => {
           expect.objectContaining({ icpId: "one", questionText: "Question 1" }),
         ]),
       },
+    });
+  });
+
+  describe("model profile selection", () => {
+    const approvedProfiles = [
+      { model_test_profile_id: "haiku-web", model_id: "claude-haiku-5-5", mode: "current_web" },
+      {
+        model_test_profile_id: "haiku-memory",
+        model_id: "claude-haiku-5-5",
+        mode: "model_knowledge",
+      },
+    ];
+
+    /** Answers each of the three configuration queries with its own rows. */
+    function configurationDatabase(profiles: unknown[]) {
+      const bound: unknown[][] = [];
+      const database: D1DatabaseLike = {
+        prepare(query) {
+          const rows = query.includes("FROM model_test_profiles")
+            ? profiles
+            : query.includes("FROM market_profiles")
+              ? [
+                  {
+                    market_profile_id: "global",
+                    display_name: "Global",
+                    geography_json: "{}",
+                    vertical_constraints_json: "[]",
+                    reference_data_version: "1",
+                  },
+                ]
+              : stages.map(templateRow);
+          const statement: D1StatementLike = {
+            bind(...values) {
+              if (query.includes("FROM model_test_profiles")) bound.push(values);
+              return statement;
+            },
+            async first<T>() {
+              return null as T | null;
+            },
+            async all<T>() {
+              return { results: rows as T[] };
+            },
+            async run() {
+              return { success: true };
+            },
+          };
+          return statement;
+        },
+      };
+      return { database, bound };
+    }
+
+    const input = {
+      packageKey: "geo-assessment-v1",
+      packageVersionLabel: "1.0.0",
+      modelProfileKey: "claude-haiku-5-5",
+      modelProfileVersionLabel: "1.0.0",
+      marketKey: "global",
+      marketVersionLabel: "1.0.0",
+    };
+
+    it("uses the model of the named approved profile", async () => {
+      const { database, bound } = configurationDatabase(approvedProfiles);
+
+      const configuration = await loadApprovedGeoRuntimeConfiguration(database, input);
+
+      expect(bound).toEqual([["claude-haiku-5-5", "1.0.0"]]);
+      expect(configuration.modelId).toBe("claude-haiku-5-5");
+      expect(configuration.currentWebModelProfileId).toBe("haiku-web");
+    });
+
+    it("rejects an unknown or unapproved profile before any AI call", async () => {
+      const { database } = configurationDatabase([]);
+
+      await expect(
+        loadApprovedGeoRuntimeConfiguration(database, { ...input, modelProfileKey: "no-such" }),
+      ).rejects.toThrow("incomplete or inconsistent");
     });
   });
 });

@@ -1,7 +1,8 @@
 import { env } from "cloudflare:workers";
 
 type ShortListRuntime = Env & {
-  OPENAI_API_KEY?: string;
+  ANTHROPIC_API_KEY?: string;
+  SHORTLIST_MODEL_PROFILE?: string;
   ASSESSMENT_IP_HASH_SECRET?: string;
 };
 
