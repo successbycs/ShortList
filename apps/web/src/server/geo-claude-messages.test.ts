@@ -115,6 +115,84 @@ describe("Claude GEO Messages provider", () => {
     },
   );
 
+  it("asks for numbered slots so list lengths are guaranteed, and returns lists", async () => {
+    const slots = Object.fromEntries(
+      [2, 1, 3, 4, 5, 6, 7, 8, 9].map((n) => [`question_${n}`, { id: `q${n}` }]),
+    );
+    const fetchImplementation = vi
+      .fn()
+      .mockResolvedValue(
+        claudeResponse([{ type: "text", text: JSON.stringify({ questions: slots }) }]),
+      );
+
+    const result = await provider(fetchImplementation).run({
+      stage: "questions",
+      mode: null,
+      instructions: "Return JSON.",
+      input: {},
+    });
+
+    const schema = sentBody(fetchImplementation, 0).output_config.format.schema;
+    expect(schema.properties.questions.required).toEqual(
+      Array.from({ length: 9 }, (_, index) => `question_${index + 1}`),
+    );
+    expect(result).toMatchObject({
+      output: { questions: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => ({ id: `q${n}` })) },
+    });
+  });
+
+  it("limits evidence IDs to the captured website pages", async () => {
+    const fetchImplementation = vi
+      .fn()
+      .mockResolvedValue(claudeResponse([{ type: "text", text: "{}" }]));
+
+    await provider(fetchImplementation).run({
+      stage: "profile",
+      mode: null,
+      instructions: "Return JSON.",
+      input: { website_sources: [{ sourceId: "src-1" }, { sourceId: "src-2" }] },
+    });
+
+    const schema = sentBody(fetchImplementation, 0).output_config.format.schema;
+    expect(schema.properties.services.items.properties.evidenceIds).toEqual({
+      type: "array",
+      items: { type: "string", enum: ["src-1", "src-2"] },
+    });
+  });
+
+  it("names each finding slot by its question and fills in the question ID and sources", async () => {
+    const fetchImplementation = vi.fn().mockResolvedValue(
+      claudeResponse([
+        {
+          type: "text",
+          text: JSON.stringify({
+            findings: { "q-a": { answerSummary: "A" }, "q-b": { answerSummary: "B" } },
+          }),
+        },
+      ]),
+    );
+
+    const result = await provider(fetchImplementation).run({
+      stage: "evaluation",
+      mode: "model_knowledge",
+      instructions: "Return JSON.",
+      input: { buyer_questions: [{ id: "q-a" }, { id: "q-b" }] },
+    });
+
+    const schema = sentBody(fetchImplementation, 0).output_config.format.schema;
+    expect(schema.properties.findings.required).toEqual(["q-a", "q-b"]);
+    expect(schema.properties.findings.properties["q-a"]).toEqual({ $ref: "#/$defs/finding" });
+    expect(schema.$defs.finding.required).not.toContain("sources");
+    expect(result).toMatchObject({
+      output: {
+        findings: [
+          { questionId: "q-a", answerSummary: "A", sources: [] },
+          { questionId: "q-b", answerSummary: "B", sources: [] },
+        ],
+      },
+    });
+  });
+
   it("researches with web search first, then writes structured findings without tools", async () => {
     const fetchImplementation = vi
       .fn()

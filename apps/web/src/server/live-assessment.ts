@@ -19,7 +19,7 @@ import {
 const REQUEST_TIMEOUT_MS = 45_000;
 // Room for nine structured findings; Claude stops early (and the run fails
 // clearly) rather than returning a cut-off answer.
-const MAX_OUTPUT_TOKENS = 4_000;
+const MAX_OUTPUT_TOKENS = 12_000;
 const MAX_INPUT_TOKENS = 16_000;
 // Each current-web evaluation may search the web at most this many times.
 const MAX_WEB_SEARCHES = 3;
