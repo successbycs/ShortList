@@ -284,7 +284,7 @@ describe("protected prototype reveal journey", () => {
     expect(screen.getByLabelText("Your business website")).toHaveValue("mara-gardens.co.nz");
   });
 
-  it("animates the assessment sequence from yellow clocks to completed checks", () => {
+  it("paces the steps to real timings and keeps the visitor updated in the last step", () => {
     vi.useFakeTimers();
     try {
       serverFunction.invoke.mockImplementationOnce(() => new Promise(() => undefined));
@@ -292,19 +292,34 @@ describe("protected prototype reveal journey", () => {
 
       fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
-      expect(screen.getByText("Buyer profile identified")).toBeInTheDocument();
-      expect(screen.getByText("Questions buyers ask AI")).toBeInTheDocument();
-      expect(screen.getByText("Local context checked")).toBeInTheDocument();
+      expect(screen.getByText("Three buyer profiles")).toBeInTheDocument();
+      expect(screen.queryByText("Local context checked")).not.toBeInTheDocument();
       expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "active");
-      expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "pending");
+      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent(
+        "0:00 elapsed · usually about a minute",
+      );
 
-      act(() => vi.advanceTimersByTime(1_150));
-
+      act(() => vi.advanceTimersByTime(10_000));
       expect(screen.getByTestId("assessment-stage-0")).toHaveAttribute("data-state", "complete");
       expect(screen.getByTestId("assessment-stage-1")).toHaveAttribute("data-state", "active");
-      act(() => vi.advanceTimersByTime(4_600));
-      expect(screen.getByText("Compiling results for you")).toBeInTheDocument();
-      expect(screen.getByTestId("assessment-stage-5")).toHaveAttribute("data-state", "active");
+      expect(screen.getByTestId("assessment-stage-4")).toHaveAttribute("data-state", "pending");
+
+      act(() => vi.advanceTimersByTime(27_000));
+      expect(screen.getByTestId("assessment-stage-4")).toHaveAttribute("data-state", "active");
+      expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(
+        "Searching the live web",
+      );
+
+      act(() => vi.advanceTimersByTime(6_000));
+      expect(screen.getByTestId("assessment-final-update")).toHaveTextContent(
+        "Checking what AI already knows",
+      );
+
+      act(() => vi.advanceTimersByTime(60_000));
+      expect(screen.getByTestId("assessment-stage-4")).toHaveAttribute("data-state", "active");
+      expect(screen.getByTestId("assessment-elapsed")).toHaveTextContent(
+        "1:43 elapsed · Taking a little longer than usual. Still working.",
+      );
     } finally {
       vi.useRealTimers();
     }
