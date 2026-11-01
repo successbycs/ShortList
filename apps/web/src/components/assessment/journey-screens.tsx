@@ -1,3 +1,4 @@
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import {
   AlertTriangle,
@@ -18,6 +19,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { requestReportEmail } from "@/functions/request-report-email";
 import type { DomainAssessmentSubmissionResult } from "@/functions/submit-domain-assessment";
 import { cn } from "@/lib/utils";
 import type { StoredGeoAssessment } from "@/server/geo-assessment-repository";
@@ -50,37 +52,73 @@ export function RefusalScreen({ onBack }: { onBack: () => void }) {
  * until the result arrives.
  */
 const stages = [
-  { title: "Website read", note: "Opening your public home page.", startsAtSecond: 0 },
+  { title: "Opening your home page", note: "Reading your public home page.", startsAtSecond: 0 },
   {
-    title: "Business details checked",
-    note: "Reading what your website says about your services, proof and where you work.",
+    title: "Finding your key pages",
+    note: "Looking through your sitemap and menus for services, pricing, about, review and location pages.",
     startsAtSecond: 3,
+  },
+  {
+    title: "Reading your key pages",
+    note: "Up to five pages, with menus, footers and pop-ups left out.",
+    startsAtSecond: 7,
+  },
+  {
+    title: "Business details",
+    note: "What you offer, where you work and the proof you show.",
+    startsAtSecond: 16,
   },
   {
     title: "Three buyer profiles",
     note: "Working out who your website is written to persuade.",
-    startsAtSecond: 15,
+    startsAtSecond: 28,
   },
   {
     title: "Nine buyer questions",
     note: "Writing the questions those buyers are likely to ask AI.",
-    startsAtSecond: 25,
+    startsAtSecond: 38,
   },
   {
-    title: "Asking AI your buyers' questions",
-    note: "",
-    startsAtSecond: 37,
+    title: "Searching the live web",
+    note: "Looking for what a buyer would find online today for each question.",
+    startsAtSecond: 48,
   },
+  {
+    title: "Checking what AI already knows",
+    note: "Asking AI about your business from what it already knows.",
+    startsAtSecond: 58,
+  },
+  { title: "Writing your findings", note: "", startsAtSecond: 66 },
 ] as const;
 
 const finalStepExplanations = [
-  "This step searches the live web for answers to each question.",
-  "It also checks what AI already knows about your business.",
-  "Then it compares the answers with what your website says.",
-  "Finally it writes a finding for each of the nine questions.",
+  "This step compares what AI says with what your website says.",
+  "It checks whether you're mentioned, described accurately and recommended.",
+  "It notes where your website could say more.",
+  "Then it puts your report together.",
 ] as const;
 const UPDATE_EVERY_SECONDS = 6;
-const SLOW_AFTER_SECONDS = 90;
+// Live runs take 58–93 s with the crawl; only longer waits get the slow message.
+const SLOW_AFTER_SECONDS = 105;
+
+/**
+ * How full the progress bar is. It fills through each step and slows on the
+ * last one, but never passes 95%: only the finished report completes it.
+ */
+export function progressPercent(elapsedSeconds: number): number {
+  const index = stages.reduce(
+    (active, stage, position) => (elapsedSeconds >= stage.startsAtSecond ? position : active),
+    0,
+  );
+  const stage = stages[index]!;
+  const next = stages[index + 1];
+  const intoStage = Math.max(0, elapsedSeconds - stage.startsAtSecond);
+  const withinStage =
+    next === undefined
+      ? 1 - Math.exp(-intoStage / 30)
+      : Math.min(1, intoStage / (next.startsAtSecond - stage.startsAtSecond));
+  return Math.min(95, ((index + withinStage) / stages.length) * 100);
+}
 
 function formatElapsed(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -122,7 +160,8 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
         <div className="h-2 overflow-hidden bg-sun-soft" aria-hidden="true">
           <div
             className="h-full bg-leaf transition-[width] duration-700 ease-out"
-            style={{ width: `${((activeStage + 1) / stages.length) * 100}%` }}
+            data-testid="assessment-progress"
+            style={{ width: `${progressPercent(elapsedSeconds)}%` }}
           />
         </div>
         <ul className="divide-y divide-border">
@@ -158,7 +197,7 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
                     {isFinal
                       ? active
                         ? finalExplanation
-                        : "Searching the web and checking what AI knows."
+                        : "Comparing the answers and writing up what we found."
                       : stage.note}
                   </p>
                 </div>
@@ -173,62 +212,21 @@ export function AssessmentProgressScreen({ domain }: { domain: string }) {
       </p>
       {/* A steady status region, so screen readers hear the meaningful
           changes but not the per-second counter. */}
-      <p role="status" className="mt-1 text-xs text-muted-foreground">
+      <p
+        role="status"
+        className={cn(
+          "mt-1 text-xs text-muted-foreground",
+          // Screen readers hear every update; sighted visitors already see
+          // them in the steps, so only the slow message is shown here.
+          elapsedSeconds < SLOW_AFTER_SECONDS && "sr-only",
+        )}
+      >
         {elapsedSeconds >= SLOW_AFTER_SECONDS
           ? "This is taking longer than usual. We are still waiting for your report."
           : activeStage === stages.length - 1
             ? finalExplanation
             : "It usually takes about a minute."}
       </p>
-    </StateShell>
-  );
-}
-
-export function ReportRevealScreen({
-  email,
-  setEmail,
-  error,
-  onSubmit,
-}: {
-  email: string;
-  setEmail: (value: string) => void;
-  error: string;
-  onSubmit: (event: FormEvent) => void;
-}) {
-  return (
-    <StateShell
-      icon={<Mail />}
-      kicker="Your assessment is ready"
-      title="See your free website report."
-      body="Enter an email address to reveal this report on this device. We do not send email or create a delivery record at this stage."
-    >
-      <form className="mt-7 max-w-xl" onSubmit={onSubmit} noValidate>
-        <label htmlFor="email" className="mb-2 block text-sm font-bold">
-          Email address
-        </label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="you@yourbusiness.co.nz"
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? "email-error" : "email-help"}
-          className="h-12 border-2 bg-card text-base"
-        />
-        <p id="email-help" className="mt-2 text-sm text-muted-foreground">
-          This is a local reveal step. PDF and email delivery will be offered separately in a later
-          release.
-        </p>
-        {error ? (
-          <p id="email-error" className="mt-3 text-sm font-semibold text-destructive" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <Button type="submit" size="lg" className="mt-6 h-12">
-          See free report now <ArrowRight />
-        </Button>
-      </form>
     </StateShell>
   );
 }
@@ -240,6 +238,7 @@ export function AssessmentResultScreen({
   result: StoredAssessmentResult;
   onStartOver: () => void;
 }) {
+  const [emailOutcome, setEmailOutcome] = useState<EmailGateOutcome | undefined>(undefined);
   if (!isGeo(result))
     return (
       <div className="mx-auto max-w-3xl">
@@ -257,6 +256,7 @@ export function AssessmentResultScreen({
         <StartOver onStartOver={onStartOver} />
       </div>
     );
+  const unlocked = emailOutcome !== undefined;
   const businessName = result.profile.businessName?.value ?? result.normalisedDomain;
   const findings = result.findings.model_knowledge;
   const overview = [
@@ -270,6 +270,59 @@ export function AssessmentResultScreen({
   ]
     .filter(Boolean)
     .join(" ");
+  const [firstIcp, ...otherIcps] = result.icps;
+  const icpCard = (icp: (typeof result.icps)[number]) => {
+    const questions = findings.filter((finding) => finding.icpId === icp.id);
+    return (
+      <article
+        key={icp.id}
+        data-testid={`icp-${icp.id}`}
+        className="rounded-lg border-2 border-ink bg-secondary p-5 shadow-[5px_5px_0_var(--ink)]"
+      >
+        <h3 className="display-face text-2xl font-bold">{icp.label}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">{icp.audienceDescription}</p>
+        <p className="mt-3 text-xs font-semibold text-muted-foreground">Questions they may ask</p>
+        <ol className="mt-3 space-y-3">
+          {questions.map((finding, index) => (
+            <li
+              key={finding.questionId}
+              data-testid="icp-question"
+              className="border-t border-border pt-3 text-sm"
+            >
+              <p className="font-bold">
+                {index + 1}. {finding.questionText}
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {finding.answerSummary ?? "The model did not retain a usable answer."}
+              </p>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-4 text-xs text-muted-foreground">{icp.uncertainty}</p>
+      </article>
+    );
+  };
+  const rest = (
+    <>
+      <div className="mt-5 grid gap-5 md:grid-cols-2">{otherIcps.map(icpCard)}</div>
+      <section className="mt-7 rounded-lg border-2 border-ink bg-sun-soft p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Top findings</p>
+        <h2 className="display-face mt-1 text-2xl font-bold">What the model returned</h2>
+        <ul className="mt-4 space-y-3">
+          {findings.slice(0, 3).map((finding) => (
+            <li key={finding.questionId} className="border-t border-border pt-3 text-sm">
+              <strong>{finding.questionText}</strong>
+              <span className="text-muted-foreground"> — {finding.answerSummary}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-xs text-muted-foreground">
+          These are stored LLM findings from this assessment. They are not a live-web result or a
+          permanent ranking.
+        </p>
+      </section>
+    </>
+  );
   return (
     <div className="mx-auto max-w-5xl">
       <div className="flex flex-col gap-4 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
@@ -281,9 +334,9 @@ export function AssessmentResultScreen({
         </div>
         <div className="rounded-md bg-ink px-4 py-3 text-sm font-semibold text-primary-foreground">
           <Clock3 className="mr-2 inline size-4" aria-hidden="true" />
-          {formatUtcTime(result.triggeredAtUtc)}
+          {formatLocalTime(result.triggeredAtUtc)}
           <br />
-          <span className="font-normal opacity-80">UTC observation time</span>
+          <span className="font-normal opacity-80">When we checked your website</span>
         </div>
       </div>
       <section className="mt-6 rounded-lg border-2 border-ink bg-card p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
@@ -315,60 +368,173 @@ export function AssessmentResultScreen({
           Each profile and question is an LLM interpretation of the assessed website copy. Treat it
           as a starting point for improving your message.
         </p>
-        <div className="mt-5 grid gap-5 md:grid-cols-3">
-          {result.icps.map((icp) => {
-            const questions = findings.filter((finding) => finding.icpId === icp.id);
-            return (
-              <article
-                key={icp.id}
-                data-testid={`icp-${icp.id}`}
-                className="rounded-lg border-2 border-ink bg-secondary p-5 shadow-[5px_5px_0_var(--ink)]"
-              >
-                <h3 className="display-face text-2xl font-bold">{icp.label}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{icp.audienceDescription}</p>
-                <p className="mt-3 text-xs font-semibold text-muted-foreground">
-                  Questions they may ask
-                </p>
-                <ol className="mt-3 space-y-3">
-                  {questions.map((finding, index) => (
-                    <li
-                      key={finding.questionId}
-                      data-testid="icp-question"
-                      className="border-t border-border pt-3 text-sm"
-                    >
-                      <p className="font-bold">
-                        {index + 1}. {finding.questionText}
-                      </p>
-                      <p className="mt-1 text-muted-foreground">
-                        {finding.answerSummary ?? "The model did not retain a usable answer."}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-                <p className="mt-4 text-xs text-muted-foreground">{icp.uncertainty}</p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-      <section className="mt-7 rounded-lg border-2 border-ink bg-sun-soft p-5 shadow-[6px_6px_0_var(--ink)] sm:p-7">
-        <p className="text-xs font-bold uppercase text-muted-foreground">Top findings</p>
-        <h2 className="display-face mt-1 text-2xl font-bold">What the model returned</h2>
-        <ul className="mt-4 space-y-3">
-          {findings.slice(0, 3).map((finding) => (
-            <li key={finding.questionId} className="border-t border-border pt-3 text-sm">
-              <strong>{finding.questionText}</strong>
-              <span className="text-muted-foreground"> — {finding.answerSummary}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 text-xs text-muted-foreground">
-          These are stored LLM findings from this assessment. They are not a live-web result or a
-          permanent ranking.
-        </p>
+        <div className="mt-5 max-w-2xl">{firstIcp ? icpCard(firstIcp) : null}</div>
+        {unlocked ? (
+          <>
+            <EmailOutcomeNotice outcome={emailOutcome} />
+            {rest}
+          </>
+        ) : (
+          <div className="relative mt-7" data-testid="report-locked">
+            {/* The rest of the report, faded behind the email box. It is
+                hidden from screen readers and keyboard until unlocked. */}
+            <div
+              aria-hidden="true"
+              inert
+              className="pointer-events-none max-h-[34rem] select-none overflow-hidden opacity-60 blur-[3px]"
+            >
+              {rest}
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/70 to-background" />
+            <div className="absolute inset-x-0 top-10 flex justify-center px-2">
+              <EmailGate assessmentId={result.assessmentId} onDone={setEmailOutcome} />
+            </div>
+          </div>
+        )}
       </section>
       <StartOver onStartOver={onStartOver} />
     </div>
+  );
+}
+
+export type EmailGateOutcome = { kind: "sent"; maskedEmail: string } | { kind: "not_sent" };
+
+/** "mara@example.co.nz" becomes "m•••@example.co.nz". */
+export function maskEmail(email: string): string {
+  const [name = "", domain = ""] = email.trim().split("@");
+  return `${name.slice(0, 1)}•••@${domain}`;
+}
+
+function EmailGate({
+  assessmentId,
+  onDone,
+}: {
+  assessmentId: string;
+  onDone: (outcome: EmailGateOutcome) => void;
+}) {
+  const sendReport = useServerFn(requestReportEmail);
+  const [email, setEmail] = useState("");
+  const [deliveryConsent, setDeliveryConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Enter a valid email address.");
+      return;
+    }
+    if (!deliveryConsent) {
+      setError("Tick the box to have your report emailed to you.");
+      return;
+    }
+    setError("");
+    setSending(true);
+    try {
+      const outcome = await sendReport({
+        data: { assessmentId, email: email.trim(), deliveryConsent, marketingConsent },
+      });
+      if (outcome.kind === "invalid_email") {
+        setError("Enter a valid email address.");
+        return;
+      }
+      if (outcome.kind === "consent_required") {
+        setError("Tick the box to have your report emailed to you.");
+        return;
+      }
+      onDone(
+        outcome.kind === "sent"
+          ? { kind: "sent", maskedEmail: maskEmail(email) }
+          : { kind: "not_sent" },
+      );
+    } catch {
+      onDone({ kind: "not_sent" });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <form
+      onSubmit={submit}
+      noValidate
+      aria-labelledby="email-gate-title"
+      className="w-full max-w-xl rounded-lg border-2 border-ink bg-card p-6 shadow-[6px_6px_0_var(--ink)]"
+    >
+      <p className="flex items-center gap-2 text-xs font-bold uppercase text-primary">
+        <Mail className="size-4" aria-hidden="true" /> Your full report
+      </p>
+      <h2 id="email-gate-title" className="display-face mt-1 text-2xl font-bold">
+        See the rest, and get it by email.
+      </h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Two more buyer profiles, their questions and what AI answered. We&apos;ll show it here and
+        email you a copy.
+      </p>
+      <label htmlFor="report-email" className="mb-2 mt-5 block text-sm font-bold">
+        Email address
+      </label>
+      <Input
+        id="report-email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        placeholder="you@yourbusiness.co.nz"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? "report-email-error" : "report-email-privacy"}
+        className="h-12 border-2 bg-card text-base"
+      />
+      <label className="mt-4 flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="mt-1 size-4"
+          checked={deliveryConsent}
+          onChange={(event) => setDeliveryConsent(event.target.checked)}
+        />
+        <span>Email me this report (required)</span>
+      </label>
+      <label className="mt-2 flex items-start gap-2 text-sm">
+        <input
+          type="checkbox"
+          className="mt-1 size-4"
+          checked={marketingConsent}
+          onChange={(event) => setMarketingConsent(event.target.checked)}
+        />
+        <span>SuccessByCS may contact me about my report (optional)</span>
+      </label>
+      {error ? (
+        <p
+          id="report-email-error"
+          className="mt-3 text-sm font-semibold text-destructive"
+          role="alert"
+        >
+          {error}
+        </p>
+      ) : null}
+      <Button type="submit" size="lg" className="mt-5 h-12" disabled={sending}>
+        {sending ? "Sending…" : "Show my full report"} <ArrowRight />
+      </Button>
+      <p id="report-email-privacy" className="mt-3 text-xs text-muted-foreground">
+        We use your email address to send this report and keep it until you ask us to delete it:
+        reply to the email or write to chris@successbycs.com.
+      </p>
+    </form>
+  );
+}
+
+function EmailOutcomeNotice({ outcome }: { outcome: EmailGateOutcome | undefined }) {
+  if (outcome === undefined) return null;
+  return (
+    <p
+      role="status"
+      className="mt-6 rounded-md border border-border bg-leaf-soft px-4 py-3 text-sm"
+    >
+      {outcome.kind === "sent"
+        ? `We've emailed your report to ${outcome.maskedEmail}. Check your inbox (and spam folder).`
+        : "We couldn't send the email just now, but here's your full report."}
+    </p>
   );
 }
 
@@ -439,15 +605,19 @@ function StartOver({ onStartOver }: { onStartOver: () => void }) {
 function isGeo(result: StoredAssessmentResult): result is StoredGeoAssessment {
   return "profile" in result && "findings" in result;
 }
-function formatUtcTime(value: string) {
+/**
+ * The check time in the visitor's own timezone, from their browser (for
+ * example NZDT in New Zealand). Visitor location is not used or stored.
+ */
+export function formatLocalTime(value: string, timeZone?: string) {
   return new Intl.DateTimeFormat("en-NZ", {
     year: "numeric",
     month: "long",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "UTC",
     timeZoneName: "short",
+    ...(timeZone ? { timeZone } : {}),
   }).format(new Date(value));
 }
 function failureContent(result: DomainAssessmentSubmissionResult) {

@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "types": "wrangler types",
     "typecheck": "tsc --noEmit",
-    "dev:worker": "wrangler dev --config wrangler.jsonc"
+    "dev:worker": "wrangler dev --config wrangler.jsonc",
+    "report-emails": "wrangler d1 execute shortlist-mvp1 --remote --command \"SELECT r.requested_at_utc AS requested, r.email_normalised AS email, c.normalised_domain AS website, r.marketing_consent AS may_contact, r.outcome FROM report_email_requests r JOIN assessment_runs a ON a.assessment_id = r.assessment_id JOIN customers c ON c.customer_id = a.customer_id ORDER BY r.requested_at_utc DESC\""
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -77,6 +78,7 @@
     "tw-animate-css": "^1.3.4",
     "vaul": "^1.1.2",
     "vite-tsconfig-paths": "^6.0.2",
+    "worker-mailer": "^1.3.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

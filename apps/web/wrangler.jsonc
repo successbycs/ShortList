@@ -1,6 +1,7 @@
 {
 	// This file deliberately contains no account, route, secret, object storage,
-	// queue, or environment binding; its only variable names the model profile.
+	// queue, or environment binding; its variables name the model profile and
+	// the report-email sender settings.
 	// The D1 entry identifies the MVP 1 database only; it does not deploy the
 	// Worker or apply its schema.
 	"name": "shortlist-web",
@@ -26,7 +27,13 @@
 	"vars": {
 		// The approved model profile (a row in model_test_profiles) that writes
 		// every report. Change it to switch model; the profile must be approved.
-		"SHORTLIST_MODEL_PROFILE": "claude-haiku-5-5"
+		"SHORTLIST_MODEL_PROFILE": "claude-haiku-5-5",
+		// Report emails (Issue #96) go through Gmail SMTP. SMTP_USER and
+		// SMTP_PASS are Worker secrets, never values in this file.
+		"SMTP_HOST": "smtp.gmail.com",
+		"SMTP_PORT": "465",
+		"REPORT_EMAIL_FROM": "ShortList by SuccessByCS <shortlist@successbycs.com>",
+		"REPORT_EMAIL_REPLY_TO": "chris@successbycs.com"
 	},
 	"d1_databases": [
 		{
