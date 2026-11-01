@@ -502,6 +502,20 @@ Recorded so nothing is lost. Each needs its own decision after Step 7.
   on 1 Nov; MVP1-JNY-001). It comes back together with email storage.
 - **Version 2 report engine**: fan-out analysis and deeper technical checks
   (Chris, 11 Oct).
+- **Version 2: crawl hardening** (Chris, 1 Nov; deferred from the lean crawl
+  plan, `.agent/execplans/2026-11-01-site-crawl-and-page-store.md`):
+  - **Retention of stored website pages:** how long the crawled page text is
+    kept (proposal: full text 90 days, then keep only the address, type,
+    title and date), with a deletion path. Website text can hold personal or
+    copyrighted material; `docs/architecture/DATA_MODEL.md` lists this as
+    open. Decide before ShortList is widely public.
+  - **Cloudflare plan limits:** confirm whether `shortlist-web` is on the
+    Workers Free plan (10 ms CPU, 50 outside requests per visitor request) or
+    Paid, and measure the crawl's CPU on the live site. Upgrade or trim the
+    crawl if it nears the limit.
+  - **Full robots.txt rules:** per-bot groups, wildcards, `$` end markers,
+    Allow exceptions and Crawl-delay (RFC 9309). The lean crawl honours
+    only `Disallow` prefixes for all bots.
 - **Bot protection** (Turnstile), deferred to MVP 3+ (#49).
 - **Paid tier**, MVP 2.
 
