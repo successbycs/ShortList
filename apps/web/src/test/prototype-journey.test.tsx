@@ -139,42 +139,89 @@ describe("protected prototype reveal journey", () => {
 
   async function startAssessment() {
     fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
-    await screen.findByRole("heading", { name: /See your free website report/i });
+    await screen.findByRole("heading", { name: /needs a refresh|A practical first look/i });
   }
 
-  async function revealReport() {
+  /** Fills the email gate on a GEO report; the email request resolves as given. */
+  async function unlockReport(outcome: { kind: string } = { kind: "sent" }) {
     await startAssessment();
+    serverFunction.invoke.mockResolvedValueOnce(outcome);
     fireEvent.change(screen.getByLabelText("Email address"), {
       target: { value: "mara@example.co.nz" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /See free report now/i }));
+    fireEvent.click(screen.getByLabelText(/Email me this report/i));
+    fireEvent.click(screen.getByRole("button", { name: /Show my full report/i }));
+    await screen.findByRole("status");
   }
 
-  it("reveals the stored report after a local email entry without claiming delivery", async () => {
+  it("shows a saved result straight away, with no email step first", async () => {
     render(<Index />);
-
     await startAssessment();
-    expect(screen.getByText(/do not send email or create a delivery record/i)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Email address"), {
-      target: { value: "mara@example.co.nz" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /See free report now/i }));
     expect(
       screen.getByRole("heading", { name: /This earlier assessment needs a refresh/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/will not show an old external-search view/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText("Email address")).not.toBeInTheDocument();
     expect(serverFunction.invoke).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the report hidden until a valid email is entered", async () => {
+  it("shows the top of the report and keeps the rest behind the email gate", async () => {
+    serverFunction.invoke.mockResolvedValueOnce(savedGeoResult);
     render(<Index />);
     await startAssessment();
-    fireEvent.change(screen.getByLabelText("Email address"), {
-      target: { value: "not-an-email" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /See free report now/i }));
+
+    expect(screen.getByText(/A practical first look at Example Gardens/i)).toBeInTheDocument();
+    expect(screen.getByTestId("icp-busy-homeowners")).toBeVisible();
+    const locked = screen.getByTestId("report-locked");
+    expect(locked.querySelector('[aria-hidden="true"]')).not.toBeNull();
+    expect(
+      screen.getByRole("heading", { name: /See the rest, and get it by email/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/keep it until you ask us to delete it/i)).toBeInTheDocument();
+  });
+
+  it("asks for a valid email and the delivery tick before sending anything", async () => {
+    serverFunction.invoke.mockResolvedValueOnce(savedGeoResult);
+    render(<Index />);
+    await startAssessment();
+
+    fireEvent.change(screen.getByLabelText("Email address"), { target: { value: "not-an-email" } });
+    fireEvent.click(screen.getByRole("button", { name: /Show my full report/i }));
     expect(screen.getByRole("alert")).toHaveTextContent("Enter a valid email address.");
-    expect(screen.getByLabelText("Email address")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Email address"), {
+      target: { value: "mara@example.co.nz" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Show my full report/i }));
+    expect(screen.getByRole("alert")).toHaveTextContent(/Tick the box/i);
+    expect(serverFunction.invoke).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("report-locked")).toBeInTheDocument();
+  });
+
+  it("sends the request, then unlocks the report and confirms the masked address", async () => {
+    serverFunction.invoke.mockResolvedValueOnce(savedGeoResult);
+    render(<Index />);
+    await unlockReport({ kind: "sent" });
+
+    expect(serverFunction.invoke).toHaveBeenLastCalledWith({
+      data: {
+        assessmentId: "geo-assessment-1",
+        email: "mara@example.co.nz",
+        deliveryConsent: true,
+        marketingConsent: false,
+      },
+    });
+    expect(screen.getByRole("status")).toHaveTextContent("m•••@example.co.nz");
+    expect(screen.queryByTestId("report-locked")).not.toBeInTheDocument();
+    expect(screen.getByTestId("icp-garden-renovators")).toBeVisible();
+  });
+
+  it("still unlocks the report when the email could not be sent, and says so", async () => {
+    serverFunction.invoke.mockResolvedValueOnce(savedGeoResult);
+    render(<Index />);
+    await unlockReport({ kind: "send_failed" });
+
+    expect(screen.getByRole("status")).toHaveTextContent(/couldn't send the email/i);
+    expect(screen.queryByTestId("report-locked")).not.toBeInTheDocument();
   });
 
   it("uses the shared admission gate before entering the checking view", () => {
@@ -224,7 +271,7 @@ describe("protected prototype reveal journey", () => {
     expect(screen.getByLabelText("Your business website")).toBeInTheDocument();
 
     await act(async () => completeAssessment?.(savedResult));
-    expect(screen.queryByRole("heading", { name: /See your free website report/i })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /needs a refresh/i })).toBeNull();
   });
 
   it("keeps a newer assessment in progress when an earlier request finishes late", async () => {
@@ -250,9 +297,7 @@ describe("protected prototype reveal journey", () => {
     await act(async () => completeFirst?.(savedResult));
     expect(screen.getByText("second.example")).toBeInTheDocument();
     await act(async () => completeSecond?.(savedResult));
-    expect(
-      await screen.findByRole("heading", { name: /See your free website report/i }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /needs a refresh/i })).toBeInTheDocument();
   });
 
   it("shows the safe unavailable outcome when the server function rejects", async () => {
@@ -405,9 +450,7 @@ describe("protected prototype reveal journey", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Check my website/i }));
 
-    expect(
-      await screen.findByRole("heading", { name: /See your free website report/i }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /needs a refresh/i })).toBeInTheDocument();
     expect(serverFunction.invoke).toHaveBeenCalledTimes(1);
   });
 
@@ -415,7 +458,7 @@ describe("protected prototype reveal journey", () => {
     serverFunction.invoke.mockResolvedValueOnce(savedGeoResult);
     render(<Index />);
 
-    await revealReport();
+    await unlockReport();
 
     expect(screen.getByText(/A practical first look at Example Gardens/i)).toBeInTheDocument();
     expect(screen.getByText("Busy homeowners")).toBeInTheDocument();
